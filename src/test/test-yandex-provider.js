@@ -9,4 +9,10 @@ describe('Yandex Provider test', () => {
         assert(resp.res.text.length === 1);
         assert(resp.res.text[0].length > 0);
     });
+
+    it('should fail because of invalid lang', async () => {
+        const resp = await translate(process.env.YANDEX_API_KEY, 'Hello', 'abc123');
+        assert(!!resp.err);
+        assert(resp.err.message.length > 0);
+    });
 });

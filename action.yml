@@ -1,9 +1,9 @@
 ---
 name: 'Translation Action'
 description: 'This action translates any text to any language supported by chosen provider.'
-# branding:
-#   icon: list
-#   color: gray-dark
+branding:
+  icon: users
+  color: green
 inputs:
   source:
     description: 'Text or path to the file for translation.'
