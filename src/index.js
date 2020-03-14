@@ -5,6 +5,7 @@ const handler = (err, res) => {
   if (err) {
     core.setFailed(err.message);
   } else {
+    console.log(res);
     core.setOutput("text", res.text);
   }
 }; 
