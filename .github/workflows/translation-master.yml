@@ -13,7 +13,7 @@ jobs:
         id: translation
         with:
           provider: yandex
-          api_key: ${{ secrets.YANDEX_API_KEY }}
+          api_key: "${{ secrets.YANDEX_API_KEY }}"
           lang: 'en-sl'
           source: 'This is awesome project! Thank you.'
       - name: Print translation result
