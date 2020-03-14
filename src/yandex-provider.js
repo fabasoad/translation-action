@@ -1,9 +1,13 @@
 const provider = require('yandex-translate');
-module.exports = (apiKey, text, lang, callback) => {
+module.exports = (apiKey, text, lang) => {
     const translate = provider(apiKey);
-    try {
-        translate.translate(text, { to: lang }, callback);
-    } catch (e) {
-        callback(e);
-    }
+    return new Promise(resolve => {        
+        try {
+            translate.translate(text, { to: lang }, (err, res) => {
+                resolve({ err, res });
+            });
+        } catch (err) {
+            resolve({ err })
+        }
+    });
 };
