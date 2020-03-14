@@ -1,5 +1,5 @@
 # Translation action
-![Translation (latest)](https://github.com/fabasoad/translation-action/workflows/Translation%20(latest)/badge.svg) ![Translation (master)](https://github.com/fabasoad/translation-action/workflows/Translation%20(master)/badge.svg) ![YAML Lint](https://github.com/fabasoad/translation-action/workflows/YAML%20Lint/badge.svg) ![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/fabasoad/translation-action?include_prereleases)
+![Translation (latest)](https://github.com/fabasoad/translation-action/workflows/Translation%20(latest)/badge.svg) ![Translation (master)](https://github.com/fabasoad/translation-action/workflows/Translation%20(master)/badge.svg) ![CI](https://github.com/fabasoad/translation-action/workflows/CI/badge.svg) ![YAML Lint](https://github.com/fabasoad/translation-action/workflows/YAML%20Lint/badge.svg) ![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/fabasoad/translation-action?include_prereleases)
 
 This action translates any text to any language supported by chosen provider. There is a list of providers that can be used for text translation. Please find more details for each provider below.
 
