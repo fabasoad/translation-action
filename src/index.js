@@ -19,10 +19,7 @@ switch (provider) {
     } catch (e) {
       handler(e);
     }
-    (async () => {
-      const resp = await translate(core.getInput('api_key'), source, core.getInput('lang'));
-      handler(resp);
-    })();
+    translate(core.getInput('api_key'), source, core.getInput('lang')).then(handler);
     break;
   default:
     handler({ message: `${provider} is not supported` });
