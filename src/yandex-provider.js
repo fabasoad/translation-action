@@ -7,7 +7,7 @@ module.exports = (apiKey, text, lang) => {
                 resolve({ err, res });
             });
         } catch (err) {
-            resolve({ err })
+            resolve({ err });
         }
     });
 };

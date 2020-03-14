@@ -5,8 +5,7 @@ const handler = (err, res) => {
   if (err) {
     core.setFailed(err.message);
   } else {
-    console.log(res);
-    core.setOutput("text", res.text);
+    core.setOutput("text", res.text[0]);
   }
 }; 
 
@@ -20,8 +19,10 @@ switch (provider) {
     } catch (e) {
       handler(e);
     }
-    const resp = await translate(core.getInput('api_key'), source, core.getInput('lang'));
-    handler(resp);
+    (async () => {
+      const resp = await translate(core.getInput('api_key'), source, core.getInput('lang'));
+      handler(resp);
+    })();
     break;
   default:
     handler({ message: `${provider} is not supported` });

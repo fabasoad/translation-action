@@ -3,6 +3,9 @@
   "version": "1.0.0",
   "description": "This GitHub action translates any text from any language to any language.",
   "main": "src/index.js",
+  "scripts": {
+    "test": "mocha src/test"
+  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/fabasoad/translation-action.git"
@@ -16,5 +19,10 @@
   "dependencies": {
     "@actions/core": "^1.2.3",
     "yandex-translate": "^2.1.3"
+  },
+  "devDependencies": {
+    "chai": "^4.2.0",
+    "dotenv": "^8.2.0",
+    "mocha": "^7.1.0"
   }
 }
