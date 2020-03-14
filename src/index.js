@@ -21,7 +21,7 @@ async function run() {
         handler(e);
       }
       const resp = await translate(core.getInput('api_key'), source, core.getInput('lang'));
-      handler(null, resp);
+      handler(resp.err, resp.res);
       break;
     default:
       handler({ message: `${provider} is not supported` });
