@@ -14,7 +14,7 @@ jobs:
         with:
           provider: yandex
           api_key: ${{ secrets.YANDEX_API_KEY }}
-          lang: 'en-ru'
+          lang: 'en-sl'
           source: 'This is awesome project! Thank you.'
       - name: Print translation result
         run: echo "${{ steps.translation.outputs.text }}"
