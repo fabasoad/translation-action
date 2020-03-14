@@ -10,6 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - uses: bahmutov/npm-install@v1
-      - run: |
+      - name: Run tests
+        run: |
         export YANDEX_API_KEY="${{ secrets.YANDEX_API_KEY }}"
         npm test
