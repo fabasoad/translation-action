@@ -4,7 +4,11 @@ module.exports = (apiKey, text, lang) => {
     return new Promise(resolve => {        
         try {
             translate.translate(text, { to: lang }, (err, res) => {
-                resolve({ err, res });
+                if (res.code === 200) {
+                    resolve({ err, res });
+                } else {
+                    resolve({ err: res });
+                }
             });
         } catch (err) {
             resolve({ err });
