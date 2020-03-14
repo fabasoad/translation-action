@@ -1,0 +1,19 @@
+{
+  "name": "translation-action",
+  "version": "1.0.0",
+  "description": "This GitHub action translates any text from any language to any language.",
+  "main": "src/index.js",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/fabasoad/translation-action.git"
+  },
+  "author": "Yevhen Fabizhevskyi",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/fabasoad/translation-action/issues"
+  },
+  "homepage": "https://github.com/fabasoad/translation-action#readme",
+  "dependencies": {
+    "yandex-translate": "^2.1.3"
+  }
+}

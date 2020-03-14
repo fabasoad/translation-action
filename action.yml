@@ -1,0 +1,25 @@
+---
+name: 'Translation Action'
+description: 'This action translates any text to any language supported by chosen provider.'
+# branding:
+#   icon: list
+#   color: gray-dark
+inputs:
+  source:
+    description: 'Text or path to the file for translation.'
+    required: true
+  provider:
+    description: 'Provider identifier.'
+    required: true
+  api_key:
+    description: 'API key that should be used for chosen provider.'
+    required: true
+  lang:
+    description: 'The translation direction. Should be one of the option proposed by chosen provider.'
+    required: true
+outputs:
+  text:
+    description: 'Translated text.'
+runs:
+  using: 'node12'
+  main: 'src/index.js'
