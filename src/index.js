@@ -1,36 +1,27 @@
 const core = require('@actions/core');
 const sourceExtract = require('./source-extractor');
 
-const handler = (err, res) => {
-  if (err) {
-    core.setFailed(err.message);
-  } else {
-    core.setOutput("text", res.text[0]);
-  }
-};
-
 async function run() {
   const provider = core.getInput('provider');
   let translate;
   switch (provider) {
     case 'microsoft':
-      translate = require('./microsoft-provider');
+      translate = require('./providers/microsoft');
       break;
     case 'yandex':
-      translate = require('./yandex-provider');
+      translate = require('./providers/yandex');
       break;
     default:
-      handler({ message: `${provider} is not supported` });
+      core.setFailed(`${provider} is not supported`);
       return;
   }
-  let source;
   try {
-    source = sourceExtract(core.getInput('source'));
+    const source = sourceExtract(core.getInput('source'));
+    const translations = await translate(core.getInput('api_key'), source, core.getInput('lang'));
+    core.setOutput('text', translations[0]);
   } catch (e) {
-    handler(e);
+    core.setFailed(e.message);
   }
-  const resp = await translate(core.getInput('api_key'), source, core.getInput('lang'));
-  handler(resp.err, resp.res);
 }
 
 run();

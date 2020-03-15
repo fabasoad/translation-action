@@ -6,18 +6,17 @@ const fixture = [{
     name: 'microsoft',
     apiKey: process.env.MICROSOFT_API_KEY,
     lang: 'bs',
-    translate: require('../microsoft-provider')
+    translate: require('../providers/microsoft')
 }, {
     name: 'yandex',
     apiKey: process.env.YANDEX_API_KEY,
     lang: 'en-ru',
-    translate: require('../yandex-provider')
+    translate: require('../providers/yandex')
 }];
 
 describe('Provider tests', () => {
     itParam('${value.name} should get correct translation', fixture, async (arg) => {
         const translations = await arg.translate(arg.apiKey, 'Hello', arg.lang);
-        console.log(translations);
         assert(translations.length > 0);
     });
 
