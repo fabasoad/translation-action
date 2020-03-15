@@ -4,7 +4,9 @@ module.exports = (apiKey, text, lang) => {
     return new Promise((resolve, reject) => {        
         try {
             translate.translate(text, { to: lang }, (err, res) => {
-                if (res.code === 200) {
+                if (err) {
+                    reject(err);
+                } else if (res.code === 200) {
                     resolve(res.text);
                 } else {
                     reject({ message: res.message });
