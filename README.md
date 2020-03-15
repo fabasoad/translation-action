@@ -3,6 +3,13 @@
 
 This action translates any text to any language supported by chosen provider. There is a list of providers that can be used for text translation. Please find more details for each provider below.
 
+## Contents
+- [Providers](#providers)
+  - [Yandex](#yandex)
+- [Inputs](#inputs)
+- [Outputs](#outputs)
+- [Example usage](#example-usage)
+
 ## Providers
 
 ### Yandex
@@ -18,27 +25,17 @@ Go to the [Developer's page](https://translate.yandex.com/developers) and click 
 ![Result](https://raw.githubusercontent.com/fabasoad/translation-action/master/screenshots/screenshot-yandex-api-key.png)
 
 ## Inputs
-
 ### `source`
-
 _[Required]_ Can be text or path to the file for translation.
-
 ### `provider`
-
 _[Required]_ Provider identifier.
-
 ### `api_key`
-
 _[Required]_ API key that should be used for chosen `provider`.
-
 ### `lang`
-
 _[Required]_ The translation direction. Should be one of the option proposed by chosen `provider`.
 
 ## Outputs
-
 ### `text`
-
 Translated text.
 
 ## Example usage
