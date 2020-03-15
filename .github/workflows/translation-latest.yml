@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v1
-      - uses: fabasoad/translation-action@v1.0.0
+      - uses: fabasoad/translation-action@v1.1.0
         id: microsoft
         with:
           provider: microsoft
@@ -18,7 +18,7 @@ jobs:
           source: 'This is awesome project! Thank you.'
       - name: Print Microsoft translation result
         run: echo "${{ steps.microsoft.outputs.text }}"
-      - uses: fabasoad/translation-action@v1.0.0
+      - uses: fabasoad/translation-action@v1.1.0
         id: yandex
         with:
           provider: yandex
