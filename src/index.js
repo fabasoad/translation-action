@@ -11,22 +11,26 @@ const handler = (err, res) => {
 
 async function run() {
   const provider = core.getInput('provider');
+  let translate;
   switch (provider) {
+    case 'microsoft':
+      translate = require('./microsoft-provider');
+      break;
     case 'yandex':
-      const translate = require('./yandex-provider');
-      let source;
-      try {
-        source = sourceExtract(core.getInput('source'));
-      } catch (e) {
-        handler(e);
-      }
-      const resp = await translate(core.getInput('api_key'), source, core.getInput('lang'));
-      handler(resp.err, resp.res);
+      translate = require('./yandex-provider');
       break;
     default:
       handler({ message: `${provider} is not supported` });
-      break;
+      return;
   }
+  let source;
+  try {
+    source = sourceExtract(core.getInput('source'));
+  } catch (e) {
+    handler(e);
+  }
+  const resp = await translate(core.getInput('api_key'), source, core.getInput('lang'));
+  handler(resp.err, resp.res);
 }
 
 run();

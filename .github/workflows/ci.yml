@@ -12,5 +12,6 @@ jobs:
       - uses: bahmutov/npm-install@v1
       - name: Run tests
         run: |
+          export MICROSOFT_API_KEY="${{ secrets.MICROSOFT_API_KEY }}"
           export YANDEX_API_KEY="${{ secrets.YANDEX_API_KEY }}"
           npm test

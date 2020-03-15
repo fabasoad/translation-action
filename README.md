@@ -5,12 +5,23 @@ This action translates any text to any language supported by chosen provider. Th
 
 ## Contents
 - [Providers](#providers)
+  - [Microsoft](#microsoft)
   - [Yandex](#yandex)
 - [Inputs](#inputs)
 - [Outputs](#outputs)
 - [Example usage](#example-usage)
 
 ## Providers
+
+### Microsoft
+#### Description
+Identifier is `microsoft`.
+#### Supported translation directions
+```json
+"af","ar","bg","bn","bs","ca","cs","cy","da","de","el","en","es","et","fa","fi","fr","he","hi","hr","ht","hu","id","is","it","ja","ko","lt","lv","ms","mt","mww","nb","nl","pl","pt","ro","ru","sk","sl","sr-Latn","sv","sw","ta","th","tlh-Latn","tr","uk","ur","vi","zh-Hans"
+```
+#### How to get API key
+Please follow the steps described in [this](https://docs.microsoft.com/en-us/azure/cognitive-services/translator/translator-text-how-to-signup) article.
 
 ### Yandex
 #### Description

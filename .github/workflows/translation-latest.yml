@@ -10,11 +10,20 @@ jobs:
     steps:
       - uses: actions/checkout@v1
       - uses: fabasoad/translation-action@v1.0.0
-        id: translation
+        id: microsoft
+        with:
+          provider: microsoft
+          api_key: ${{ secrets.MICROSOFT_API_KEY }}
+          lang: 'nl'
+          source: 'This is awesome project! Thank you.'
+      - name: Print Microsoft translation result
+        run: echo "${{ steps.microsoft.outputs.text }}"
+      - uses: fabasoad/translation-action@v1.0.0
+        id: yandex
         with:
           provider: yandex
           api_key: ${{ secrets.YANDEX_API_KEY }}
           lang: 'en-ru'
           source: 'This is awesome project! Thank you.'
-      - name: Print translation result
-        run: echo "${{ steps.translation.outputs.text }}"
+      - name: Print Yandex translation result
+        run: echo "${{ steps.yandex.outputs.text }}"
