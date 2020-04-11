@@ -25,6 +25,7 @@ jobs:
         source: ['Performance']    
       fail-fast: false
     steps:
+      - uses: actions/checkout@v2.1.0
       - uses: ./
         id: linguatools
         with:
