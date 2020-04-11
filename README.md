@@ -1,10 +1,11 @@
 # Translation action
-![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/fabasoad/translation-action?include_prereleases) ![Translation (latest)](https://github.com/fabasoad/translation-action/workflows/Translation%20(latest)/badge.svg) ![Translation (master)](https://github.com/fabasoad/translation-action/workflows/Translation%20(master)/badge.svg) ![CI](https://github.com/fabasoad/translation-action/workflows/CI/badge.svg) ![YAML Lint](https://github.com/fabasoad/translation-action/workflows/YAML%20Lint/badge.svg) [![Total alerts](https://img.shields.io/lgtm/alerts/g/fabasoad/translation-action.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/fabasoad/translation-action/alerts/) [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/fabasoad/translation-action.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/fabasoad/translation-action/context:javascript) [![Maintainability](https://api.codeclimate.com/v1/badges/84bb3beceb9503272bc9/maintainability)](https://codeclimate.com/github/fabasoad/translation-action/maintainability) [![Known Vulnerabilities](https://snyk.io/test/github/fabasoad/translation-action/badge.svg?targetFile=package.json)](https://snyk.io/test/github/fabasoad/translation-action?targetFile=package.json)
+![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/fabasoad/translation-action?include_prereleases) ![CI (latest)](https://github.com/fabasoad/translation-action/workflows/CI%20(latest)/badge.svg) ![CI (master)](https://github.com/fabasoad/translation-action/workflows/CI%20(master)/badge.svg) ![YAML Lint](https://github.com/fabasoad/translation-action/workflows/YAML%20Lint/badge.svg) [![Total alerts](https://img.shields.io/lgtm/alerts/g/fabasoad/translation-action.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/fabasoad/translation-action/alerts/) [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/fabasoad/translation-action.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/fabasoad/translation-action/context:javascript) [![Maintainability](https://api.codeclimate.com/v1/badges/84bb3beceb9503272bc9/maintainability)](https://codeclimate.com/github/fabasoad/translation-action/maintainability) [![Known Vulnerabilities](https://snyk.io/test/github/fabasoad/translation-action/badge.svg?targetFile=package.json)](https://snyk.io/test/github/fabasoad/translation-action?targetFile=package.json)
 
 This action translates any text to any language supported by chosen provider. There is a list of providers that can be used for text translation. Please find more details for each provider below.
 
 ## Contents
 - [Providers](#providers)
+  - [Linguatools](#linguatools)
   - [Microsoft](#microsoft)
   - [MyMemory](#mymemory)
   - [Yandex](#yandex)
@@ -13,6 +14,13 @@ This action translates any text to any language supported by chosen provider. Th
 - [Example usage](#example-usage)
 
 ## Providers
+
+### Linguatools
+Identifier is `linguatools`. API Key is not needed for this provider.
+#### Supported translation directions
+```json
+"de-en","de-es","de-nl","de-pl","de-it","de-cs","en-de","es-de","nl-de","pl-de","it-de","cs-de"
+```
 
 ### Microsoft
 Identifier is `microsoft`.

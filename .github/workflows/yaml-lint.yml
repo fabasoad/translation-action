@@ -11,7 +11,7 @@ jobs:
     name: Lint
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v1
+      - uses: actions/checkout@v2.1.0
       - uses: ibiqlik/action-yamllint@v1.0.0
         with:
           config_file: .yamllint.yml

@@ -1,0 +1,72 @@
+---
+name: CI (latest)
+
+on: push
+
+jobs:
+  unit_tests:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.1.0
+        with:
+          ref: 'v1.2.3'
+      - uses: Adzz/jest_test_action@v1.0.0
+        env:
+          MICROSOFT_API_KEY: ${{ secrets.MICROSOFT_API_KEY }}
+          MYMEMORY_API_KEY: ${{ secrets.MYMEMORY_API_KEY }}
+          YANDEX_API_KEY: ${{ secrets.YANDEX_API_KEY }}
+        with:
+          package-manager: npm
+          command: test
+  functional_tests:
+    name: Functional tests
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        source: ['Performance']    
+      fail-fast: false
+    steps:
+      - uses: fabasoad/translation-action@v1.3.0
+        id: linguatools
+        with:
+          provider: linguatools
+          lang: 'en-de'
+          source: ${{ matrix.source }}
+      - name: Print Linguatools translation result
+        run: echo "${{ steps.linguatools.outputs.text }}" | grep -q 'Leistung' || exit 1;
+      - uses: fabasoad/translation-action@v1.3.0
+        id: microsoft
+        with:
+          provider: microsoft
+          api_key: ${{ secrets.MICROSOFT_API_KEY }}
+          lang: 'nl'
+          source: ${{ matrix.source }}
+      - name: Print Microsoft translation result
+        run: echo "${{ steps.microsoft.outputs.text }}" | grep -q 'Prestaties' || exit 1;
+      - uses: fabasoad/translation-action@v1.3.0
+        id: mymemory_free
+        with:
+          provider: mymemory
+          lang: 'en|pt'
+          source: ${{ matrix.source }}
+      - name: Print MyMemory (Free) translation result
+        run: echo "${{ steps.mymemory_free.outputs.text }}" | grep -q 'Live performance' || exit 1;
+      - uses: fabasoad/translation-action@v1.3.0
+        id: mymemory_registered
+        with:
+          provider: mymemory
+          api_key: ${{ secrets.MYMEMORY_API_KEY }}
+          lang: 'en|it'
+          source: ${{ matrix.source }}
+      - name: Print MyMemory (Registered) translation result
+        run: echo "${{ steps.mymemory_registered.outputs.text }}" | grep -q 'Svolgimento' || exit 1;
+      - uses: fabasoad/translation-action@v1.3.0
+        id: yandex
+        with:
+          provider: yandex
+          api_key: ${{ secrets.YANDEX_API_KEY }}
+          lang: 'en-tr'
+          source: ${{ matrix.source }}
+      - name: Print Yandex translation result
+        run: echo "${{ steps.yandex.outputs.text }}" | grep -q 'Performans' || exit 1;

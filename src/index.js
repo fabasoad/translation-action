@@ -1,7 +1,7 @@
 const core = require('@actions/core');
 const sourceExtract = require('./source-extractor');
 
-const SUPPORTED_PROVIDERS = ['microsoft','mymemory','yandex'];
+const SUPPORTED_PROVIDERS = ['linguatools','microsoft','mymemory','yandex'];
 
 async function run() {
   const provider = core.getInput('provider');
