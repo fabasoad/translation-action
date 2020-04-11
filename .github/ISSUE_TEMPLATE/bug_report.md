@@ -25,7 +25,7 @@ If applicable, add screenshots to help explain your problem.
 
 **Technical information (please complete the following information):**
  - OS: [e.g. MacOS]
- - `translation-action` version [e.g. 1.2.0]
+ - `translation-action` version [e.g. 1.2.1]
 
 **Additional context**
 Add any other context about the problem here.
