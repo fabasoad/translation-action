@@ -25,4 +25,4 @@ runs:
   using: 'node12'
   main: 'dist/index.js'
   env:
-    NODE_OPTIONS: --no-warnings
+    NODE_NO_WARNINGS: '1'
