@@ -1,5 +1,6 @@
 ---
 name: 'Translation Action'
+author: Yevhen Fabizhevskyi
 description: 'This action translates any text to any language supported by chosen provider.'
 branding:
   icon: users
@@ -23,3 +24,5 @@ outputs:
 runs:
   using: 'node12'
   main: 'dist/index.js'
+  env:
+    NODE_OPTIONS: --no-warnings
