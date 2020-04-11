@@ -1,15 +1,22 @@
 {
   "name": "translation-action",
-  "version": "1.0.0",
+  "version": "1.2.0",
   "description": "This GitHub action translates any text from any language to any language.",
-  "main": "src/index.js",
+  "main": "dist/index.js",
   "scripts": {
-    "test": "mocha src/test"
+    "build": "ncc build -m src/index.js",
+    "test": "mocha --timeout 3000 __tests__"
   },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/fabasoad/translation-action.git"
   },
+  "keywords": [
+    "actions",
+    "translation",
+    "translator",
+    "lang"
+  ],
   "author": "Yevhen Fabizhevskyi",
   "license": "MIT",
   "bugs": {
@@ -18,10 +25,12 @@
   "homepage": "https://github.com/fabasoad/translation-action#readme",
   "dependencies": {
     "@actions/core": "^1.2.3",
+    "got": "^10.7.0",
     "microsoft-text-translator": "0.0.3",
     "yandex-translate": "^2.1.3"
   },
   "devDependencies": {
+    "@zeit/ncc": "^0.22.1",
     "chai": "^4.2.0",
     "dotenv": "^8.2.0",
     "mocha": "^7.1.1",

@@ -6,6 +6,7 @@ This action translates any text to any language supported by chosen provider. Th
 ## Contents
 - [Providers](#providers)
   - [Microsoft](#microsoft)
+  - [MyMemory](#mymemory)
   - [Yandex](#yandex)
 - [Inputs](#inputs)
 - [Outputs](#outputs)
@@ -14,7 +15,6 @@ This action translates any text to any language supported by chosen provider. Th
 ## Providers
 
 ### Microsoft
-#### Description
 Identifier is `microsoft`.
 #### Supported translation directions
 ```json
@@ -23,8 +23,14 @@ Identifier is `microsoft`.
 #### How to get API key
 Please follow the steps described in [this](https://docs.microsoft.com/en-us/azure/cognitive-services/translator/translator-text-how-to-signup) article.
 
+### MyMemory
+Identifier is `mymemory`.
+#### Supported translation directions
+Language direction should be separated by `|` character. For example, `en|it` (from English to Italian). More details [here](https://mymemory.translated.net/doc/spec.php).
+#### How to get API key
+API Key is _optional_. Visit [Usage Limit Page](https://mymemory.translated.net/doc/usagelimits.php) to see the usage limit for free accounts. In case you want to use your API KEY, you should go to [Registration Page](https://www.translated.net/top/) and register a new account. Then go to [API Key Generator Page](https://mymemory.translated.net/doc/keygen.php) and generate a new key.
+
 ### Yandex
-#### Description
 Identifier is `yandex`.
 #### Supported translation directions
 ```json
