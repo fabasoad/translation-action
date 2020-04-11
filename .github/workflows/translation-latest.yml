@@ -13,7 +13,7 @@ jobs:
       fail-fast: false
     steps:
       - uses: actions/checkout@v1
-      - uses: fabasoad/translation-action@v1.2.1
+      - uses: fabasoad/translation-action@v1.2.2
         id: microsoft
         with:
           provider: microsoft
@@ -22,7 +22,7 @@ jobs:
           source: ${{ matrix.source }}
       - name: Print Microsoft translation result
         run: echo "${{ steps.microsoft.outputs.text }}"
-      - uses: fabasoad/translation-action@v1.2.1
+      - uses: fabasoad/translation-action@v1.2.2
         id: mymemory
         with:
           provider: mymemory
@@ -31,7 +31,7 @@ jobs:
           source: ${{ matrix.source }}
       - name: Print MyMemory translation result
         run: echo "${{ steps.mymemory.outputs.text }}"
-      - uses: fabasoad/translation-action@v1.2.1
+      - uses: fabasoad/translation-action@v1.2.2
         id: yandex
         with:
           provider: yandex

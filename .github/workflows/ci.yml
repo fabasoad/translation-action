@@ -6,12 +6,13 @@ on: push
 jobs:
   build:
     name: Build
-    runs-on: ubuntu-18.04
+    runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.1.0
       - uses: Adzz/jest_test_action@v1.0.0
         env:
           MICROSOFT_API_KEY: ${{ secrets.MICROSOFT_API_KEY }}
+          MYMEMORY_API_KEY: ${{ secrets.MYMEMORY_API_KEY }}
           YANDEX_API_KEY: ${{ secrets.YANDEX_API_KEY }}
         with:
           package-manager: npm

@@ -1,5 +1,5 @@
-const assert = require('chai').assert;
-const fs = require('fs');
+const { assert } = require('chai');
+const path = require('path');
 
 const sourceExtract = require('../src/source-extractor');
 
@@ -10,12 +10,6 @@ describe('Source extractor test', () => {
     });
 
     it('should extract file content', () => {
-        const text = 'some text';
-        fs.writeFileSync('abc123.txt', text);
-        try {
-            assert.equal(sourceExtract('abc123.txt'), text);
-        } finally {
-            fs.unlinkSync('abc123.txt');
-        }
+        assert.equal(sourceExtract(path.join(__dirname, 'text.txt')), 'Simple text for translation.');
     });
 });
