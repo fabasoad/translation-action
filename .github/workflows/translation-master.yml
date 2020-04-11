@@ -7,23 +7,36 @@ jobs:
   translation:
     name: Run translation
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        source: ['__tests__/text.txt', 'This project is awesome!']    
+      fail-fast: false
     steps:
       - uses: actions/checkout@v1
-      - uses: fabasoad/translation-action@master
+      - uses: ./
         id: microsoft
         with:
           provider: microsoft
           api_key: ${{ secrets.MICROSOFT_API_KEY }}
           lang: 'nl'
-          source: 'This is awesome project! Thank you.'
+          source: ${{ matrix.source }}
       - name: Print Microsoft translation result
         run: echo "${{ steps.microsoft.outputs.text }}"
-      - uses: fabasoad/translation-action@master
+      - uses: ./
+        id: mymemory
+        with:
+          provider: mymemory
+          api_key: ${{ secrets.MYMEMORY_API_KEY }}
+          lang: 'en|it'
+          source: ${{ matrix.source }}
+      - name: Print MyMemory translation result
+        run: echo "${{ steps.mymemory.outputs.text }}"
+      - uses: ./
         id: yandex
         with:
           provider: yandex
           api_key: ${{ secrets.YANDEX_API_KEY }}
           lang: 'en-ru'
-          source: 'This is awesome project! Thank you.'
+          source: ${{ matrix.source }}
       - name: Print Yandex translation result
         run: echo "${{ steps.yandex.outputs.text }}"
