@@ -9,7 +9,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        source: ['__tests__/text.txt', 'This project is awesome!']    
+        source: ['This project is awesome!']    
       fail-fast: false
     steps:
       - uses: actions/checkout@v1
