@@ -14,7 +14,8 @@ inputs:
     required: true
   api_key:
     description: 'API key that should be used for chosen provider.'
-    required: true
+    required: false
+    default: null
   lang:
     description: 'The translation direction. Should be one of the option proposed by chosen provider.'
     required: true

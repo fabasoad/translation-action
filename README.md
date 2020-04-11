@@ -42,18 +42,17 @@ Go to the [Developer's page](https://translate.yandex.com/developers) and click 
 ![Result](https://raw.githubusercontent.com/fabasoad/translation-action/master/screenshots/screenshot-yandex-api-key.png)
 
 ## Inputs
-### `source`
-_[Required]_ Can be text or path to the file for translation.
-### `provider`
-_[Required]_ Provider identifier.
-### `api_key`
-_[Required]_ API key that should be used for chosen `provider`.
-### `lang`
-_[Required]_ The translation direction. Should be one of the option proposed by chosen `provider`.
+| Name     | Required | Description                                                                                      | Default | Possible values                                                   |
+|----------|----------|--------------------------------------------------------------------------------------------------|---------|-------------------------------------------------------------------|
+| source   | Yes      | Can be text or path to the file for translation.                                                 |         | _&lt;Path&gt;_,_&lt;String&gt;_                             |
+| provider | Yes      | Provider identifier                                                                              |         | [microsoft](#microsoft), [mymemory](#mymemory), [yandex](#yandex) |
+| api_key  | No       | API key that should be used for chosen [provider](#providers)                                    | null    | _&lt;String&gt;_                                                  |
+| lang     | Yes      | The translation direction. Should be one of the option proposed by chosen [provider](#providers) |         | _&lt;String&gt;_                                                  |
 
 ## Outputs
-### `text`
-Translated text.
+| Name | Required | Description     |
+|------|----------|-----------------|
+| text | Yes      | Translated text |
 
 ## Example usage
 
