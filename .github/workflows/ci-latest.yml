@@ -10,7 +10,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2.1.0
         with:
-          ref: 'v1.2.3'
+          ref: 'v1.3.0'
       - uses: Adzz/jest_test_action@v1.0.0
         env:
           MICROSOFT_API_KEY: ${{ secrets.MICROSOFT_API_KEY }}
@@ -33,7 +33,7 @@ jobs:
           provider: linguatools
           lang: 'en-de'
           source: ${{ matrix.source }}
-      - name: Print Linguatools translation result
+      - name: Check Linguatools translation result
         run: echo "${{ steps.linguatools.outputs.text }}" | grep -q 'Leistung' || exit 1;
       - uses: fabasoad/translation-action@v1.3.0
         id: microsoft
@@ -42,7 +42,7 @@ jobs:
           api_key: ${{ secrets.MICROSOFT_API_KEY }}
           lang: 'nl'
           source: ${{ matrix.source }}
-      - name: Print Microsoft translation result
+      - name: Check Microsoft translation result
         run: echo "${{ steps.microsoft.outputs.text }}" | grep -q 'Prestaties' || exit 1;
       - uses: fabasoad/translation-action@v1.3.0
         id: mymemory_free
@@ -50,7 +50,7 @@ jobs:
           provider: mymemory
           lang: 'en|pt'
           source: ${{ matrix.source }}
-      - name: Print MyMemory (Free) translation result
+      - name: Check MyMemory (Free) translation result
         run: echo "${{ steps.mymemory_free.outputs.text }}" | grep -q 'Live performance' || exit 1;
       - uses: fabasoad/translation-action@v1.3.0
         id: mymemory_registered
@@ -59,7 +59,7 @@ jobs:
           api_key: ${{ secrets.MYMEMORY_API_KEY }}
           lang: 'en|it'
           source: ${{ matrix.source }}
-      - name: Print MyMemory (Registered) translation result
+      - name: Check MyMemory (Registered) translation result
         run: echo "${{ steps.mymemory_registered.outputs.text }}" | grep -q 'Svolgimento' || exit 1;
       - uses: fabasoad/translation-action@v1.3.0
         id: yandex
@@ -68,5 +68,5 @@ jobs:
           api_key: ${{ secrets.YANDEX_API_KEY }}
           lang: 'en-tr'
           source: ${{ matrix.source }}
-      - name: Print Yandex translation result
+      - name: Check Yandex translation result
         run: echo "${{ steps.yandex.outputs.text }}" | grep -q 'Performans' || exit 1;
