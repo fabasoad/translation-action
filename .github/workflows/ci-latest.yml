@@ -14,7 +14,7 @@ jobs:
     steps:
       - uses: actions/checkout@v2.1.0
         with:
-          ref: v1.3.0
+          ref: ${{ github.ref }}
       - uses: Adzz/jest_test_action@v1.0.0
         env:
           MICROSOFT_API_KEY: ${{ secrets.MICROSOFT_API_KEY }}
@@ -32,7 +32,7 @@ jobs:
         source: ['Performance']    
       fail-fast: false
     steps:
-      - uses: fabasoad/translation-action@v1.3.0
+      - uses: fabasoad/translation-action@${{ github.ref }}
         id: linguatools
         with:
           provider: linguatools
@@ -41,7 +41,7 @@ jobs:
       - name: Validate Linguatools translation result
         run: |
           [[ "${{ steps.linguatools.outputs.text }}" == "Leistung" ]] || exit 1;
-      - uses: fabasoad/translation-action@v1.3.0
+      - uses: fabasoad/translation-action@${{ github.ref }}
         id: microsoft
         with:
           provider: microsoft
@@ -51,7 +51,7 @@ jobs:
       - name: Validate Microsoft translation result
         run: |
           [[ "${{ steps.microsoft.outputs.text }}" == "Prestaties" ]] || exit 1;
-      - uses: fabasoad/translation-action@v1.3.0
+      - uses: fabasoad/translation-action@${{ github.ref }}
         id: mymemory_free
         with:
           provider: mymemory
@@ -60,7 +60,7 @@ jobs:
       - name: Validate MyMemory (Free) translation result
         run: |
           [[ "${{ steps.mymemory_free.outputs.text }}" == "Live performance" ]] || exit 1;
-      - uses: fabasoad/translation-action@v1.3.0
+      - uses: fabasoad/translation-action@${{ github.ref }}
         id: mymemory_registered
         with:
           provider: mymemory
@@ -70,7 +70,7 @@ jobs:
       - name: Validate MyMemory (Registered) translation result
         run: |
           [[ "${{ steps.mymemory_registered.outputs.text }}" == "Svolgimento" ]] || exit 1;
-      - uses: fabasoad/translation-action@v1.3.0
+      - uses: fabasoad/translation-action@${{ github.ref }}
         id: yandex
         with:
           provider: yandex
