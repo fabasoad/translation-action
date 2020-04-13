@@ -1,11 +1,18 @@
 ---
 name: CI (master)
 
-on: push
+on:
+  push:
+    branches:
+      - master
+  pull_request:
+    branches:
+      - master
 
 jobs:
   unit_tests:
     name: Unit tests
+    timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2.1.0
@@ -19,6 +26,7 @@ jobs:
           command: test
   functional_tests:
     name: Functional tests
+    timeout-minutes: 5
     runs-on: ubuntu-latest
     strategy:
       matrix:
@@ -32,8 +40,9 @@ jobs:
           provider: linguatools
           lang: 'en-de'
           source: ${{ matrix.source }}
-      - name: Check Linguatools translation result
-        run: echo "${{ steps.linguatools.outputs.text }}" | grep -q 'Leistung' || exit 1;
+      - name: Validate Linguatools translation result
+        run: |
+          [[ "${{ steps.linguatools.outputs.text }}" == "Leistung" ]] || exit 1;
       - uses: ./
         id: microsoft
         with:
@@ -41,16 +50,18 @@ jobs:
           api_key: ${{ secrets.MICROSOFT_API_KEY }}
           lang: 'nl'
           source: ${{ matrix.source }}
-      - name: Check Microsoft translation result
-        run: echo "${{ steps.microsoft.outputs.text }}" | grep -q 'Prestaties' || exit 1;
+      - name: Validate Microsoft translation result
+        run: |
+          [[ "${{ steps.microsoft.outputs.text }}" == "Prestaties" ]] || exit 1;
       - uses: ./
         id: mymemory_free
         with:
           provider: mymemory
           lang: 'en|pt'
           source: ${{ matrix.source }}
-      - name: Check MyMemory (Free) translation result
-        run: echo "${{ steps.mymemory_free.outputs.text }}" | grep -q 'Live performance' || exit 1;
+      - name: Validate MyMemory (Free) translation result
+        run: |
+          [[ "${{ steps.mymemory_free.outputs.text }}" == "Live performance" ]] || exit 1;
       - uses: ./
         id: mymemory_registered
         with:
@@ -58,8 +69,9 @@ jobs:
           api_key: ${{ secrets.MYMEMORY_API_KEY }}
           lang: 'en|it'
           source: ${{ matrix.source }}
-      - name: Check MyMemory (Registered) translation result
-        run: echo "${{ steps.mymemory_registered.outputs.text }}" | grep -q 'Svolgimento' || exit 1;
+      - name: Validate MyMemory (Registered) translation result
+        run: |
+          [[ "${{ steps.mymemory_registered.outputs.text }}" == "Svolgimento" ]] || exit 1;
       - uses: ./
         id: yandex
         with:
@@ -67,5 +79,6 @@ jobs:
           api_key: ${{ secrets.YANDEX_API_KEY }}
           lang: 'en-tr'
           source: ${{ matrix.source }}
-      - name: Check Yandex translation result
-        run: echo "${{ steps.yandex.outputs.text }}" | grep -q 'Performans' || exit 1;
+      - name: Validate Yandex translation result
+        run: |
+          [[ "${{ steps.yandex.outputs.text }}" == "Performans" ]] || exit 1;
