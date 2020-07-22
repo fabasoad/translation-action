@@ -1,13 +1,13 @@
 ---
-name: CI (master)
+name: CI (main)
 
 on:
   push:
     branches:
-      - master
+      - main
   pull_request:
     branches:
-      - master
+      - main
 
 jobs:
   unit_tests:
@@ -15,7 +15,7 @@ jobs:
     timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.1.0
+      - uses: actions/checkout@v2.3.1
       - uses: Adzz/jest_test_action@v1.0.0
         env:
           MICROSOFT_API_KEY: ${{ secrets.MICROSOFT_API_KEY }}
@@ -33,7 +33,7 @@ jobs:
         source: ['Performance']    
       fail-fast: false
     steps:
-      - uses: actions/checkout@v2.1.0
+      - uses: actions/checkout@v2.3.1
       - uses: ./
         id: linguatools
         with:

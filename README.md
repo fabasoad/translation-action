@@ -1,5 +1,5 @@
 # Translation action
-![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/fabasoad/translation-action?include_prereleases) ![CI (latest)](https://github.com/fabasoad/translation-action/workflows/CI%20(latest)/badge.svg) ![CI (master)](https://github.com/fabasoad/translation-action/workflows/CI%20(master)/badge.svg) ![YAML Lint](https://github.com/fabasoad/translation-action/workflows/YAML%20Lint/badge.svg) [![Total alerts](https://img.shields.io/lgtm/alerts/g/fabasoad/translation-action.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/fabasoad/translation-action/alerts/) [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/fabasoad/translation-action.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/fabasoad/translation-action/context:javascript) [![Maintainability](https://api.codeclimate.com/v1/badges/84bb3beceb9503272bc9/maintainability)](https://codeclimate.com/github/fabasoad/translation-action/maintainability) [![Known Vulnerabilities](https://snyk.io/test/github/fabasoad/translation-action/badge.svg?targetFile=package.json)](https://snyk.io/test/github/fabasoad/translation-action?targetFile=package.json)
+![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/fabasoad/translation-action?include_prereleases) ![CI (latest)](https://github.com/fabasoad/translation-action/workflows/CI%20(latest)/badge.svg) ![CI (main)](https://github.com/fabasoad/translation-action/workflows/CI%20(main)/badge.svg) ![YAML Lint](https://github.com/fabasoad/translation-action/workflows/YAML%20Lint/badge.svg) [![Total alerts](https://img.shields.io/lgtm/alerts/g/fabasoad/translation-action.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/fabasoad/translation-action/alerts/) [![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/fabasoad/translation-action.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/fabasoad/translation-action/context:javascript) [![Maintainability](https://api.codeclimate.com/v1/badges/84bb3beceb9503272bc9/maintainability)](https://codeclimate.com/github/fabasoad/translation-action/maintainability) [![Known Vulnerabilities](https://snyk.io/test/github/fabasoad/translation-action/badge.svg?targetFile=package.json)](https://snyk.io/test/github/fabasoad/translation-action?targetFile=package.json)
 
 This action translates any text to any language supported by chosen provider. There is a list of providers that can be used for text translation. Please find more details for each provider below.
 
@@ -47,7 +47,7 @@ Identifier is `yandex`.
 #### How to get API key
 Go to the [Developer's page](https://translate.yandex.com/developers) and click on `Login`->`Register` and register a new account. Then go to the [API keys page](https://translate.yandex.com/developers/keys) and copy API key:
 
-![Result](https://raw.githubusercontent.com/fabasoad/translation-action/master/screenshots/screenshot-yandex-api-key.png)
+![Result](https://raw.githubusercontent.com/fabasoad/translation-action/main/screenshots/screenshot-yandex-api-key.png)
 
 ## Inputs
 | Name     | Required | Description                                                                                      | Default | Possible values                                                   |
@@ -89,4 +89,4 @@ jobs:
 ```
 
 ### Result
-![Result](https://raw.githubusercontent.com/fabasoad/translation-action/master/screenshots/screenshot-yandex-result.png)
+![Result](https://raw.githubusercontent.com/fabasoad/translation-action/main/screenshots/screenshot-yandex-result.png)
