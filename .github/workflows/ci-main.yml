@@ -42,9 +42,6 @@ jobs:
       - name: Validate Linguatools translation result
         run: |
           [[ "${{ steps.linguatools.outputs.text }}" == "Leistung" ]] || exit 1;
-      - name: Validate Microsoft translation result
-        run: |
-          [[ "${{ steps.microsoft.outputs.text }}" == "Prestaties" ]] || exit 1;
       - uses: ./
         id: mymemory_free
         with:
