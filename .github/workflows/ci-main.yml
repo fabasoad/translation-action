@@ -65,7 +65,7 @@ jobs:
       - name: Validate MyMemory (Registered) translation result
         run: |
           echo "'${{ matrix.source }}' has been translated to '${{ steps.mymemory_registered.outputs.text }}'"
-          [[ "${{ steps.mymemory_registered.outputs.text }}" == "Svolgimento" ]] || exit 1;
+          [[ "${{ steps.mymemory_registered.outputs.text }}" == "Elevate" ]] || exit 1;
         shell: bash
       - uses: ./
         id: yandex
