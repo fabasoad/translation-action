@@ -41,7 +41,9 @@ jobs:
           source: ${{ matrix.source }}
       - name: Validate Linguatools translation result
         run: |
+          echo "'${{ matrix.source }}' has been translated to '${{ steps.linguatools.outputs.text }}'"
           [[ "${{ steps.linguatools.outputs.text }}" == "Leistung" ]] || exit 1;
+        shell: bash
       - uses: ./
         id: mymemory_free
         with:
@@ -50,7 +52,9 @@ jobs:
           source: ${{ matrix.source }}
       - name: Validate MyMemory (Free) translation result
         run: |
+          echo "'${{ matrix.source }}' has been translated to '${{ steps.mymemory_free.outputs.text }}'"
           [[ "${{ steps.mymemory_free.outputs.text }}" == "Live performance" ]] || exit 1;
+        shell: bash
       - uses: ./
         id: mymemory_registered
         with:
@@ -60,7 +64,9 @@ jobs:
           source: ${{ matrix.source }}
       - name: Validate MyMemory (Registered) translation result
         run: |
+          echo "'${{ matrix.source }}' has been translated to '${{ steps.mymemory_registered.outputs.text }}'"
           [[ "${{ steps.mymemory_registered.outputs.text }}" == "Svolgimento" ]] || exit 1;
+        shell: bash
       - uses: ./
         id: yandex
         with:
@@ -70,4 +76,6 @@ jobs:
           source: ${{ matrix.source }}
       - name: Validate Yandex translation result
         run: |
+          echo "'${{ matrix.source }}' has been translated to '${{ steps.yandex.outputs.text }}'"
           [[ "${{ steps.yandex.outputs.text }}" == "Performans" ]] || exit 1;
+        shell: bash
