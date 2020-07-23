@@ -8,12 +8,12 @@ const fixture = [{
     name: 'linguatools',
     apiKey: null,
     lang: 'en-de'
-}, {
+}, /* Disable it as current API key is not valid anymore */ /*{
     title: 'Microsoft',
     name: 'microsoft',
     apiKey: process.env.MICROSOFT_API_KEY,
     lang: 'nl'
-}, {
+},*/ {
     title: 'MyMemory (Free)',
     name: 'mymemory',
     apiKey: null,

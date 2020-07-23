@@ -17,7 +17,6 @@ jobs:
           ref: ${{ github.ref }}
       - uses: Adzz/jest_test_action@v1.0.0
         env:
-          MICROSOFT_API_KEY: ${{ secrets.MICROSOFT_API_KEY }}
           MYMEMORY_API_KEY: ${{ secrets.MYMEMORY_API_KEY }}
           YANDEX_API_KEY: ${{ secrets.YANDEX_API_KEY }}
         with:
@@ -41,13 +40,6 @@ jobs:
       - name: Validate Linguatools translation result
         run: |
           [[ "${{ steps.linguatools.outputs.text }}" == "Leistung" ]] || exit 1;
-      - uses: fabasoad/translation-action@v1.3.0
-        id: microsoft
-        with:
-          provider: microsoft
-          api_key: ${{ secrets.MICROSOFT_API_KEY }}
-          lang: 'nl'
-          source: ${{ matrix.source }}
       - name: Validate Microsoft translation result
         run: |
           [[ "${{ steps.microsoft.outputs.text }}" == "Prestaties" ]] || exit 1;
