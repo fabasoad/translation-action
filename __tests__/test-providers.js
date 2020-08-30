@@ -8,12 +8,13 @@ const fixture = [{
     name: 'linguatools',
     apiKey: null,
     lang: 'en-de'
-}, /* Disable it as current API key is not valid anymore */ /*{
+}, /* {
     title: 'Microsoft',
     name: 'microsoft',
     apiKey: process.env.MICROSOFT_API_KEY,
+    addParam: 'canadacentral',
     lang: 'nl'
-},*/ {
+}, */ {
     title: 'MyMemory (Free)',
     name: 'mymemory',
     apiKey: null,
@@ -33,14 +34,14 @@ const fixture = [{
 describe('Provider tests', () => {
     itParam('${value.title} should get correct translation', fixture, async (arg) => {
         const translate = require(`../src/providers/${arg.name}`);
-        const translations = await translate(arg.apiKey, 'Evening', arg.lang);
+        const translations = await translate(arg.apiKey, 'Evening', arg.lang, arg.addParam);
         assert(translations.length > 0);
     });
 
     itParam('${value.title} should fail because of invalid lang', fixture, async (arg) => {
         const translate = require(`../src/providers/${arg.name}`);
         try {
-            await translate(arg.apiKey, 'Evening', 'abc123');
+            await translate(arg.apiKey, 'Evening', 'abc123', arg.addParam);
         } catch (e) {
             assert.isNotNull(e);
             return;

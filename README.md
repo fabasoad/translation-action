@@ -31,6 +31,13 @@ Identifier is `microsoft`.
 #### How to get API key
 Please follow the steps described in [this](https://docs.microsoft.com/en-us/azure/cognitive-services/translator/translator-text-how-to-signup) article.
 
+You will also need to provide the region of the key using the `api_additional_parameter` eg
+
+```YAML
+with:
+  api_additional_parameter: canadacentral
+```
+
 ### MyMemory
 Identifier is `mymemory`.
 #### Supported translation directions

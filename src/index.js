@@ -9,7 +9,7 @@ async function run() {
     const translate = require(`./providers/${provider}`);
     try {
       const source = sourceExtract(core.getInput('source'));
-      const translations = await translate(core.getInput('api_key'), source, core.getInput('lang'));
+      const translations = await translate(core.getInput('api_key'), source, core.getInput('lang'), core.getInput('api_additional_parameter'));
       core.setOutput('text', translations[0]);
     } catch (e) {
       core.setFailed(e.message);

@@ -1,6 +1,6 @@
 const got = require('got');
 
-module.exports = (apiKey, text, lang) => {
+module.exports = (apiKey, text, lang, addParam) => {
   const url = `https://lt-translate-test.herokuapp.com/?langpair=${lang}&query=${text}`;
   return got(url).then(({ body }) => {
     const translations = JSON.parse(body);
