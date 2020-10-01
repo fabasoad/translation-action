@@ -65,15 +65,3 @@ jobs:
           echo "'${{ matrix.source }}' has been translated to '${{ steps.mymemory_registered.outputs.text }}'"
           [[ "${{ steps.mymemory_registered.outputs.text }}" == "Elevate" ]] || exit 1;
         shell: bash
-      - uses: fabasoad/translation-action@v1.3.1
-        id: yandex
-        with:
-          provider: yandex
-          api_key: ${{ secrets.YANDEX_API_KEY }}
-          lang: 'en-tr'
-          source: ${{ matrix.source }}
-      - name: Validate Yandex translation result
-        run: |
-          echo "'${{ matrix.source }}' has been translated to '${{ steps.yandex.outputs.text }}'"
-          [[ "${{ steps.yandex.outputs.text }}" == "Performans" ]] || exit 1;
-        shell: bash
