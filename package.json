@@ -24,7 +24,7 @@
   },
   "homepage": "https://github.com/fabasoad/translation-action#readme",
   "dependencies": {
-    "@actions/core": "^1.2.5",
+    "@actions/core": "^1.2.6",
     "got": "^11.5.2",
     "node-fetch": "^2.6.1",
     "yandex-translate": "^2.1.3"
