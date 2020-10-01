@@ -9,6 +9,7 @@ This action translates any text to any language supported by chosen provider. Th
   - [Microsoft](#microsoft)
   - [MyMemory](#mymemory)
   - [Yandex](#yandex)
+  - [FunTranslations](#funtranslations)
 - [Inputs](#inputs)
 - [Outputs](#outputs)
 - [Example usage](#example-usage)
@@ -55,6 +56,18 @@ Identifier is `yandex`.
 Go to the [Developer's page](https://translate.yandex.com/developers) and click on `Login`->`Register` and register a new account. Then go to the [API keys page](https://translate.yandex.com/developers/keys) and copy API key:
 
 ![Result](https://raw.githubusercontent.com/fabasoad/translation-action/main/screenshots/screenshot-yandex-api-key.png)
+
+### FunTranslations
+Identifier is `funtranslations`.
+#### Supported translation directions
+`from` direction is English only at this moment, so `lang` parameter can be found [here](https://funtranslations.com/api/). Example:
+```yaml
+- uses: fabasoad/translation-action@main
+  with:
+    provider: funtranslations
+    lang: 'klingon'
+    source: 'Who are you'
+```
 
 ## Inputs
 | Name     | Required | Description                                                                                      | Default | Possible values                                                   |

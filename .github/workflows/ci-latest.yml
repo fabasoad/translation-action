@@ -31,7 +31,7 @@ jobs:
         source: ['Performance']    
       fail-fast: false
     steps:
-      - uses: fabasoad/translation-action@v1.3.1
+      - uses: fabasoad/translation-action@v1.4.0
         id: linguatools
         with:
           provider: linguatools
@@ -42,7 +42,7 @@ jobs:
           echo "'${{ matrix.source }}' has been translated to '${{ steps.linguatools.outputs.text }}'"
           [[ "${{ steps.linguatools.outputs.text }}" == "Leistung" ]] || exit 1;
         shell: bash
-      - uses: fabasoad/translation-action@v1.3.1
+      - uses: fabasoad/translation-action@v1.4.0
         id: mymemory_free
         with:
           provider: mymemory
@@ -53,7 +53,7 @@ jobs:
           echo "'${{ matrix.source }}' has been translated to '${{ steps.mymemory_free.outputs.text }}'"
           [[ "${{ steps.mymemory_free.outputs.text }}" == "Live performance" ]] || exit 1;
         shell: bash
-      - uses: fabasoad/translation-action@v1.3.1
+      - uses: fabasoad/translation-action@v1.4.0
         id: mymemory_registered
         with:
           provider: mymemory
@@ -64,4 +64,15 @@ jobs:
         run: |
           echo "'${{ matrix.source }}' has been translated to '${{ steps.mymemory_registered.outputs.text }}'"
           [[ "${{ steps.mymemory_registered.outputs.text }}" == "Elevate" ]] || exit 1;
+        shell: bash
+      - uses: fabasoad/translation-action@v1.4.0
+        id: funtranslations
+        with:
+          provider: funtranslations
+          lang: 'klingon'
+          source: ${{ matrix.source }}
+      - name: Validate FunTranslations translation result
+        run: |
+          echo "'${{ matrix.source }}' has been translated to '${{ steps.funtranslations.outputs.text }}'"
+          [[ "${{ steps.funtranslations.outputs.text }}" == "Performance" ]] || exit 1;
         shell: bash
