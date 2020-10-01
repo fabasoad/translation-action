@@ -34,8 +34,16 @@ const fixture = [{
 describe('Provider tests', () => {
     itParam('${value.title} should get correct translation', fixture, async (arg) => {
         const translate = require(`../src/providers/${arg.name}`);
-        const translations = await translate(arg.apiKey, 'Evening', arg.lang, arg.addParam);
-        assert(translations.length > 0);
+        try {
+            const translations = await translate(arg.apiKey, 'Evening', arg.lang, arg.addParam);
+            assert(translations.length > 0);
+        } catch ({ message }) {
+            if (message === 'Maximum daily translated text volume exceeded') {
+                console.warn(`[${arg.title}] ${message}`);
+            } else {
+                assert.fail(message);
+            }
+        }
     });
 
     itParam('${value.title} should fail because of invalid lang', fixture, async (arg) => {
