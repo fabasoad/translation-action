@@ -1,3 +1,5 @@
+Closes #<Issue Number>
+
 ## Pull request checklist
 
 Please check if your PR fulfills the following requirements:
@@ -25,8 +27,6 @@ Please check the type of change your PR introduces:
 
 ## What is the current behavior?
 <!-- Please describe the current behavior that you are modifying, or link to a relevant issue. -->
-
-Issue Number: N/A
 
 
 ## What is the new behavior?
