@@ -67,3 +67,14 @@ jobs:
           echo "'${{ matrix.source }}' has been translated to '${{ steps.mymemory_registered.outputs.text }}'"
           [[ "${{ steps.mymemory_registered.outputs.text }}" == "Elevate" ]] || exit 1;
         shell: bash
+      - uses: ./
+        id: funtranslations
+        with:
+          provider: funtranslations
+          lang: 'klingon'
+          source: ${{ matrix.source }}
+      - name: Validate FunTranslations translation result
+        run: |
+          echo "'${{ matrix.source }}' has been translated to '${{ steps.funtranslations.outputs.text }}'"
+          [[ "${{ steps.funtranslations.outputs.text }}" == "Performance" ]] || exit 1;
+        shell: bash

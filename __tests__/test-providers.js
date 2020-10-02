@@ -18,13 +18,18 @@ const fixture = [{
     name: 'mymemory',
     apiKey: process.env.MYMEMORY_API_KEY,
     lang: 'en|it'
+}, {
+    title: 'FunTranslations',
+    name: 'funtranslations',
+    apiKey: null,
+    lang: 'vulcan'
 }];
 
 describe('Provider tests', () => {
     itParam('${value.title} should get correct translation', fixture, async (arg) => {
         const translate = require(`../src/providers/${arg.name}`);
         const translations = await translate(arg.apiKey, 'Evening', arg.lang, arg.addParam);
-        assert(translations.length > 0);
+        assert.isTrue(translations.length > 0);
     });
 
     itParam('${value.title} should fail because of invalid lang', fixture, async (arg) => {
