@@ -25,7 +25,7 @@ If applicable, add screenshots to help explain your problem.
 
 **Technical information (please complete the following information):**
  - OS: [e.g. Windows 10 Enterprise v.1909 (OS Build 18363.720)]
- - `translation-action` version [e.g. 1.3.0]
+ - `translation-action` version [e.g. 1.4.1]
 
 **Additional context**
 Add any other context about the problem here.
