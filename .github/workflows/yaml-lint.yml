@@ -17,4 +17,3 @@ jobs:
         with:
           config_file: .yamllint.yml
           strict: false
-          file_or_dir: action.yml .github/**.yml
