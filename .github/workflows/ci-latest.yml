@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        source: ['Performance']    
+        source: ['Performance']
       fail-fast: false
     steps:
       - uses: fabasoad/translation-action@v1.4.1
