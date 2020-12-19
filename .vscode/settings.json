@@ -1,0 +1,20 @@
+{
+  "editor.codeActionsOnSave": {
+    "source.fixAll": true,
+    "fixAll.eslint": true,
+    "source.organizeImports": true,
+  },
+  "cSpell.words": [
+    "Leistung",
+    "UNSECURE",
+    "brainfuck",
+    "camelcase",
+    "funtranslations",
+    "issuehunt",
+    "liberapay",
+    "linguatools",
+    "mymemory",
+    "vercel"
+  ],
+  "editor.rulers": [ 80 ]
+}
