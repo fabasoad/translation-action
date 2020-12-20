@@ -95,12 +95,13 @@ Identifier is `funtranslations`.
 
 ## Inputs
 
-| Name     | Required | Description                                                                                      | Default | Possible values                                                   |
-|----------|----------|--------------------------------------------------------------------------------------------------|---------|-------------------------------------------------------------------|
-| source   | Yes      | Can be text or path to the file for translation.                                                 |         | _&lt;Path&gt;_,_&lt;String&gt;_                             |
-| provider | Yes      | Provider identifier                                                                              |         | [microsoft](#microsoft), [mymemory](#mymemory), [yandex](#yandex) |
-| api_key  | No       | API key that should be used for chosen [provider](#providers)                                    | null    |_&lt;String&gt;_                                                  |
-| lang     | Yes      | The translation direction. Should be one of the option proposed by chosen [provider](#providers) |         | _&lt;String&gt;_                                                  |
+| Name                     | Required | Description                                                                                      | Default | Possible values                                                                                                                     |
+|--------------------------|----------|--------------------------------------------------------------------------------------------------|---------|-------------------------------------------------------------------------------------------------------------------------------------|
+| source                   | Yes      | Can be text or path to the file for translation                                                  |         | _&lt;Path&gt;_,_&lt;String&gt;_                                                                                                     |
+| provider                 | Yes      | Provider identifier                                                                              |         | [linguatools](#linguatools), [microsoft](#microsoft), [mymemory](#mymemory), [yandex](#yandex), [funtranslations](#funtranslations) |
+| api_key                  | No       | API key that should be used for chosen [provider](#providers)                                    |         |                                                                                                                                     |
+| api_additional_parameter | No       | Additional parameter for the API. eg the region for Microsoft: `canadacentral`                   | `null`  | _&lt;String&gt;_                                                                                                                    |
+| lang                     | Yes      | The translation direction. Should be one of the option proposed by chosen [provider](#providers) |         | _&lt;String&gt;_                                                                                                                    |
 
 ## Outputs
 
@@ -136,4 +137,4 @@ jobs:
 
 ### Result
 
-![Result](https://raw.githubusercontent.com/fabasoad/translation-action/main/screenshots/screenshot-yandex-result.png)
+![Result](screenshots/screenshot-yandex-result.png)
