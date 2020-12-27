@@ -1,0 +1,45 @@
+---
+name: Create release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  create_release:
+    name: Release
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+        with:
+          fetch-depth: 0
+          ref: ${{ github.ref }}
+      - name: Get commits since last release
+        id: changes
+        uses: simbo/changes-since-last-release-action@v1
+      - name: Get latest version
+        id: substring
+        run: |
+          ver=$(echo "${{ steps.changes.outputs.last-tag }}" | cut -c2-)
+          echo '::set-output name=version::'$ver
+      - name: Increase version
+        id: semver
+        uses: matt-FFFFFF/simple-semver@v0.1.0
+        with:
+          semver-input: ${{ steps.substring.outputs.version }}
+          increment: p
+      - name: Create release
+        id: create_release
+        uses: actions/create-release@v1
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        with:
+          tag_name: v${{ steps.semver.outputs.semver }}
+          release_name: v${{ steps.semver.outputs.semver }}
+          body: |
+            # Changes
+
+            ${{ steps.changes.outputs.log }}
+          draft: false
+          prerelease: false
