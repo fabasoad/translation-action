@@ -20,6 +20,8 @@
     "liberapay",
     "linguatools",
     "mymemory",
+    "semver",
+    "simbo",
     "vercel"
   ],
   "editor.rulers": [ 80 ]
