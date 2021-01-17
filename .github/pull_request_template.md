@@ -1,4 +1,6 @@
-Closes #<IssueNumber>
+<!-- markdownlint-disable-file MD041 -->
+
+Closes #{IssueNumber}
 
 ## Pull request checklist
 
