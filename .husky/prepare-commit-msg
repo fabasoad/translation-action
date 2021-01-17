@@ -1,2 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/sh
+. "$(dirname $0)/_/husky.sh"
+
 git secrets --prepare_commit_msg_hook -- "$@"
