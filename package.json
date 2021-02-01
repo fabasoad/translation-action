@@ -6,8 +6,8 @@
   "scripts": {
     "build": "ncc build -m src/index.ts",
     "lint:md": "markdownlint --config .markdownlint.yml '**/*.md'",
-    "lint:ts": "eslint --ext ts src",
-    "lint": "yarn run lint:md && yarn run lint:ts",
+    "lint:es": "eslint --ext ts src",
+    "lint": "yarn run lint:md && yarn run lint:es",
     "postinstall": "yarn husky install",
     "prepare": "yarn run snyk-protect",
     "security:auth": "snyk auth",
