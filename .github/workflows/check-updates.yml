@@ -59,7 +59,7 @@ jobs:
           branch: bump/patch
           branch-suffix: timestamp
           commit-message: 'Bump dependencies by "${{ github.workflow }} #${{ github.run_number }}"'
-          committer: github-actions <noreply@github.com>
+          committer: GitHub <noreply@github.com>
           delete-branch: true
           labels: dependencies
           reviewers: ${{ github.actor }}
