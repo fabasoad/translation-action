@@ -1,0 +1,44 @@
+---
+name: Unit Tests
+
+on:
+  push:
+    branches:
+      - main
+      - 'bugfix/**'
+      - 'feature/**'
+
+env:
+  ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+
+jobs:
+  unit_tests:
+    name: Lint and Test
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2.3.4
+      - name: Cache node_modules
+        id: cache
+        uses: actions/cache@v2.1.3
+        with:
+          path: '**/node_modules'
+          key: ${{ runner.os }}-modules-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      - name: Compile
+        if: ${{ steps.cache.outputs.cache-hit != 'true' }}
+        run: yarn install
+      - name: Lint
+        run: yarn run lint
+      - name: Unit tests
+        run: yarn test
+        if: github.ref != 'refs/heads/main'
+      - name: Unit tests with coverage
+        uses: paambaati/codeclimate-action@v2.7.5
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        env:
+          CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+        with:
+          coverageCommand: yarn test
+          debug: true
