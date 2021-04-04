@@ -4,8 +4,9 @@ name: Security Tests
 on:
   push:
     branches:
-      - main
+      - 'main'
       - 'bugfix/**'
+      - 'bump/patch-*'
       - 'feature/**'
   schedule:
     - cron: '25 2 * * 6'
