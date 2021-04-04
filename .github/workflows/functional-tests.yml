@@ -4,8 +4,9 @@ name: Functional Tests
 on:
   push:
     branches:
-      - main
+      - 'main'
       - 'bugfix/**'
+      - 'bump/patch-*'
       - 'feature/**'
 
 env:
