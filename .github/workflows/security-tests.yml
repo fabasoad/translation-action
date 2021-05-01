@@ -6,10 +6,8 @@ on:
     branches:
       - 'main'
       - 'bugfix/**'
-      - 'bump/patch-*'
+      - 'dependabot/*'
       - 'feature/**'
-  schedule:
-    - cron: '25 2 * * 6'
 
 jobs:
   snyk_tests:

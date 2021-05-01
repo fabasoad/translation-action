@@ -1,6 +1,6 @@
 {
   "name": "translation-action",
-  "version": "1.4.9",
+  "version": "1.4.10",
   "description": "This GitHub action translates any text from any language to any language.",
   "main": "dist/index.js",
   "scripts": {
@@ -32,18 +32,18 @@
   },
   "homepage": "https://github.com/fabasoad/translation-action#readme",
   "dependencies": {
-    "@actions/core": "1.2.6",
+    "@actions/core": "1.2.7",
     "node-fetch": "2.6.1",
     "yandex-translate": "2.1.3"
   },
   "devDependencies": {
-    "@types/jest": "26.0.22",
-    "@types/node-fetch": "2.5.9",
-    "@typescript-eslint/eslint-plugin": "4.20.0",
-    "@typescript-eslint/parser": "4.20.0",
-    "@vercel/ncc": "0.27.0",
+    "@types/jest": "26.0.23",
+    "@types/node-fetch": "2.5.10",
+    "@typescript-eslint/eslint-plugin": "4.22.0",
+    "@typescript-eslint/parser": "4.22.0",
+    "@vercel/ncc": "0.28.4",
     "dotenv": "8.2.0",
-    "eslint": "7.23.0",
+    "eslint": "7.25.0",
     "eslint-config-google": "0.14.0",
     "git-branch-is": "4.0.0",
     "husky": "6.0.0",
@@ -52,9 +52,9 @@
     "markdownlint-cli": "0.27.1",
     "mocha-param": "2.0.1",
     "nyc": "15.1.0",
-    "snyk": "1.522.0",
-    "ts-jest": "26.5.4",
-    "typescript": "4.2.3"
+    "snyk": "1.574.0",
+    "ts-jest": "26.5.5",
+    "typescript": "4.2.4"
   },
   "snyk": true
 }
