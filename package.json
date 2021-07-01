@@ -41,7 +41,7 @@
     "@types/node-fetch": "2.5.10",
     "@typescript-eslint/eslint-plugin": "4.22.0",
     "@typescript-eslint/parser": "4.26.0",
-    "@vercel/ncc": "0.28.4",
+    "@vercel/ncc": "0.28.6",
     "dotenv": "8.2.0",
     "eslint": "7.27.0",
     "eslint-config-google": "0.14.0",
