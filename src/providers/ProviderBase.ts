@@ -19,6 +19,6 @@ export default abstract class ProviderBase {
     if (!response.ok) {
       throw new ProviderError(response.status, response.statusText);
     }
-    return response.json();
+    return response.json().then((data) => data as T);
   }
 }
