@@ -3,19 +3,20 @@ import ProviderBase from './ProviderBase';
 type MyMemoryResponse = { matches: { match: number, translation: string }[] };
 
 export default class MyMemoryProvider extends ProviderBase {
-  private apiKey: string | undefined;
+  private readonly apiKey: string | undefined;
 
   constructor(apiKey?: string) {
-    super();
+    super('https://api.mymemory.translated.net');
     this.apiKey = apiKey;
   }
 
   translate(text: string, lang: string): Promise<string[]> {
-    let url = `https://api.mymemory.translated.net/get?q=${text}&langpair=${lang}`;
+    let url = `/get?q=${text}&langpair=${lang}`;
     url += (this.apiKey ? `&key=${this.apiKey}` : '');
-    return this.api<MyMemoryResponse>(url).then(({ matches }) => {
-      matches.sort((a, b) => a.match > b.match ? 1 : -1);
-      return matches.map(({ translation }) => translation);
-    });
+    return this.api<MyMemoryResponse>({ url, method: 'GET' })
+      .then(({ matches }) => {
+        matches.sort((a, b) => a.match > b.match ? 1 : -1);
+        return matches.map(({ translation }) => translation);
+      });
   }
 }

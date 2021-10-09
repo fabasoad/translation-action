@@ -2,7 +2,7 @@ import provider from 'yandex-translate';
 import ProviderBase from './ProviderBase';
 
 export default class YandexProvider extends ProviderBase {
-  private apiKey: string;
+  private readonly apiKey: string;
 
   constructor(apiKey: string) {
     super();
