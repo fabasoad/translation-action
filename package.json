@@ -3,7 +3,6 @@
   "version": "1.4.10",
   "description": "This GitHub action translates any text from any language to any language.",
   "main": "dist/index.js",
-  "type": "module",
   "scripts": {
     "build": "ncc build -m src/index.ts",
     "lint:md": "markdownlint --config .markdownlint.yml '**/*.md'",
