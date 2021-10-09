@@ -4,9 +4,13 @@ type FunTranslationsResponse =
   { success: { total: number } | undefined, contents: { translated: string } };
 
 export default class FunTranslationsProvider extends ProviderBase {
+  constructor() {
+    super('https://api.funtranslations.com');
+  }
+
   async translate(text: string, lang: string): Promise<string[]> {
-    const url = `https://api.funtranslations.com/translate/${lang}.json?text=${text}`;
-    return this.api<FunTranslationsResponse>(url)
+    const url = `/translate/${lang}.json?text=${text}`;
+    return this.api<FunTranslationsResponse>({ url, method: 'GET' })
       .then(({ success, contents }) => {
         if (success && success.total > 0) {
           return [contents.translated];
