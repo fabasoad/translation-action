@@ -14,7 +14,7 @@ jobs:
     name: Snyk
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.3.4
+      - uses: actions/checkout@v2.3.5
         with:
           ref: ${{ github.ref }}
       - uses: snyk/actions/node@master
@@ -29,7 +29,7 @@ jobs:
         language: ['javascript']
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v2.3.4
+        uses: actions/checkout@v2.3.5
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v1
         with:
