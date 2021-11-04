@@ -1,6 +1,6 @@
 {
   "name": "translation-action",
-  "version": "1.4.11",
+  "version": "1.4.12",
   "description": "This GitHub action translates any text from any language to any language.",
   "main": "dist/index.js",
   "scripts": {
@@ -38,22 +38,22 @@
   },
   "devDependencies": {
     "@types/jest": "27.0.2",
-    "@typescript-eslint/eslint-plugin": "4.33.0",
-    "@typescript-eslint/parser": "4.33.0",
+    "@typescript-eslint/eslint-plugin": "5.3.0",
+    "@typescript-eslint/parser": "5.3.0",
     "@vercel/ncc": "0.31.1",
     "dotenv": "10.0.0",
-    "eslint": "7.32.0",
+    "eslint": "8.1.0",
     "eslint-config-google": "0.14.0",
     "git-branch-is": "4.0.0",
-    "husky": "7.0.2",
-    "jest": "27.2.5",
-    "jest-circus": "27.2.5",
+    "husky": "7.0.4",
+    "jest": "27.3.1",
+    "jest-circus": "27.3.1",
     "markdownlint-cli": "0.29.0",
     "mocha-param": "2.0.1",
     "nyc": "15.1.0",
-    "snyk": "1.733.0",
-    "ts-jest": "27.0.5",
-    "typescript": "4.4.3"
+    "snyk": "1.752.0",
+    "ts-jest": "27.0.7",
+    "typescript": "4.4.4"
   },
   "snyk": true
 }
