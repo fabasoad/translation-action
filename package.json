@@ -47,7 +47,7 @@
     "git-branch-is": "4.0.0",
     "husky": "7.0.4",
     "jest": "27.3.1",
-    "jest-circus": "27.3.1",
+    "jest-circus": "27.4.5",
     "markdownlint-cli": "0.30.0",
     "mocha-param": "2.0.1",
     "nyc": "15.1.0",
