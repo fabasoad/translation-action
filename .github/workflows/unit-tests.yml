@@ -6,7 +6,7 @@ on:
     branches:
       - 'main'
       - 'bugfix/**'
-      - 'dependabot/*'
+      - 'dependabot/**'
       - 'feature/**'
 
 env:

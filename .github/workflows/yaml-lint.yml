@@ -5,6 +5,7 @@ on:
   push:
     paths:
       - '**.yml'
+      - '**.yaml'
 
 jobs:
   lint:
