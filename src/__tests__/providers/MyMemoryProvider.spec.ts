@@ -10,7 +10,7 @@ describe('MyMemoryProvider', () => {
       const provider: ProviderBase = new MyMemoryProvider(apiKey);
       const translations = await provider.translate('Evening', 'en|pt');
       expect(translations.length).toBeGreaterThan(0);
-      expect(translations[0]).toEqual('Boa noite!');
+      expect(translations[0]).toEqual('Noite:');
     });
 
   it('should fail because of invalid lang', async () => {
