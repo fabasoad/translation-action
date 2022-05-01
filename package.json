@@ -42,7 +42,7 @@
     "@typescript-eslint/parser": "5.9.0",
     "@vercel/ncc": "0.33.1",
     "dotenv": "10.0.0",
-    "eslint": "8.6.0",
+    "eslint": "8.14.0",
     "eslint-config-google": "0.14.0",
     "git-branch-is": "4.0.0",
     "husky": "7.0.4",
