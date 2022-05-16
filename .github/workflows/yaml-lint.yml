@@ -13,7 +13,7 @@ jobs:
     timeout-minutes: 3
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2.4.0
+      - uses: actions/checkout@v3
       - uses: ibiqlik/action-yamllint@v3.1
         with:
           config_file: .yamllint.yml
