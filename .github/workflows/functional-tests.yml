@@ -5,12 +5,8 @@ on:
   push:
     branches:
       - 'main'
-      - 'bugfix/**'
-      - 'dependabot/**'
-      - 'feature/**'
-
-env:
-  ACTIONS_ALLOW_UNSECURE_COMMANDS: true
+      - 'fix-*'
+      - 'feature-*'
 
 jobs:
   functional_tests:
