@@ -34,7 +34,7 @@ jobs:
         id: mymemory_free
         with:
           provider: mymemory
-          lang: 'en|ua'
+          lang: 'en|pt'
           source: ${{ matrix.source }}
       - name: Validate MyMemory (Free) translation result
         run: |
