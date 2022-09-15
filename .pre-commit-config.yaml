@@ -24,7 +24,7 @@ repos:
       - id: detect-secrets
         stages: ["commit", "push"]
   - repo: https://github.com/zricethezav/gitleaks
-    rev: v8.10.2
+    rev: v8.12.0
     hooks:
       - id: gitleaks
         stages: ["commit", "push"]
@@ -35,7 +35,7 @@ repos:
         stages: ["push"]
   # TypeScript
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v8.21.0
+    rev: v8.23.1
     hooks:
       - id: eslint
         args: ['--fix']
@@ -44,12 +44,12 @@ repos:
         exclude: ^dist/.*\.js$
   # Markdown
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.32.1
+    rev: v0.32.2
     hooks:
       - id: markdownlint
   # Yaml
   - repo: https://github.com/adrienverge/yamllint
-    rev: v1.27.1
+    rev: v1.28.0
     hooks:
       - id: yamllint
         args: ["-c", ".yamllint.yml"]
