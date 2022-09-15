@@ -13,7 +13,7 @@ describe('MyMemoryProvider', () => {
       expect(translations[0]).toEqual('NOITE');
     });
 
-  it('should fail because of invalid lang', async () => {
+  test('should fail because of invalid lang', async () => {
     const provider: ProviderBase = new MyMemoryProvider();
     try {
       await provider.translate('Evening', 'abc123');
