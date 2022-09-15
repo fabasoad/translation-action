@@ -7,25 +7,32 @@ assignees: fabasoad
 
 ---
 
-**Describe the bug**
+#### Describe the bug
+
 A clear and concise description of what the bug is.
 
-**Steps to Reproduce**
+#### Steps to Reproduce
+
 1. Run '...'
 2. See error
 
-**Expected behavior**
+#### Expected behavior
+
 A clear and concise description of what you expected to happen.
 
-**Actual behavior**
+#### Actual behavior
+
 A clear and concise description of what is happening now.
 
-**Screenshots**
+#### Screenshots
+
 If applicable, add screenshots to help explain your problem.
 
-**Technical information (please complete the following information):**
- - OS: [e.g. Windows 10 Enterprise v.1909 (OS Build 18363.720)]
- - `translation-action` version [e.g. 1.4.1]
+#### Technical information (please complete the following information)
 
-**Additional context**
+- OS: [e.g. Windows 10 Enterprise v.1909 (OS Build 18363.720)]
+- `translation-action` version [e.g. 1.4.1]
+
+#### Additional context
+
 Add any other context about the problem here.
