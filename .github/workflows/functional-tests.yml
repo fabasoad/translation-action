@@ -34,12 +34,12 @@ jobs:
         id: mymemory_free
         with:
           provider: mymemory
-          lang: 'en|pt'
+          lang: 'en|ua'
           source: ${{ matrix.source }}
       - name: Validate MyMemory (Free) translation result
         run: |
           echo "'${{ matrix.source }}' has been translated to '${{ steps.mymemory_free.outputs.text }}'"
-          [[ "${{ steps.mymemory_free.outputs.text }}" == "Desempenho" ]] || exit 1;
+          [[ "${{ steps.mymemory_free.outputs.text }}" == "Live performance" ]] || exit 1;
         shell: bash
       - uses: ./
         id: mymemory_registered
