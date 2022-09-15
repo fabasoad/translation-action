@@ -1,28 +1,31 @@
-import FunTranslationsProvider from '../../providers/FunTranslationsProvider';
-import ProviderBase, { ProviderError } from '../../providers/ProviderBase';
+import FunTranslationsProvider from '../../providers/FunTranslationsProvider'
+import ProviderBase, { ProviderError } from '../../providers/ProviderBase'
 
 describe('FunTranslationsProvider', () => {
-  it('should get correct translation', async () => {
-    const provider: ProviderBase = new FunTranslationsProvider();
+  test('should get correct translation', async () => {
+    const provider: ProviderBase = new FunTranslationsProvider()
     try {
-      const translations = await provider.translate('Evening', 'vulcan');
-      expect(translations.length).toEqual(1);
-      expect(translations[0]).toEqual('Khru');
+      const translations = await provider.translate('Evening', 'vulcan')
+      expect(translations.length).toEqual(1)
+      expect(translations[0]).toEqual('Khru')
     } catch (e) {
       if (!(e instanceof ProviderError)) {
-        fail();
+        const { statusCode } = e as any
+        if (statusCode !== 429) {
+          throw e
+        }
       }
     }
-  });
+  })
 
-  it('should fail because of invalid lang', async () => {
-    const provider: ProviderBase = new FunTranslationsProvider();
+  test('should fail because of invalid lang', async () => {
+    const provider: ProviderBase = new FunTranslationsProvider()
     try {
-      await provider.translate('Evening', 'abc123');
+      await provider.translate('Evening', 'abc123')
     } catch (e) {
-      expect(e).toBeTruthy();
-      return;
+      expect(e).toBeTruthy()
+      return
     }
-    fail();
-  });
-});
+    fail()
+  })
+})
