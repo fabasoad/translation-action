@@ -2,7 +2,7 @@ import FunTranslationsProvider from '../../providers/FunTranslationsProvider';
 import ProviderBase, { ProviderError } from '../../providers/ProviderBase';
 
 describe('FunTranslationsProvider', () => {
-  it('should get correct translation', async () => {
+  test('should get correct translation', async () => {
     const provider: ProviderBase = new FunTranslationsProvider();
     try {
       const translations = await provider.translate('Evening', 'vulcan');
@@ -15,7 +15,7 @@ describe('FunTranslationsProvider', () => {
     }
   });
 
-  it('should fail because of invalid lang', async () => {
+  test('should fail because of invalid lang', async () => {
     const provider: ProviderBase = new FunTranslationsProvider();
     try {
       await provider.translate('Evening', 'abc123');

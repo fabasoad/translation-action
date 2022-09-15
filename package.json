@@ -1,16 +1,12 @@
 {
   "name": "translation-action",
-  "version": "1.4.12",
+  "version": "1.4.13",
   "description": "This GitHub action translates any text from any language to any language.",
   "main": "dist/index.js",
   "scripts": {
     "build": "ncc build -m src/index.ts",
-    "lint:md": "markdownlint --config .markdownlint.yml '**/*.md'",
-    "lint:es": "eslint --ext ts src",
-    "lint": "yarn run lint:md && yarn run lint:es",
-    "postinstall": "yarn husky install",
-    "security:auth": "snyk auth",
-    "security:test": "snyk test",
+    "lint": "eslint --ext ts src",
+    "postinstall": "pre-commit install --hook-type pre-commit && pre-commit install --hook-type pre-push",
     "test": "jest --config=jest.config.json --coverage"
   },
   "repository": {
@@ -42,16 +38,10 @@
     "dotenv": "16.0.1",
     "eslint": "8.17.0",
     "eslint-config-google": "0.14.0",
-    "git-branch-is": "4.0.0",
-    "husky": "8.0.1",
     "jest": "28.1.1",
     "jest-circus": "28.1.1",
-    "markdownlint-cli": "0.31.1",
     "mocha-param": "2.0.1",
-    "nyc": "15.1.0",
-    "snyk": "1.947.0",
     "ts-jest": "28.0.4",
-    "typescript": "4.7.3"
-  },
-  "snyk": true
+    "typescript": "4.8.3"
+  }
 }
