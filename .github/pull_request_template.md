@@ -6,7 +6,8 @@ Closes #{IssueNumber}
 
 Please check if your PR fulfills the following requirements:
 
-- [ ] I have read the [CONTRIBUTING](https://github.com/fabasoad/translation-action/CONTRIBUTING.md) doc.
+- [ ] I have read the [CONTRIBUTING](https://github.com/fabasoad/translation-action/CONTRIBUTING.md)
+doc.
 - [ ] Tests for the changes have been added (for bug fixes / features).
 - [ ] Docs have been reviewed and added / updated if needed (for bug fixes / features).
 - [ ] Build (`yarn run build`) was run locally and any changes were pushed.
