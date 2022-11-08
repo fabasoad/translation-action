@@ -111,7 +111,6 @@ found [here](https://funtranslations.com/api/). Example:
 
 ## Inputs
 
-<!-- markdownlint-disable MD013 -->
 | Name                     | Required | Description                                                                                      | Default | Possible values                                                                                                                     |
 |--------------------------|----------|--------------------------------------------------------------------------------------------------|---------|-------------------------------------------------------------------------------------------------------------------------------------|
 | source                   | Yes      | Can be text or path to the file for translation                                                  |         | _&lt;Path&gt;_,_&lt;String&gt;_                                                                                                     |
@@ -119,7 +118,6 @@ found [here](https://funtranslations.com/api/). Example:
 | api_key                  | No       | API key that should be used for chosen [provider](#providers)                                    |         |                                                                                                                                     |
 | api_additional_parameter | No       | Additional parameter for the API. eg the region for Microsoft: `canadacentral`                   | `null`  | _&lt;String&gt;_                                                                                                                    |
 | lang                     | Yes      | The translation direction. Should be one of the option proposed by chosen [provider](#providers) |         | _&lt;String&gt;_                                                                                                                    |
-<!-- markdownlint-enable MD013 -->
 
 ## Outputs
 

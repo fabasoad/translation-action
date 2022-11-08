@@ -29,13 +29,13 @@ repos:
       - id: gitleaks
         stages: ["commit", "push"]
   - repo: https://github.com/fabasoad/pre-commit-snyk
-    rev: v0.1.0
+    rev: v0.2.0
     hooks:
       - id: snyk-test
         stages: ["push"]
   # TypeScript
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v8.25.0
+    rev: v8.27.0
     hooks:
       - id: eslint
         args: ['--fix']
