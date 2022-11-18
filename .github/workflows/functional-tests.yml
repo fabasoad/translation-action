@@ -14,7 +14,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        source: ['Performance']
+        source: ['Love']
       fail-fast: false
     steps:
       - uses: actions/checkout@v3
@@ -27,7 +27,7 @@ jobs:
       - name: Validate Linguatools translation result
         run: |
           echo "'${{ matrix.source }}' has been translated to '${{ steps.linguatools.outputs.text }}'"
-          [[ "${{ steps.linguatools.outputs.text }}" == "Leistung" ]] || exit 1;
+          [[ "${{ steps.linguatools.outputs.text }}" == "Liebe" ]] || exit 1;
         shell: bash
       - uses: ./
         id: mymemory_free
@@ -38,7 +38,7 @@ jobs:
       - name: Validate MyMemory (Free) translation result
         run: |
           echo "'${{ matrix.source }}' has been translated to '${{ steps.mymemory_free.outputs.text }}'"
-          [[ "${{ steps.mymemory_free.outputs.text }}" == "Live performance" ]] || exit 1;
+          [[ "${{ steps.mymemory_free.outputs.text }}" == "Amor" ]] || exit 1;
         shell: bash
       - uses: ./
         id: mymemory_registered
@@ -50,7 +50,7 @@ jobs:
       - name: Validate MyMemory (Registered) translation result
         run: |
           echo "'${{ matrix.source }}' has been translated to '${{ steps.mymemory_registered.outputs.text }}'"
-          [[ "${{ steps.mymemory_registered.outputs.text }}" == "Commissione di" ]] || exit 1;
+          [[ "${{ steps.mymemory_registered.outputs.text }}" == "Amore" ]] || exit 1;
         shell: bash
       - uses: ./
         id: funtranslations
@@ -61,5 +61,5 @@ jobs:
       - name: Validate FunTranslations translation result
         run: |
           echo "'${{ matrix.source }}' has been translated to '${{ steps.funtranslations.outputs.text }}'"
-          [[ "${{ steps.funtranslations.outputs.text }}" == "Performance" ]] || exit 1;
+          [[ "${{ steps.funtranslations.outputs.text }}" == "Love" ]] || exit 1;
         shell: bash
