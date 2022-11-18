@@ -5,8 +5,7 @@ on:
   push:
     branches:
       - 'main'
-      - 'fix-*'
-      - 'feature-*'
+  pull_request:
 
 jobs:
   functional_tests:
