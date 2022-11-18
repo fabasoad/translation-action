@@ -61,5 +61,5 @@ jobs:
       - name: Validate FunTranslations translation result
         run: |
           echo "'${{ matrix.source }}' has been translated to '${{ steps.funtranslations.outputs.text }}'"
-          [[ "${{ steps.funtranslations.outputs.text }}" == "Love" ]] || exit 1;
+          [[ "${{ steps.funtranslations.outputs.text }}" == "Parmaq" ]] || exit 1;
         shell: bash
