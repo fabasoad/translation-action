@@ -5,8 +5,6 @@
 ![Functional Tests](https://github.com/fabasoad/translation-action/workflows/Functional%20Tests/badge.svg)
 ![Security Tests](https://github.com/fabasoad/translation-action/workflows/Security%20Tests/badge.svg)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/fabasoad/translation-action/main.svg)](https://results.pre-commit.ci/latest/github/fabasoad/translation-action/main)
-[![Total alerts](https://img.shields.io/lgtm/alerts/g/fabasoad/translation-action.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/fabasoad/translation-action/alerts/)
-[![Language grade: JavaScript](https://img.shields.io/lgtm/grade/javascript/g/fabasoad/translation-action.svg?logo=lgtm&logoWidth=18)](https://lgtm.com/projects/g/fabasoad/translation-action/context:javascript)
 [![Maintainability](https://api.codeclimate.com/v1/badges/84bb3beceb9503272bc9/maintainability)](https://codeclimate.com/github/fabasoad/translation-action/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/84bb3beceb9503272bc9/test_coverage)](https://codeclimate.com/github/fabasoad/translation-action/test_coverage)
 [![Known Vulnerabilities](https://snyk.io/test/github/fabasoad/translation-action/badge.svg?targetFile=package.json)](https://snyk.io/test/github/fabasoad/translation-action?targetFile=package.json)
