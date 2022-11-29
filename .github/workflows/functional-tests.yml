@@ -33,7 +33,7 @@ jobs:
         id: mymemory_free
         with:
           provider: mymemory
-          lang: 'en|pt'
+          lang: 'en|se'
           source: ${{ matrix.source }}
       - name: Validate MyMemory (Free) translation result
         run: |
@@ -45,7 +45,7 @@ jobs:
         with:
           provider: mymemory
           api_key: ${{ secrets.MYMEMORY_API_KEY }}
-          lang: 'en|it'
+          lang: 'en|no'
           source: ${{ matrix.source }}
       - name: Validate MyMemory (Registered) translation result
         run: |
