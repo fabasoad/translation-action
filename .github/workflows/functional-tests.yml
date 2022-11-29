@@ -22,14 +22,14 @@ jobs:
             expected: Liebe
             api_key: N_A # pragma: allowlist secret
           - provider: mymemory
-            lang: 'en|dk'
+            lang: 'en|it'
             source: Love
-            expected: elskov
+            expected: Love
             api_key: N_A # pragma: allowlist secret
           - provider: mymemory
-            lang: 'en|kr'
+            lang: 'en|pt'
             source: Love
-            expected: 사랑
+            expected: Love
             api_key: MYMEMORY_API_KEY # pragma: allowlist secret
           - provider: funtranslations
             lang: 'klingon'
@@ -44,7 +44,7 @@ jobs:
           provider: ${{ matrix.provider }}
           lang: ${{ matrix.lang }}
           source: ${{ matrix.source }}
-          api_key: ${{ secrets[matrix.api_key] }}
+          api_key: "${{ secrets[matrix.api_key] }}"
       - name: Validate ${{ matrix.provider }} translation result
         run: |
           echo "'${{ matrix.source }}' has been translated to '${{ steps.result.outputs.text }}'"
