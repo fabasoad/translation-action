@@ -9,11 +9,11 @@ on:
 
 jobs:
   translate:
-    run-name: Translate (${{ matrix.provider }})
     name: Translate
     timeout-minutes: 5
     runs-on: ubuntu-latest
     strategy:
+      fail-fast: false
       matrix:
         include:
           - provider: linguatools
@@ -36,7 +36,6 @@ jobs:
             source: Love
             expected: Parmaq
             api_key: N_A # pragma: allowlist secret
-      fail-fast: false
     steps:
       - uses: actions/checkout@v3
       - uses: ./
