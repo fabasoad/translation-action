@@ -41,8 +41,8 @@ jobs:
       - uses: ./
         id: result
         with:
-          provider: linguatools
-          lang: 'en-de'
+          provider: ${{ matrix.provider }}
+          lang: ${{ matrix.lang }}
           source: ${{ matrix.source }}
           api_key: ${{ secrets[matrix.api_key] }}
       - name: Validate ${{ matrix.provider }} translation result
