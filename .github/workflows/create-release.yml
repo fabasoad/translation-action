@@ -18,10 +18,12 @@ jobs:
         id: latest_release
         run: |
           latest_tag=$(curl --silent "https://api.github.com/repos/${{ github.repository }}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-          echo "::set-output name=tag::${latest_tag}"
+          echo "tag=${latest_tag}" >> $GITHUB_OUTPUT
+        shell: sh
       - name: Get current release tag
         id: current_release
-        run: echo "::set-output name=tag::${GITHUB_REF/refs\/tags\//}"
+        run: echo "tag=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
+        shell: bash
       - name: Build changelog
         id: changelog
         run: |
@@ -29,7 +31,8 @@ jobs:
           body="${body//'%'/'%25'}"
           body="${body//$'\n'/'%0A'}"
           body="${body//$'\r'/'%0D'}"
-          echo "::set-output name=body::${body}"
+          echo "body=${body}" >> $GITHUB_OUTPUT
+        shell: bash
       - name: Create release
         uses: softprops/action-gh-release@v1
         with:
@@ -42,3 +45,7 @@ jobs:
             ${{ steps.changelog.outputs.body }}
           draft: false
           prerelease: false
+      - name: Bump tags
+        uses: fischerscode/tagger@v0
+        with:
+          prefix: v
