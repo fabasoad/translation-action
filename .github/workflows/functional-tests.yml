@@ -8,58 +8,45 @@ on:
   pull_request:
 
 jobs:
-  functional_tests:
+  translate:
     name: Translate
     timeout-minutes: 5
     runs-on: ubuntu-latest
     strategy:
-      matrix:
-        source: ['Love']
       fail-fast: false
+      matrix:
+        include:
+          - provider: linguatools
+            lang: 'en-de'
+            source: Love
+            expected: Liebe
+            api_key: N_A # pragma: allowlist secret
+          - provider: mymemory
+            lang: 'en|it'
+            source: Love
+            expected: 'Con affetto,'
+            api_key: N_A # pragma: allowlist secret
+          - provider: mymemory
+            lang: 'en|pt'
+            source: Love
+            expected: 'Com gratidão,'
+            api_key: MYMEMORY_API_KEY # pragma: allowlist secret
+          - provider: funtranslations
+            lang: 'klingon'
+            source: Love
+            expected: Parmaq
+            api_key: N_A # pragma: allowlist secret
     steps:
       - uses: actions/checkout@v3
       - uses: ./
-        id: linguatools
+        id: result
         with:
-          provider: linguatools
-          lang: 'en-de'
+          provider: ${{ matrix.provider }}
+          lang: ${{ matrix.lang }}
           source: ${{ matrix.source }}
-      - name: Validate Linguatools translation result
+          api_key: "${{ secrets[matrix.api_key] }}"
+      - name: Validate ${{ matrix.provider }} translation result
         run: |
-          echo "'${{ matrix.source }}' has been translated to '${{ steps.linguatools.outputs.text }}'"
-          [[ "${{ steps.linguatools.outputs.text }}" == "Liebe" ]] || exit 1;
-        shell: bash
-      - uses: ./
-        id: mymemory_free
-        with:
-          provider: mymemory
-          lang: 'en|pt'
-          source: ${{ matrix.source }}
-      - name: Validate MyMemory (Free) translation result
-        run: |
-          echo "'${{ matrix.source }}' has been translated to '${{ steps.mymemory_free.outputs.text }}'"
-          [[ "${{ steps.mymemory_free.outputs.text }}" == "Com gratidão," ]] || exit 1;
-        shell: bash
-      - uses: ./
-        id: mymemory_registered
-        with:
-          provider: mymemory
-          api_key: ${{ secrets.MYMEMORY_API_KEY }}
-          lang: 'en|it'
-          source: ${{ matrix.source }}
-      - name: Validate MyMemory (Registered) translation result
-        run: |
-          echo "'${{ matrix.source }}' has been translated to '${{ steps.mymemory_registered.outputs.text }}'"
-          [[ "${{ steps.mymemory_registered.outputs.text }}" == "amore" ]] || exit 1;
-        shell: bash
-      - uses: ./
-        id: funtranslations
-        with:
-          provider: funtranslations
-          lang: 'klingon'
-          source: ${{ matrix.source }}
-      - name: Validate FunTranslations translation result
-        run: |
-          echo "'${{ matrix.source }}' has been translated to '${{ steps.funtranslations.outputs.text }}'"
-          [[ "${{ steps.funtranslations.outputs.text }}" == "Parmaq" ]] || exit 1;
-        shell: bash
+          echo "'${{ matrix.source }}' has been translated to '${{ steps.result.outputs.text }}'"
+          [ "${{ steps.result.outputs.text }}" = "${{ matrix.expected }}" ] || exit 1;
+        shell: sh
