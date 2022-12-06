@@ -26,7 +26,7 @@ repos:
       - id: detect-secrets
         stages: ["commit", "push"]
   - repo: https://github.com/zricethezav/gitleaks
-    rev: v8.15.1
+    rev: v8.15.2
     hooks:
       - id: gitleaks
         stages: ["commit", "push"]
@@ -37,7 +37,7 @@ repos:
         stages: ["push"]
   # TypeScript
   - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v8.28.0
+    rev: v8.29.0
     hooks:
       - id: eslint
         args: ['--fix']
