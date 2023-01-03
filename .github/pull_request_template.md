@@ -1,7 +1,5 @@
 <!-- markdownlint-disable-file MD041 -->
 
-Closes #{IssueNumber}
-
 ## Pull request checklist
 
 Please check if your PR fulfills the following requirements:
@@ -50,3 +48,7 @@ Please check the type of change your PR introduces:
 
 <!-- Any other information that is important to this PR such as screenshots of how the component looks before and after the change. -->
 <!-- This document was adapted from the open-source [appium/appium](https://github.com/appium/appium/blob/master/.github/PULL_REQUEST_TEMPLATE.md) repository. -->
+
+---
+
+Closes #{IssueNumber}
