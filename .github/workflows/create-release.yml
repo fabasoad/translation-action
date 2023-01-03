@@ -14,35 +14,19 @@ jobs:
       - uses: actions/checkout@v3
         with:
           fetch-depth: 0
-      - name: Get latest release tag
-        id: latest_release
-        run: |
-          latest_tag=$(curl --silent "https://api.github.com/repos/${{ github.repository }}/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')
-          echo "tag=${latest_tag}" >> $GITHUB_OUTPUT
-        shell: sh
-      - name: Get current release tag
-        id: current_release
-        run: echo "tag=${GITHUB_REF/refs\/tags\//}" >> $GITHUB_OUTPUT
-        shell: bash
-      - name: Build changelog
+      - name: Get changelog
         id: changelog
-        run: |
-          body=$(git log --pretty=oneline ${{ steps.latest_release.outputs.tag }}..${{ steps.current_release.outputs.tag }})
-          body="${body//'%'/'%25'}"
-          body="${body//$'\n'/'%0A'}"
-          body="${body//$'\r'/'%0D'}"
-          echo "body=${body}" >> $GITHUB_OUTPUT
-        shell: bash
+        uses: simbo/changes-since-last-release-action@v1
       - name: Create release
         uses: softprops/action-gh-release@v1
         with:
           tag_name: ${{ github.ref }}
-          name: ${{ steps.current_release.outputs.tag }}
+          name: ${{ github.ref_name }}
           token: ${{ secrets.GITHUB_TOKEN }}
           body: |
             # Changelog
 
-            ${{ steps.changelog.outputs.body }}
+            ${{ steps.changelog.outputs.log }}
           draft: false
           prerelease: false
       - name: Bump tags

@@ -1,7 +1,7 @@
 ---
 default_install_hook_types: ["pre-commit", "pre-push"]
 default_stages: ["commit"]
-exclude: ^(.gitleaks\.toml|dist/.*\.js)$
+exclude: ^(\.gitleaks\.toml|dist/.*\.js)$
 minimum_pre_commit_version: 2.18.0
 repos:
   - repo: local
@@ -12,6 +12,13 @@ repos:
         language: system
         pass_filenames: false
         verbose: true
+      - id: eslint
+        name: Lint
+        entry: yarn run lint
+        language: system
+        pass_filenames: false
+        verbose: true
+        stages: ["push"]
       - id: test
         name: Unit tests
         entry: yarn test
@@ -35,15 +42,6 @@ repos:
     hooks:
       - id: snyk-test
         stages: ["push"]
-  # TypeScript
-  - repo: https://github.com/pre-commit/mirrors-eslint
-    rev: v8.31.0
-    hooks:
-      - id: eslint
-        args: ['--fix']
-        files: \.[jt]sx?$
-        types: [file]
-        exclude: ^dist/.*\.js$
   # Markdown
   - repo: https://github.com/igorshubovych/markdownlint-cli
     rev: v0.32.2

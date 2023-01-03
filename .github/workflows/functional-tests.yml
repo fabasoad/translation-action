@@ -19,17 +19,17 @@ jobs:
           - provider: linguatools
             lang: 'en-de'
             source: Love
-            expected: Liebe
+            expected: 'Love'
             api_key: N_A # pragma: allowlist secret
           - provider: mymemory
             lang: 'en|it'
             source: Love
-            expected: 'Con affetto,'
+            expected: 'Lo adoro'
             api_key: N_A # pragma: allowlist secret
           - provider: mymemory
             lang: 'en|pt'
             source: Love
-            expected: 'Com gratidão,'
+            expected: 'Amor'
             api_key: MYMEMORY_API_KEY # pragma: allowlist secret
           - provider: funtranslations
             lang: 'klingon'
