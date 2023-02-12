@@ -19,12 +19,13 @@ jobs:
         uses: actions/cache@v3
         with:
           path: '**/node_modules'
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}-${{ hashFiles('**/.yarnrc.yml') }}
           restore-keys: |
             ${{ runner.os }}-yarn-
       - name: Compile
         if: ${{ steps.cache.outputs.cache-hit != 'true' }}
         run: yarn install
+        shell: bash
       - name: Lint
         run: yarn run lint
       - name: Unit tests
