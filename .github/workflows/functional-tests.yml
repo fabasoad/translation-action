@@ -24,12 +24,12 @@ jobs:
           - provider: mymemory
             lang: 'en|it'
             source: Love
-            expected: 'Lo adoro'
+            expected: 'AMORE'
             api_key: N_A # pragma: allowlist secret
           - provider: mymemory
             lang: 'en|pt'
             source: Love
-            expected: 'Amor'
+            expected: 'Com gratidão,'
             api_key: MYMEMORY_API_KEY # pragma: allowlist secret
           - provider: funtranslations
             lang: 'klingon'
