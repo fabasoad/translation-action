@@ -8,7 +8,7 @@ on:
   pull_request:
 
 jobs:
-  codeql_tests:
+  codeql:
     name: CodeQL
     runs-on: ubuntu-latest
     strategy:
@@ -26,3 +26,12 @@ jobs:
         uses: github/codeql-action/autobuild@v2
       - name: Perform CodeQL Analysis
         uses: github/codeql-action/analyze@v2
+  yarn-audit:
+    name: Yarn audit
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: Yarn audit
+        run: yarn npm audit --all
+        shell: sh
