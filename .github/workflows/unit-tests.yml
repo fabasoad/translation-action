@@ -25,15 +25,17 @@ jobs:
       - name: Compile
         if: ${{ steps.cache.outputs.cache-hit != 'true' }}
         run: yarn install
-        shell: bash
+        shell: sh
       - name: Lint
         run: yarn run lint
+        shell: sh
       - name: Unit tests
-        run: yarn test
         if: github.ref != 'refs/heads/main'
+        run: yarn test
+        shell: sh
       - name: Unit tests with coverage
-        uses: paambaati/codeclimate-action@v3.2.0
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        uses: paambaati/codeclimate-action@v3.2.0
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
         with:
