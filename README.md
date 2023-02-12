@@ -66,8 +66,8 @@ jobs:
 Output is the following:
 
 ```text
-> echo "Translation is 'Кохання'"
-Translation is 'Кохання'
+> echo "Translation is 'Любов'"
+Translation is 'Любов'
 ```
 
 ### Linguatools

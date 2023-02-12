@@ -19,7 +19,7 @@ jobs:
           - provider: 'deepl'
             lang: 'en-uk'
             source: 'Love'
-            expected: 'Кохання'
+            expected: 'Любов'
             api_key: 'DEEPL_API_KEY' # pragma: allowlist secret
           - provider: 'linguatools'
             lang: 'en-de'
