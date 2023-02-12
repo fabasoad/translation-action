@@ -16,26 +16,31 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - provider: linguatools
+          - provider: 'deepl'
+            lang: 'en-uk'
+            source: 'Love'
+            expected: 'Любов'
+            api_key: 'DEEPL_API_KEY' # pragma: allowlist secret
+          - provider: 'linguatools'
             lang: 'en-de'
-            source: Love
+            source: 'Love'
             expected: 'Love'
-            api_key: N_A # pragma: allowlist secret
-          - provider: mymemory
+            api_key: 'N_A' # pragma: allowlist secret
+          - provider: 'mymemory'
             lang: 'en|it'
-            source: Love
+            source: 'Love'
             expected: 'AMORE'
-            api_key: N_A # pragma: allowlist secret
-          - provider: mymemory
+            api_key: 'N_A' # pragma: allowlist secret
+          - provider: 'mymemory'
             lang: 'en|pt'
-            source: Love
+            source: 'Love'
             expected: 'Com gratidão,'
-            api_key: MYMEMORY_API_KEY # pragma: allowlist secret
-          - provider: funtranslations
+            api_key: 'MYMEMORY_API_KEY' # pragma: allowlist secret
+          - provider: 'funtranslations'
             lang: 'klingon'
-            source: Love
-            expected: Parmaq
-            api_key: N_A # pragma: allowlist secret
+            source: 'Love'
+            expected: 'Parmaq'
+            api_key: 'N_A' # pragma: allowlist secret
     steps:
       - uses: actions/checkout@v3
       - uses: ./

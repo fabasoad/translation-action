@@ -16,6 +16,7 @@ more details for each provider below.
 ## Contents
 
 - [Providers](#providers)
+  - [DeepL](#deepl)
   - [Linguatools](#linguatools)
   - [Microsoft](#microsoft)
   - [MyMemory](#mymemory)
@@ -26,6 +27,48 @@ more details for each provider below.
 - [Example usage](#example-usage)
 
 ## Providers
+
+### DeepL
+
+- Identifier is `deepl`.
+- Supported translation directions can be found [here](https://www.deepl.com/docs-api/general/get-languages/).
+  - Be aware that source and target languages should be separated by `-` (hyphen)
+  character while using them in `lang` input. For example, `en-pt` should be used
+  in case you want to translate text from English into Portugal. See [Example](#deepl-example)
+  for more details.
+- How to get API key:
+  - Sign up to [DeepL](https://www.deepl.com) (free plan is fine).
+  - Go to `Account -> Account -> Authentication Key for DeepL API` section
+
+#### DeepL Example
+
+Example of translating "Love" word from English into Ukrainian:
+
+```yaml
+jobs:
+  deepl:
+    name: DeepL
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v3
+      - uses: fabasoad/translation-action@main
+        id: deepl-step
+        with:
+          provider: deepl
+          lang: en-uk
+          source: Love
+          api_key: ${{ secrets.DEEPL_API_KEY }}
+      - name: Print the result
+        run: echo "Translation is '${{ steps.deepl-step.outputs.text }}'"
+        shell: sh
+```
+
+Output is the following:
+
+```text
+> echo "Translation is 'Любов'"
+Translation is 'Любов'
+```
 
 ### Linguatools
 

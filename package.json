@@ -1,6 +1,6 @@
 {
   "name": "translation-action",
-  "version": "1.4.15",
+  "version": "1.5.0",
   "description": "This GitHub action translates any text from any language to any language.",
   "main": "dist/index.js",
   "scripts": {
@@ -26,6 +26,7 @@
   "homepage": "https://github.com/fabasoad/translation-action#readme",
   "dependencies": {
     "@actions/core": "1.10.0",
+    "deepl-node": "1.8.0",
     "typed-rest-client": "1.8.9",
     "yandex-translate": "2.1.3"
   },

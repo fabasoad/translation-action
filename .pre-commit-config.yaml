@@ -17,7 +17,7 @@ repos:
         entry: yarn run lint
         language: system
         pass_filenames: false
-        verbose: true
+        verbose: false
         stages: ["push"]
       - id: test
         name: Unit tests
@@ -27,7 +27,7 @@ repos:
         verbose: true
         stages: ["push"]
       - id: audit
-        name: yarn audit
+        name: Yarn audit
         entry: yarn npm audit --all
         language: system
         pass_filenames: false
