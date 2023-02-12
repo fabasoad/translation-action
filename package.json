@@ -6,7 +6,6 @@
   "scripts": {
     "build": "ncc build -m src/index.ts",
     "lint": "eslint --ext ts src",
-    "postinstall": "[[ \"${CI:false}\" != \"true\" ]] && pre-commit install",
     "test": "jest --config=jest.config.json --coverage"
   },
   "repository": {
