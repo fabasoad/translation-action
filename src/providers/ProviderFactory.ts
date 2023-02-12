@@ -4,6 +4,7 @@ import LinguaToolsProvider from './LinguaToolsProvider'
 import MicrosoftProvider from './MicrosoftProvider'
 import MyMemoryProvider from './MyMemoryProvider'
 import YandexProvider from './YandexProvider'
+import DeeplProvider from './DeeplProvider';
 
 export type ProviderType =
   'deepl' |
@@ -18,6 +19,8 @@ export default class ProviderFactory {
     type: ProviderType, apiKey: string, apiAdditionalParam: string
   ): ProviderBase {
     switch (type) {
+    case 'deepl':
+      return new DeeplProvider(apiKey)
     case 'funtranslations':
       return new FunTranslationsProvider()
     case 'linguatools':
