@@ -1,6 +1,6 @@
 {
   "name": "translation-action",
-  "version": "1.5.0",
+  "version": "2.0.0",
   "description": "This GitHub action translates any text from any language to any language.",
   "main": "dist/index.js",
   "scripts": {
@@ -27,8 +27,7 @@
   "dependencies": {
     "@actions/core": "1.10.0",
     "deepl-node": "1.8.0",
-    "typed-rest-client": "1.8.9",
-    "yandex-translate": "2.1.3"
+    "typed-rest-client": "1.8.9"
   },
   "devDependencies": {
     "@types/jest": "29.4.0",

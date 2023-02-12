@@ -3,16 +3,14 @@ import FunTranslationsProvider from './FunTranslationsProvider'
 import LinguaToolsProvider from './LinguaToolsProvider'
 import MicrosoftProvider from './MicrosoftProvider'
 import MyMemoryProvider from './MyMemoryProvider'
-import YandexProvider from './YandexProvider'
-import DeeplProvider from './DeeplProvider';
+import DeeplProvider from './DeeplProvider'
 
 export type ProviderType =
   'deepl' |
   'funtranslations' |
   'linguatools' |
   'microsoft' |
-  'mymemory' |
-  'yandex'
+  'mymemory'
 
 export default class ProviderFactory {
   getProvider(
@@ -29,8 +27,6 @@ export default class ProviderFactory {
       return new MicrosoftProvider(apiKey, apiAdditionalParam)
     case 'mymemory':
       return new MyMemoryProvider(apiKey)
-    case 'yandex':
-      return new YandexProvider(apiKey)
     default:
       throw new Error(`${type} is not supported`)
     }

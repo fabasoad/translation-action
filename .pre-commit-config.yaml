@@ -75,4 +75,4 @@ repos:
 ci:
   autofix_prs: true
   autoupdate_schedule: quarterly
-  skip: [build, eslint, test]
+  skip: [build, eslint, test, audit]
