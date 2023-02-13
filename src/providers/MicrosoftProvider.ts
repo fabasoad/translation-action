@@ -1,19 +1,19 @@
-import ProviderBase from './ProviderBase';
+import ProviderBase from './ProviderBase'
 
-type MicrosoftResponse = { translations: { text: string }[] }[];
+type MicrosoftResponse = { translations: { text: string }[] }[]
 
 export default class MicrosoftProvider extends ProviderBase {
-  private readonly apiKey: string;
-  private readonly addParam: string;
+  private readonly apiKey: string
+  private readonly addParam: string
 
   constructor(apiKey: string, addParam: string) {
-    super('https://api.cognitive.microsofttranslator.com');
-    this.apiKey = apiKey;
-    this.addParam = addParam;
+    super('https://api.cognitive.microsofttranslator.com')
+    this.apiKey = apiKey
+    this.addParam = addParam
   }
 
   translate(text: string, lang: string): Promise<string[]> {
-    const url: string = `/translate?api-version=3.0&to=${lang}`;
+    const url = `/translate?api-version=3.0&to=${lang}`
     return this.api<MicrosoftResponse>({
       url,
       headers: {
@@ -23,6 +23,6 @@ export default class MicrosoftProvider extends ProviderBase {
       },
       method: 'POST',
       data: { Text: text }
-    }).then((resp) => resp[0].translations.map((t) => t.text));
+    }).then((resp) => resp[0].translations.map((t) => t.text))
   }
 }

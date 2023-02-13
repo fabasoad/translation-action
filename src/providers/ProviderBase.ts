@@ -2,13 +2,13 @@ import { IRestResponse, RestClient } from 'typed-rest-client/RestClient';
 import { IHeaders } from 'typed-rest-client/Interfaces';
 
 export class ProviderError extends Error {
-  private readonly status: number;
+  private readonly _status: number;
   constructor(status: number, message: string) {
     super(message);
-    this.status = status;
+    this._status = status;
   }
-  public getStatus(): number {
-    return this.status;
+  public get status(): number {
+    return this._status;
   }
 }
 

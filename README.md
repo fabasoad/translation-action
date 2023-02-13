@@ -16,7 +16,7 @@ more details for each provider below.
 
 ## Contents
 
-<!-* TOC -->
+<!-- TOC -->
 * [Translation action](#translation-action)
   * [Contents](#contents)
   * [Inputs](#inputs)
@@ -27,7 +27,7 @@ more details for each provider below.
     * [Microsoft](#microsoft)
     * [MyMemory](#mymemory)
     * [FunTranslations](#funtranslations)
-<!-* TOC -->
+<!-- TOC -->
 
 ## Inputs
 

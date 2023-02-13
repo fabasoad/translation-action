@@ -8,9 +8,9 @@ describe('FunTranslationsProvider', () => {
       const translations = await provider.translate('Evening', 'vulcan')
       expect(translations.length).toEqual(1)
       expect(translations[0]).toEqual('Khru')
-    } catch (e) {
+    } catch (e: unknown) {
       if (!(e instanceof ProviderError)) {
-        const { statusCode } = e as any
+        const { statusCode } = e as never
         if (statusCode !== 429) {
           throw e
         }

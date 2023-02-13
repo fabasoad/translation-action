@@ -1,7 +1,8 @@
 import ProviderBase from '../../providers/ProviderBase'
 import DeeplProvider from '../../providers/DeeplProvider'
+import { config } from 'dotenv'
 
-require('dotenv').config();
+config()
 
 describe('DeeplProvider', () => {
   test('should get correct translation', async () => {
