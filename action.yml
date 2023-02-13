@@ -15,11 +15,11 @@ inputs:
   api_key:
     description: 'API key that should be used for chosen provider.'
     required: false
-    default: null
+    default: ''
   api_additional_parameter:
     description: 'Additional parameter for the API. eg the region for Microsoft: canadacentral.'
     required: false
-    default: null
+    default: ''
   lang:
     description: 'The translation direction. Should be one of the option proposed by chosen provider.'
     required: true
