@@ -2383,6 +2383,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"google-translate-api-x@npm:10.5.4":
+  version: 10.5.4
+  resolution: "google-translate-api-x@npm:10.5.4"
+  checksum: 67bf3d1d081bbea19c3d19c6d8ad22f0191fae4d39f4e1aa15ca9c8df59e0a5cd695e000afffaf82f44b5e9a9e189f5fc92bec448d9b6a145842ab1009e01d99
+  languageName: node
+  linkType: hard
+
 "graceful-fs@npm:^4.2.6, graceful-fs@npm:^4.2.9":
   version: 4.2.10
   resolution: "graceful-fs@npm:4.2.10"
@@ -4325,6 +4332,7 @@ __metadata:
     dotenv: 16.0.3
     eslint: 8.34.0
     eslint-config-google: 0.14.0
+    google-translate-api-x: 10.5.4
     jest: 29.4.2
     jest-circus: 29.4.2
     mocha-param: 2.0.1

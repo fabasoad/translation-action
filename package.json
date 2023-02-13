@@ -27,6 +27,7 @@
   "dependencies": {
     "@actions/core": "1.10.0",
     "deepl-node": "1.8.0",
+    "google-translate-api-x": "10.5.4",
     "typed-rest-client": "1.8.9"
   },
   "devDependencies": {
