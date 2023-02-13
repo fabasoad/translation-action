@@ -1,5 +1,5 @@
 import LinguaToolsProvider from '../../providers/LinguaToolsProvider'
-import ProviderBase from '../../providers/ProviderBase'
+import ProviderBase, { ProviderError } from '../../providers/ProviderBase'
 
 describe('LinguaToolsProvider', () => {
   test.skip('should get correct translation', async () => {
@@ -13,8 +13,9 @@ describe('LinguaToolsProvider', () => {
     const provider: ProviderBase = new LinguaToolsProvider()
     try {
       await provider.translate('Evening', 'abc123')
-    } catch (e) {
-      if ((<any>e).status && (<any>e).status === 404) {
+    } catch (e: unknown) {
+      const { status } = e as ProviderError
+      if (status === 404) {
         throw e
       }
       expect(e).toBeTruthy()
