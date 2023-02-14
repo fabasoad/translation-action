@@ -1,5 +1,6 @@
 import ProviderBase from './ProviderBase'
 import { translate } from 'google-translate-api-x'
+import fetch from 'node-fetch'
 
 export default class GoogleProvider extends ProviderBase {
   constructor() {
@@ -8,7 +9,8 @@ export default class GoogleProvider extends ProviderBase {
 
   async translate(text: string, lang: string): Promise<string[]> {
     const [from, to]: string[] = lang.split('-')
-    const result = await translate<string>(text, { from, to })
-    return Promise.resolve([result.text])
+    return translate<string>(text, {
+      from, to, requestFunction: fetch
+    }).then(({ text }) => [text])
   }
 }
