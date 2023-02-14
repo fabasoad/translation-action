@@ -1,7 +1,6 @@
 import ProviderBase, {ProviderError} from '../../providers/ProviderBase'
 import DeeplProvider from '../../providers/DeeplProvider'
 import { config } from 'dotenv'
-import FunTranslationsProvider from '../../providers/FunTranslationsProvider';
 
 config()
 
