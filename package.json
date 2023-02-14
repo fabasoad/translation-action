@@ -1,6 +1,6 @@
 {
   "name": "translation-action",
-  "version": "2.0.0",
+  "version": "2.1.0",
   "description": "This GitHub action translates any text from any language to any language.",
   "main": "dist/index.js",
   "scripts": {
@@ -27,12 +27,14 @@
   "dependencies": {
     "@actions/core": "1.10.0",
     "deepl-node": "1.8.0",
+    "google-translate-api-x": "10.5.4",
+    "node-fetch": "2.6.9",
     "typed-rest-client": "1.8.9"
   },
   "devDependencies": {
     "@types/jest": "29.4.0",
-    "@typescript-eslint/eslint-plugin": "5.51.0",
-    "@typescript-eslint/parser": "5.51.0",
+    "@typescript-eslint/eslint-plugin": "5.52.0",
+    "@typescript-eslint/parser": "5.52.0",
     "@vercel/ncc": "0.36.1",
     "dotenv": "16.0.3",
     "eslint": "8.34.0",

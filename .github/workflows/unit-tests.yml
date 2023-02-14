@@ -41,6 +41,8 @@ jobs:
         uses: paambaati/codeclimate-action@v3.2.0
         env:
           CC_TEST_REPORTER_ID: ${{ secrets.CC_TEST_REPORTER_ID }}
+          DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
+          MYMEMORY_API_KEY: ${{ secrets.MYMEMORY_API_KEY }}
         with:
           coverageCommand: yarn test
           debug: true

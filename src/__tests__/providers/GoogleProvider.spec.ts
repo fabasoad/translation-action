@@ -1,20 +1,18 @@
-import FunTranslationsProvider from '../../providers/FunTranslationsProvider'
+import GoogleProvider from '../../providers/GoogleProvider'
 import ProviderTester from './ProviderTester'
 
-describe('FunTranslationsProvider', () => {
+describe('GoogleProvider', () => {
   let providerTester: ProviderTester
 
   beforeAll(() => {
     providerTester = new ProviderTester(
-      new FunTranslationsProvider()
+      new GoogleProvider()
     )
   })
 
   test(
     'should get correct translation',
-    async () => providerTester.positive({
-      text: 'Evening', lang: 'vulcan', expected: 'Khru'
-    })
+    async () => providerTester.positive()
   )
 
   test(
