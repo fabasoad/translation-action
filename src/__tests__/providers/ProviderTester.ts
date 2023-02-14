@@ -1,11 +1,11 @@
 import ProviderBase, { ProviderError } from '../../providers/ProviderBase'
 
-export interface NegativeOptions {
+type NegativeOptions = {
   lang: string
   text: string
 }
 
-export interface PositiveOptions extends NegativeOptions {
+type PositiveOptions = NegativeOptions & {
   expected: string
 }
 
