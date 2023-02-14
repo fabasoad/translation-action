@@ -15,15 +15,11 @@ export default class ProviderTester {
     this.provider = provider
   }
 
-  async positive(options?: PositiveOptions): Promise<void> {
-    let text = 'Poem'
-    let lang = 'en-uk'
-    let expected = 'Вірш'
-    if (options) {
-      text = options.text
-      lang = options.lang
-      expected = options.expected
-    }
+  async positive({ text, lang, expected }: PositiveOptions = {
+    text: 'Poem',
+    lang: 'en-uk',
+    expected: 'Вірш'
+  }): Promise<void> {
     try {
       const translations = await this.provider.translate(text, lang)
       expect(translations.length).toBeGreaterThan(0)
@@ -42,13 +38,10 @@ export default class ProviderTester {
     }
   }
 
-  async negative(options?: NegativeOptions): Promise<void> {
-    let text = 'Anything'
-    let lang = 'en-abc123'
-    if (options) {
-      text = options.text
-      lang = options.lang
-    }
+  async negative({ text, lang }: NegativeOptions = {
+    text: 'Anything',
+    lang: 'en-abc123'
+  }): Promise<void> {
     try {
       await this.provider.translate(text, lang)
     } catch (e) {
