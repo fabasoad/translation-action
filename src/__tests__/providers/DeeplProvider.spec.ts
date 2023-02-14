@@ -1,6 +1,7 @@
-import ProviderBase from '../../providers/ProviderBase'
+import ProviderBase, {ProviderError} from '../../providers/ProviderBase'
 import DeeplProvider from '../../providers/DeeplProvider'
 import { config } from 'dotenv'
+import FunTranslationsProvider from '../../providers/FunTranslationsProvider';
 
 config()
 
@@ -8,9 +9,22 @@ describe('DeeplProvider', () => {
   test('should get correct translation', async () => {
     const provider: ProviderBase =
       new DeeplProvider(process.env.DEEPL_API_KEY || '')
-    const translations = await provider.translate('Poem', 'en-uk')
-    expect(translations.length).toEqual(1)
-    expect(translations[0]).toEqual('Вірш')
+    try {
+      const translations = await provider.translate('Poem', 'en-uk')
+      expect(translations.length).toEqual(1)
+      expect(translations[0]).toEqual('Вірш')
+    } catch (e: unknown) {
+      let sc: number
+      if (e instanceof ProviderError) {
+        sc = (<ProviderError>e).status
+      } else {
+        const { statusCode } = e as never
+        sc = statusCode
+      }
+      if (sc !== 429) {
+        throw e
+      }
+    }
   })
 
   test('should fail because of invalid lang', async () => {

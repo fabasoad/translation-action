@@ -9,11 +9,15 @@ describe('FunTranslationsProvider', () => {
       expect(translations.length).toEqual(1)
       expect(translations[0]).toEqual('Khru')
     } catch (e: unknown) {
-      if (!(e instanceof ProviderError)) {
+      let sc: number
+      if (e instanceof ProviderError) {
+        sc = (<ProviderError>e).status
+      } else {
         const { statusCode } = e as never
-        if (statusCode !== 429) {
-          throw e
-        }
+        sc = statusCode
+      }
+      if (sc !== 429) {
+        throw e
       }
     }
   })
