@@ -1,6 +1,6 @@
 import DeeplProvider from '../../providers/DeeplProvider'
 import { config } from 'dotenv'
-import ProviderTester from './ProviderTester';
+import ProviderTester from './ProviderTester'
 
 config()
 

@@ -26,6 +26,7 @@ repos:
         pass_filenames: false
         verbose: true
         stages: ["push"]
+  # Security
       - id: audit
         name: Yarn audit
         entry: yarn npm audit --all
@@ -33,7 +34,6 @@ repos:
         pass_filenames: false
         verbose: false
         stages: ["push"]
-  # Security
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.4.0
     hooks:
@@ -73,6 +73,5 @@ repos:
       - id: no-commit-to-branch
       - id: trailing-whitespace
 ci:
-  autofix_prs: true
-  autoupdate_schedule: quarterly
+  autofix_prs: false
   skip: [build, eslint, test, audit]
