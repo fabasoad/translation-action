@@ -7,7 +7,7 @@ on:
       - 'v*.*.*'
 
 jobs:
-  create_release:
+  create-release:
     name: Release
     runs-on: ubuntu-latest
     steps:

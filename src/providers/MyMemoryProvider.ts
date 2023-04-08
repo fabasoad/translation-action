@@ -15,7 +15,7 @@ export default class MyMemoryProvider extends ProviderBase {
     url += (this.apiKey ? `&key=${this.apiKey}` : '');
     return this.api<MyMemoryResponse>({ url, method: 'GET' })
       .then(({ matches }) => {
-        matches.sort((a, b) => a.match > b.match ? 1 : -1);
+        matches.sort((a, b) => a.match > b.match ? -1 : 1);
         return matches.map(({ translation }) => translation);
       });
   }

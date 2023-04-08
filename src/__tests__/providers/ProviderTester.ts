@@ -21,7 +21,7 @@ export default class ProviderTester {
     expected: 'Вірш'
   }): Promise<void> {
     try {
-      const translations = await this.provider.translate(text, lang)
+      const translations: string[] = await this.provider.translate(text, lang)
       expect(translations.length).toBeGreaterThan(0)
       expect(translations[0]).toEqual(expected)
     } catch (e: unknown) {
