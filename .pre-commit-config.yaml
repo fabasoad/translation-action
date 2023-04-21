@@ -1,7 +1,7 @@
 ---
 default_install_hook_types: ["pre-commit", "pre-push"]
 default_stages: ["commit"]
-exclude: ^(\.gitleaks\.toml|dist/.*\.js|\.yarn/.*)$
+exclude: ^(dist/.*\.js|\.yarn/.*)$
 minimum_pre_commit_version: 2.18.0
 repos:
   - repo: local
@@ -40,7 +40,7 @@ repos:
       - id: detect-secrets
         stages: ["commit", "push"]
   - repo: https://github.com/zricethezav/gitleaks
-    rev: v8.16.2
+    rev: v8.16.3
     hooks:
       - id: gitleaks
         stages: ["commit", "push"]
@@ -65,6 +65,7 @@ repos:
     hooks:
       - id: check-merge-conflict
       - id: check-json
+      - id: check-toml
       - id: detect-private-key
         stages: ["commit", "push"]
       - id: end-of-file-fixer
