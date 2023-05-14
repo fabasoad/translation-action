@@ -5,7 +5,7 @@
 ![Unit Tests](https://github.com/fabasoad/translation-action/workflows/Unit%20Tests/badge.svg)
 ![Functional Tests](https://github.com/fabasoad/translation-action/workflows/Functional%20Tests/badge.svg)
 ![Security Tests](https://github.com/fabasoad/translation-action/workflows/Security%20Tests/badge.svg)
-[![pre-commit.ci status](https://results.pre-commit.ci/badge/github/fabasoad/translation-action/main.svg)](https://results.pre-commit.ci/latest/github/fabasoad/translation-action/main)
+![pre-commit](https://github.com/fabasoad/translation-action/actions/workflows/pre-commit.yml/badge.svg)
 [![Maintainability](https://api.codeclimate.com/v1/badges/84bb3beceb9503272bc9/maintainability)](https://codeclimate.com/github/fabasoad/translation-action/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/84bb3beceb9503272bc9/test_coverage)](https://codeclimate.com/github/fabasoad/translation-action/test_coverage)
 [![Known Vulnerabilities](https://snyk.io/test/github/fabasoad/translation-action/badge.svg?targetFile=package.json)](https://snyk.io/test/github/fabasoad/translation-action?targetFile=package.json)

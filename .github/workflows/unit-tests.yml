@@ -7,6 +7,10 @@ on:
       - 'main'
   pull_request:
 
+defaults:
+  run:
+    shell: sh
+
 jobs:
   unit_tests:
     name: Lint and Test
@@ -27,17 +31,12 @@ jobs:
       - name: Compile
         if: ${{ steps.yarn-cache.outputs.cache-hit != 'true' }}
         run: yarn install
-        shell: sh
-      - name: Lint
-        run: yarn run lint
-        shell: sh
       - name: Unit tests
         if: github.ref != 'refs/heads/main'
         env:
           DEEPL_API_KEY: ${{ secrets.DEEPL_API_KEY }}
           MYMEMORY_API_KEY: ${{ secrets.MYMEMORY_API_KEY }}
         run: yarn test
-        shell: sh
       - name: Unit tests with coverage
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: paambaati/codeclimate-action@v3.2.0
