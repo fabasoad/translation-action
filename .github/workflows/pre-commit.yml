@@ -1,0 +1,40 @@
+---
+name: Pre-commit
+
+on: # yamllint disable-line rule:truthy
+  push:
+    branches:
+      - main
+  pull_request:
+
+defaults:
+  run:
+    shell: sh
+
+env:
+  SKIP: no-commit-to-branch
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/fabasoad/pre-commit-container:latest
+      options: --user root
+    steps:
+      - uses: actions/checkout@v3
+        with:
+          fetch-depth: 0
+      - name: Update git config
+        run: |
+          repo=$(echo "${{ github.repository }}" | cut -d "/" -f 2)
+          git config --global --add safe.directory "/__w/$repo/$repo"
+      - name: Run pre-commit on changed files
+        if: ${{ github.event_name == 'pull_request' }}
+        run: |
+          pre-commit run --to-ref ${{ github.sha }} --from-ref origin/${{ github.base_ref }} --hook-stage=commit
+          pre-commit run --to-ref ${{ github.sha }} --from-ref origin/${{ github.base_ref }} --hook-stage=push
+      - name: Run pre-commit on all files
+        if: ${{ github.event_name == 'push' && github.ref_name == 'main' }}
+        run: |
+          pre-commit run --hook-stage=commit --all-files
+          pre-commit run --hook-stage=push --all-files
