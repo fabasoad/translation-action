@@ -12,7 +12,7 @@ defaults:
     shell: sh
 
 env:
-  SKIP: no-commit-to-branch
+  SKIP: no-commit-to-branch, snyk
 
 jobs:
   pre-commit:
@@ -28,6 +28,19 @@ jobs:
         run: |
           repo=$(echo "${{ github.repository }}" | cut -d "/" -f 2)
           git config --global --add safe.directory "/__w/$repo/$repo"
+      - name: Cache yarn dependencies
+        id: yarn-cache
+        uses: actions/cache@v3
+        with:
+          path: |
+            .yarn/cache
+            node_modules
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}-${{ hashFiles('**/.yarnrc.yml') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+      - name: Compile
+        if: ${{ steps.yarn-cache.outputs.cache-hit != 'true' }}
+        run: yarn install
       - name: Run pre-commit on changed files
         if: ${{ github.event_name == 'pull_request' }}
         run: |
