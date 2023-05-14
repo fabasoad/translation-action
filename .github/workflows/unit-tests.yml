@@ -31,8 +31,6 @@ jobs:
       - name: Compile
         if: ${{ steps.yarn-cache.outputs.cache-hit != 'true' }}
         run: yarn install
-      - name: Lint
-        run: yarn run lint
       - name: Unit tests
         if: github.ref != 'refs/heads/main'
         env:

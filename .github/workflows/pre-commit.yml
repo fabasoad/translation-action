@@ -12,7 +12,7 @@ defaults:
     shell: sh
 
 env:
-  SKIP: no-commit-to-branch, snyk
+  SKIP: no-commit-to-branch, snyk-test, build, test
 
 jobs:
   pre-commit:
