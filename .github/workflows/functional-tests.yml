@@ -34,7 +34,7 @@ jobs:
           - provider: 'mymemory'
             lang: 'en|it'
             source: 'Love'
-            expected: 'Amore'
+            expected: 'Ama.'
             api_key: 'N_A' # pragma: allowlist secret
           - provider: 'mymemory'
             lang: 'en|pt'

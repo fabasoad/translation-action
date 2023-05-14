@@ -1,6 +1,6 @@
 ---
 default_install_hook_types: ["pre-commit", "pre-push"]
-default_stages: ["commit"]
+default_stages: ["commit", "push"]
 exclude: ^(dist/.*\.js|\.yarn/.*)$
 minimum_pre_commit_version: 2.18.0
 repos:
@@ -12,6 +12,7 @@ repos:
         language: system
         pass_filenames: false
         verbose: true
+        stages: ["push"]
       - id: eslint
         name: Lint
         entry: yarn run lint
@@ -38,12 +39,10 @@ repos:
     rev: v1.4.0
     hooks:
       - id: detect-secrets
-        stages: ["commit", "push"]
   - repo: https://github.com/zricethezav/gitleaks
     rev: v8.16.3
     hooks:
       - id: gitleaks
-        stages: ["commit", "push"]
   - repo: https://github.com/fabasoad/pre-commit-snyk
     rev: v0.3.0
     hooks:
@@ -51,28 +50,36 @@ repos:
         stages: ["push"]
   # Markdown
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.33.0
+    rev: v0.34.0
     hooks:
-      - id: markdownlint
+      - id: markdownlint-fix
+        stages: ["commit"]
   # Yaml
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.31.0
     hooks:
       - id: yamllint
+        stages: ["push"]
+  # GitHub Actions
+  - repo: https://github.com/rhysd/actionlint
+    rev: v1.6.24
+    hooks:
+      - id: actionlint
+        args: ["-pyflakes="]
+        stages: ["push"]
   # Other
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v4.4.0
     hooks:
       - id: check-merge-conflict
       - id: check-json
+        stages: ["push"]
       - id: check-toml
+        stages: ["push"]
       - id: detect-private-key
-        stages: ["commit", "push"]
       - id: end-of-file-fixer
       - id: mixed-line-ending
         args: ["--fix=lf"]
       - id: no-commit-to-branch
+        stages: ["commit"]
       - id: trailing-whitespace
-ci:
-  autofix_prs: false
-  skip: [build, eslint, test, audit]
