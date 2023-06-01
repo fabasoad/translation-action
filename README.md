@@ -2,9 +2,9 @@
 
 [![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
 ![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/fabasoad/translation-action?include_prereleases)
-![Unit Tests](https://github.com/fabasoad/translation-action/workflows/Unit%20Tests/badge.svg)
-![Functional Tests](https://github.com/fabasoad/translation-action/workflows/Functional%20Tests/badge.svg)
-![Security Tests](https://github.com/fabasoad/translation-action/workflows/Security%20Tests/badge.svg)
+![unit-tests](https://github.com/fabasoad/translation-action/actions/workflows/unit-tests.yml/badge.svg)
+![functional-tests](https://github.com/fabasoad/translation-action/actions/workflows/functional-tests.yml/badge.svg)
+![security](https://github.com/fabasoad/translation-action/actions/workflows/security.yml/badge.svg)
 ![pre-commit](https://github.com/fabasoad/translation-action/actions/workflows/pre-commit.yml/badge.svg)
 [![Maintainability](https://api.codeclimate.com/v1/badges/84bb3beceb9503272bc9/maintainability)](https://codeclimate.com/github/fabasoad/translation-action/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/84bb3beceb9503272bc9/test_coverage)](https://codeclimate.com/github/fabasoad/translation-action/test_coverage)
