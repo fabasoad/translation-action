@@ -9,7 +9,7 @@ on:
 
 jobs:
   translate:
-    name: Translate
+    name: ${{ matrix.provider }}
     timeout-minutes: 5
     runs-on: ubuntu-latest
     strategy:
