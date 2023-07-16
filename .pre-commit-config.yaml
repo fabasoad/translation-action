@@ -40,17 +40,17 @@ repos:
     hooks:
       - id: detect-secrets
   - repo: https://github.com/zricethezav/gitleaks
-    rev: v8.16.3
+    rev: v8.17.0
     hooks:
       - id: gitleaks
   - repo: https://github.com/fabasoad/pre-commit-snyk
-    rev: v0.3.0
+    rev: v0.4.0
     hooks:
       - id: snyk-test
         stages: ["push"]
   # Markdown
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.34.0
+    rev: v0.35.0
     hooks:
       - id: markdownlint-fix
         stages: ["commit"]
@@ -62,7 +62,7 @@ repos:
         stages: ["push"]
   # GitHub Actions
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.6.24
+    rev: v1.6.25
     hooks:
       - id: actionlint
         args: ["-pyflakes="]
