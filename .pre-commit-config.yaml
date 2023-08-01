@@ -39,7 +39,7 @@ repos:
     rev: v1.4.0
     hooks:
       - id: detect-secrets
-  - repo: https://github.com/zricethezav/gitleaks
+  - repo: https://github.com/gitleaks/gitleaks
     rev: v8.17.0
     hooks:
       - id: gitleaks
