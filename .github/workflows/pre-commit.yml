@@ -25,9 +25,7 @@ jobs:
         with:
           fetch-depth: 0
       - name: Update git config
-        run: |
-          repo=$(echo "${{ github.repository }}" | cut -d "/" -f 2)
-          git config --global --add safe.directory "/__w/$repo/$repo"
+        run: git config --global --add safe.directory "$(pwd)"
       - name: Cache yarn dependencies
         id: yarn-cache
         uses: actions/cache@v3
