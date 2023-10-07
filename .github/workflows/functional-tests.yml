@@ -4,7 +4,7 @@ name: Functional Tests
 on:
   push:
     branches:
-      - 'main'
+      - "main"
   pull_request:
 
 jobs:
@@ -16,38 +16,38 @@ jobs:
       fail-fast: false
       matrix:
         include:
-          - provider: 'deepl'
-            lang: 'en-uk'
-            source: 'Love'
-            expected: 'Любов'
-            api_key: 'DEEPL_API_KEY' # pragma: allowlist secret
-          - provider: 'google'
-            lang: 'en-hr'
-            source: 'Love'
-            expected: 'Ljubav'
-            api_key: 'N_A' # pragma: allowlist secret
-          - provider: 'linguatools'
-            lang: 'en-de'
-            source: 'Love'
-            expected: 'Love'
-            api_key: 'N_A' # pragma: allowlist secret
-          - provider: 'mymemory'
-            lang: 'en|it'
-            source: 'Love'
-            expected: 'Ama.'
-            api_key: 'N_A' # pragma: allowlist secret
-          - provider: 'mymemory'
-            lang: 'en|pt'
-            source: 'Love'
-            expected: 'Amor'
-            api_key: 'MYMEMORY_API_KEY' # pragma: allowlist secret
-          - provider: 'funtranslations'
-            lang: 'klingon'
-            source: 'Love'
-            expected: 'Parmaq'
-            api_key: 'N_A' # pragma: allowlist secret
+          - provider: "deepl"
+            lang: "en-uk"
+            source: "Love"
+            expected: "Любов"
+            api_key: "DEEPL_API_KEY" # pragma: allowlist secret
+          - provider: "google"
+            lang: "en-hr"
+            source: "Love"
+            expected: "Ljubav"
+            api_key: "N_A" # pragma: allowlist secret
+          - provider: "linguatools"
+            lang: "en-de"
+            source: "Love"
+            expected: "Love"
+            api_key: "N_A" # pragma: allowlist secret
+          - provider: "mymemory"
+            lang: "en|it"
+            source: "Love"
+            expected: "L'amore"
+            api_key: "N_A" # pragma: allowlist secret
+          - provider: "mymemory"
+            lang: "en|pt"
+            source: "Love"
+            expected: "Amor"
+            api_key: "MYMEMORY_API_KEY" # pragma: allowlist secret
+          - provider: "funtranslations"
+            lang: "klingon"
+            source: "Love"
+            expected: "Parmaq"
+            api_key: "N_A" # pragma: allowlist secret
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: ./
         id: result
         with:
