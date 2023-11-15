@@ -23,6 +23,6 @@ export default class MicrosoftProvider extends ProviderBase {
       },
       method: 'POST',
       data: { Text: text }
-    }).then((resp) => resp[0].translations.map((t) => t.text))
+    }).then((resp) => resp[0].translations.map(({ text }) => text))
   }
 }

@@ -17,7 +17,8 @@ jobs:
     timeout-minutes: 5
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout ${{ github.repository }}
+        uses: actions/checkout@v4
       - name: Cache yarn dependencies
         id: yarn-cache
         uses: actions/cache@v3
