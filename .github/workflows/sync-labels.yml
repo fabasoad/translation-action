@@ -14,7 +14,8 @@ jobs:
     name: Sync labels
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout ${{ github.repository }}
+        uses: actions/checkout@v4
       - name: Run Label Syncer
         uses: micnncim/action-label-syncer@v1
         env:

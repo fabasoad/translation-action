@@ -47,8 +47,10 @@ jobs:
             expected: "Parmaq"
             api_key: "N_A" # pragma: allowlist secret
     steps:
-      - uses: actions/checkout@v4
-      - uses: ./
+      - name: Checkout ${{ github.repository }}
+        uses: actions/checkout@v4
+      - name: Translate (${{ matrix.provider }}, ${{ matrix.lang }})
+        uses: ./
         id: result
         with:
           provider: ${{ matrix.provider }}
