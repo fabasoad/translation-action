@@ -1,29 +1,36 @@
 ---
 name: Security
 
-on:
+on: # yamllint disable-line rule:truthy
   push:
     branches:
       - 'main'
   pull_request:
 
+defaults:
+  run:
+    shell: sh
+
 jobs:
-  codeql:
-    name: CodeQL
+  code-scanning:
+    name: Code scanning
     runs-on: ubuntu-latest
-    strategy:
-      fail-fast: false
-      matrix:
-        language: ['javascript']
     steps:
       - name: Checkout ${{ github.repository }}
         uses: actions/checkout@v4
       - name: Initialize CodeQL
         uses: github/codeql-action/init@v2
         with:
-          languages: ${{ matrix.language }}
+          languages: "javascript"
       - name: Perform CodeQL Analysis
+        id: codeql-analysis
         uses: github/codeql-action/analyze@v2
+      - name: Upload to GHAS
+        if: always()
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          category: "code-scanning"
+          sarif_file: "${{ steps.codeql-analysis.outputs.sarif-output }}"
   yarn-audit:
     name: Yarn audit
     runs-on: ubuntu-latest
@@ -32,4 +39,21 @@ jobs:
         uses: actions/checkout@v4
       - name: Yarn audit
         run: yarn npm audit --all
-        shell: sh
+  directory-scanning:
+    name: Directory scanning
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout ${{ github.repository }}
+        uses: actions/checkout@v4
+      - name: Scan current project
+        id: scan-directory
+        uses: anchore/scan-action@v3
+        with:
+          by-cve: "true"
+          path: "."
+      - name: Upload to GHAS
+        if: always()
+        uses: github/codeql-action/upload-sarif@v2
+        with:
+          category: "directory-scanning"
+          sarif_file: "${{ steps.scan-directory.outputs.sarif }}"
