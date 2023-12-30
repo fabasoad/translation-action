@@ -1,6 +1,6 @@
 import ProviderBase from './ProviderBase'
 import { translate } from 'google-translate-api-x'
-import fetch from './wrappers/node-fetch'
+import fetch from 'node-fetch'
 
 export default class GoogleProvider extends ProviderBase {
   constructor() {
