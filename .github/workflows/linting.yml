@@ -14,7 +14,7 @@ jobs:
     steps:
       - name: Checkout ${{ github.repository }}
         uses: actions/checkout@v4
-      - uses: actions/setup-node@v3
+      - uses: actions/setup-node@v4
         with:
           node-version: "20.10.0"
       - name: Cache yarn dependencies
@@ -45,7 +45,7 @@ jobs:
           annotations: true
       - name: Upload to GHAS
         if: always()
-        uses: github/codeql-action/upload-sarif@v2
+        uses: github/codeql-action/upload-sarif@v3
         with:
           category: "eslint"
           sarif_file: "eslint-results.sarif"
