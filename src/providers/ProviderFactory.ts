@@ -1,10 +1,11 @@
 import ProviderBase from './ProviderBase'
 import FunTranslationsProvider from './FunTranslationsProvider'
+import LibreTranslateProvider from './LibreTranslateProvider'
 import LinguaToolsProvider from './LinguaToolsProvider'
 import MicrosoftProvider from './MicrosoftProvider'
 import MyMemoryProvider from './MyMemoryProvider'
 import DeeplProvider from './DeeplProvider'
-import GoogleProvider from './GoogleProvider';
+import GoogleProvider from './GoogleProvider'
 
 export type ProviderType =
   'deepl' |
@@ -12,7 +13,8 @@ export type ProviderType =
   'funtranslations' |
   'linguatools' |
   'microsoft' |
-  'mymemory'
+  'mymemory' |
+  'libretranslate'
 
 export default class ProviderFactory {
   getProvider(
@@ -25,6 +27,8 @@ export default class ProviderFactory {
       return new GoogleProvider()
     case 'funtranslations':
       return new FunTranslationsProvider()
+    case 'libretranslate':
+      return new LibreTranslateProvider(apiKey)
     case 'linguatools':
       return new LinguaToolsProvider()
     case 'microsoft':

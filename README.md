@@ -24,6 +24,7 @@ more details for each provider below.
   * [Providers](#providers)
     * [DeepL](#deepl)
     * [Google](#google)
+    * [LibreTranslate](#libretranslate)
     * [Linguatools](#linguatools)
     * [Microsoft](#microsoft)
     * [MyMemory](#mymemory)
@@ -32,13 +33,13 @@ more details for each provider below.
 
 ## Inputs
 
-| Name                     | Required | Description                                                                                      | Default | Possible values                                                                                                                                      |
-|--------------------------|----------|--------------------------------------------------------------------------------------------------|---------|------------------------------------------------------------------------------------------------------------------------------------------------------|
-| source                   | Yes      | Can be text or path to the file for translation                                                  |         | _&lt;Path&gt;_,_&lt;String&gt;_                                                                                                                      |
-| provider                 | Yes      | Provider identifier                                                                              |         | [deepl](#deepl), [google](#google), [linguatools](#linguatools), [microsoft](#microsoft), [mymemory](#mymemory), [funtranslations](#funtranslations) |
-| api_key                  | No       | API key that should be used for chosen [provider](#providers)                                    | `""`    | _&lt;String&gt;_                                                                                                                                     |
-| api_additional_parameter | No       | Additional parameter for the API. eg the region for Microsoft: `canadacentral`                   | `""`    | _&lt;String&gt;_                                                                                                                                     |
-| lang                     | Yes      | The translation direction. Should be one of the option proposed by chosen [provider](#providers) |         | _&lt;String&gt;_                                                                                                                                     |
+| Name                     | Required | Description                                                                                      | Default | Possible values                                                                                                                                                           |
+|--------------------------|----------|--------------------------------------------------------------------------------------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| source                   | Yes      | Can be text or path to the file for translation                                                  |         | _&lt;Path&gt;_,_&lt;String&gt;_                                                                                                                                           |
+| provider                 | Yes      | Provider identifier                                                                              |         | [deepl](#deepl), [google](#google), [libretranslate](#libretranslate), [linguatools](#linguatools), [microsoft](#microsoft), [mymemory](#mymemory), [funtranslations](#funtranslations) |
+| api_key                  | No       | API key that should be used for chosen [provider](#providers)                                    | `""`    | _&lt;String&gt;_                                                                                                                                                          |
+| api_additional_parameter | No       | Additional parameter for the API. eg the region for Microsoft: `canadacentral`                   | `""`    | _&lt;String&gt;_                                                                                                                                                          |
+| lang                     | Yes      | The translation direction. Should be one of the option proposed by chosen [provider](#providers) |         | _&lt;String&gt;_                                                                                                                                                          |
 
 ## Outputs
 
@@ -68,7 +69,7 @@ jobs:
     name: DeepL
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: fabasoad/translation-action@main
         id: deepl-step
         with:
@@ -105,7 +106,7 @@ jobs:
     name: Google
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
       - uses: fabasoad/translation-action@main
         id: google-step
         with:
@@ -122,6 +123,46 @@ Output is the following:
 ```text
 > echo "Translation is 'Victory'"
 Translation is 'Victory'
+```
+
+### LibreTranslate
+
+* Identifier is `libretranslate`.
+* Supported translation directions can be found [here](https://libretranslate.com/languages).
+  * Be aware that source and target languages should be separated by `-` (hyphen)
+    character while using them in `lang` input. For example, `en-es` should be used
+    in case you want to translate text from English into Spanish. See example
+    below for more details.
+* How to get API key:
+  * Sign up to [LibreTranslate](https://portal.libretranslate.com/).
+  * Go to `Home -> Get API Key` section
+
+Example of translating "Victory" word from English into Ukrainian:
+
+```yaml
+jobs:
+  libretranslate:
+    name: LibreTranslate
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: fabasoad/translation-action@main
+        id: libretranslate-step
+        with:
+          provider: libretranslate
+          lang: en-uk
+          source: Victory
+          api_key: ${{ secrets.LIBRETRANSLATE_API_KEY }}
+      - name: Print the result
+        run: echo "Translation is '${{ steps.libretranslate-step.outputs.text }}'"
+        shell: sh
+```
+
+Output is the following:
+
+```text
+> echo "Translation is 'Перемога'"
+Translation is 'Перемога'
 ```
 
 ### Linguatools
