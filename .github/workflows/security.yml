@@ -4,7 +4,7 @@ name: Security
 on: # yamllint disable-line rule:truthy
   push:
     branches:
-      - 'main'
+      - main
   pull_request:
 
 defaults:

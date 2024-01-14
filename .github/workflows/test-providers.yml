@@ -1,14 +1,23 @@
 ---
-name: Functional Tests
+name: Test providers
 
 on:
+  pull_request:
+    paths:
+      - .github/workflows/test-providers.yml
+      - dist/**
+      - src/**
+      - action.yml
   push:
     branches:
-      - "main"
-  pull_request:
+      - main
+
+defaults:
+  run:
+    shell: sh
 
 jobs:
-  translate:
+  test-providers:
     name: ${{ matrix.provider }}
     timeout-minutes: 5
     runs-on: ubuntu-latest
@@ -61,4 +70,3 @@ jobs:
         run: |
           echo "'${{ matrix.source }}' has been translated to '${{ steps.result.outputs.text }}'"
           [ "${{ steps.result.outputs.text }}" = "${{ matrix.expected }}" ] || exit 1;
-        shell: sh

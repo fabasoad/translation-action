@@ -2,10 +2,14 @@
 name: Unit Tests
 
 on:
+  pull_request:
+    paths:
+      - dist/**
+      - src/**
+      - jest.config.json
   push:
     branches:
-      - 'main'
-  pull_request:
+      - main
 
 defaults:
   run:

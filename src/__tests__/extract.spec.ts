@@ -9,6 +9,6 @@ describe('extract', () => {
 
   test('should extract file content', () => {
     expect(extract(path.join(__dirname, 'text.txt')))
-      .toEqual('Simple text for translation.\n');
+      .toEqual('Simple text for translation.');
   });
 });

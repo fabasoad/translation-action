@@ -1,0 +1,54 @@
+---
+name: Test source
+
+on:
+  pull_request:
+    paths:
+      - .github/workflows/test-source.yml
+      - dist/**
+      - src/**
+      - action.yml
+  push:
+    branches:
+      - main
+
+defaults:
+  run:
+    shell: sh
+
+jobs:
+  test-source:
+    name: Source as ${{ matrix.source }}
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    env:
+      TEXT: "Love"
+      EXPECTED: "Любов"
+    strategy:
+      matrix:
+        source: ["file", "text"]
+    steps:
+      - name: Checkout ${{ github.repository }}
+        uses: actions/checkout@v4
+      - name: Prepare source
+        id: params
+        run: |
+          if [ "${{ matrix.source }}" = "file" ]; then
+            source="source.txt"
+            echo "${TEXT}" > "${source}"
+          else
+            source="${TEXT}"
+          fi
+          echo "source=${source}" >> "$GITHUB_OUTPUT"
+      - name: Translate
+        uses: ./
+        id: translate
+        with:
+          provider: "deepl"
+          lang: "en-uk"
+          source: "${{ steps.params.outputs.source }}"
+          api_key: "${{ secrets.DEEPL_API_KEY }}"
+      - name: Validate translated text
+        run: |
+          echo "'${TEXT}' has been translated to '${{ steps.translate.outputs.text }}'"
+          [ "${{ steps.translate.outputs.text }}" = "${EXPECTED}" ] || exit 1;
