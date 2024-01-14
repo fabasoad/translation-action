@@ -13,49 +13,38 @@ defaults:
     shell: sh
 
 jobs:
-  test-source-text:
-    name: Source as text
+  test-source:
+    name: Source as ${{ matrix.source }}
     timeout-minutes: 5
     runs-on: ubuntu-latest
     env:
-      SOURCE: "Love"
+      TEXT: "Love"
       EXPECTED: "Любов"
+    strategy:
+      matrix:
+        source: ["file", "text"]
     steps:
       - name: Checkout ${{ github.repository }}
         uses: actions/checkout@v4
+      - name: Prepare source
+        id: params
+        run: |
+          if [ "${{ matrix.source }}" = "file" ]; then
+            source="source.txt"
+            echo "${TEXT}" > "${source}"
+          else
+            source="${TEXT}"
+          fi
+          echo "source=${source}" >> "$GITHUB_OUTPUT"
       - name: Translate
         uses: ./
         id: translate
         with:
           provider: "deepl"
           lang: "en-uk"
-          source: "${{ env.SOURCE }}"
+          source: "${{ steps.params.outputs.source }}"
           api_key: "${{ secrets.DEEPL_API_KEY }}"
       - name: Validate translated text
         run: |
-          echo "'${SOURCE}' has been translated to '${{ steps.translate.outputs.text }}'"
+          echo "'${TEXT}' has been translated to '${{ steps.translate.outputs.text }}'"
           [ "${{ steps.translate.outputs.text }}" = "${EXPECTED}" ] || exit 1;
-  test-source-file:
-    name: Source as file
-    timeout-minutes: 5
-    runs-on: ubuntu-latest
-    env:
-      SOURCE: "Love"
-      EXPECTED: "Любов"
-    steps:
-      - name: Checkout ${{ github.repository }}
-        uses: actions/checkout@v4
-      - name: Prepare file
-        run: echo "${SOURCE}" > source.txt
-      - name: Translate
-        uses: ./
-        id: translate
-        with:
-          provider: "deepl"
-          lang: "en-uk"
-          source: "source.txt"
-          api_key: "${{ secrets.DEEPL_API_KEY }}"
-      - name: Validate translated text
-        run: |
-          echo "'${SOURCE}' has been translated to '${{ steps.translate.outputs.text }}'"
-          [ "${{ steps.result.outputs.text }}" = "${EXPECTED}" ] || exit 1;
