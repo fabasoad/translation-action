@@ -34,7 +34,7 @@ jobs:
       - name: Validate translated text
         run: |
           echo "'${SOURCE}' has been translated to '${{ steps.translate.outputs.text }}'"
-          [ "${{ steps.result.outputs.text }}" = "${EXPECTED}" ] || exit 1;
+          [ "${{ steps.translate.outputs.text }}" = "${EXPECTED}" ] || exit 1;
   test-source-file:
     name: Source as file
     timeout-minutes: 5
