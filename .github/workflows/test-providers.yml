@@ -2,10 +2,15 @@
 name: Test providers
 
 on:
-  pull_request: {}
+  pull_request:
+    paths:
+      - .github/workflows/test-providers.yml
+      - dist/**
+      - src/**
+      - action.yml
   push:
     branches:
-      - "main"
+      - main
 
 defaults:
   run:

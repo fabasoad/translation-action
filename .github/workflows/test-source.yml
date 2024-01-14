@@ -2,11 +2,15 @@
 name: Test source
 
 on:
-  pull_request: {}
+  pull_request:
+    paths:
+      - .github/workflows/test-source.yml
+      - dist/**
+      - src/**
+      - action.yml
   push:
     branches:
-      - "main"
-      - "test/source"
+      - main
 
 defaults:
   run:

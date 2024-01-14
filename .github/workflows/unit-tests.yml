@@ -2,10 +2,10 @@
 name: Unit Tests
 
 on:
+  pull_request: {}
   push:
     branches:
-      - 'main'
-  pull_request:
+      - main
 
 defaults:
   run:
