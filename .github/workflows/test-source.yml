@@ -1,0 +1,61 @@
+---
+name: Test source
+
+on:
+  pull_request: {}
+  push:
+    branches:
+      - "main"
+      - "test/source"
+
+defaults:
+  run:
+    shell: sh
+
+jobs:
+  test-source-text:
+    name: Source as text
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    env:
+      SOURCE: "Love"
+      EXPECTED: "Любов"
+    steps:
+      - name: Checkout ${{ github.repository }}
+        uses: actions/checkout@v4
+      - name: Translate
+        uses: ./
+        id: translate
+        with:
+          provider: "deepl"
+          lang: "en-uk"
+          source: "${{ env.SOURCE }}"
+          api_key: "${{ secrets.DEEPL_API_KEY }}"
+      - name: Validate translated text
+        run: |
+          echo "'${SOURCE}' has been translated to '${{ steps.translate.outputs.text }}'"
+          [ "${{ steps.result.outputs.text }}" = "${EXPECTED}" ] || exit 1;
+  test-source-file:
+    name: Source as file
+    timeout-minutes: 5
+    runs-on: ubuntu-latest
+    env:
+      SOURCE: "Love"
+      EXPECTED: "Любов"
+    steps:
+      - name: Checkout ${{ github.repository }}
+        uses: actions/checkout@v4
+      - name: Prepare file
+        run: echo "${SOURCE}" > source.txt
+      - name: Translate
+        uses: ./
+        id: translate
+        with:
+          provider: "deepl"
+          lang: "en-uk"
+          source: "source.txt"
+          api_key: "${{ secrets.DEEPL_API_KEY }}"
+      - name: Validate translated text
+        run: |
+          echo "'${SOURCE}' has been translated to '${{ steps.translate.outputs.text }}'"
+          [ "${{ steps.result.outputs.text }}" = "${EXPECTED}" ] || exit 1;
