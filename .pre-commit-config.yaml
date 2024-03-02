@@ -56,13 +56,13 @@ repos:
         stages: ["commit"]
   # Yaml
   - repo: https://github.com/adrienverge/yamllint
-    rev: v1.34.0
+    rev: v1.35.1
     hooks:
       - id: yamllint
         stages: ["push"]
   # GitHub Actions
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.6.26
+    rev: v1.6.27
     hooks:
       - id: actionlint
         args: ["-pyflakes="]
