@@ -34,8 +34,8 @@
   "devDependencies": {
     "@microsoft/eslint-formatter-sarif": "3.0.0",
     "@types/jest": "29.5.12",
-    "@typescript-eslint/eslint-plugin": "7.1.0",
-    "@typescript-eslint/parser": "7.1.0",
+    "@typescript-eslint/eslint-plugin": "7.2.0",
+    "@typescript-eslint/parser": "7.2.0",
     "@vercel/ncc": "0.38.1",
     "dotenv": "16.4.5",
     "eslint": "8.57.0",
@@ -44,7 +44,7 @@
     "jest-circus": "29.7.0",
     "mocha-param": "2.0.1",
     "ts-jest": "29.1.2",
-    "typescript": "5.3.3"
+    "typescript": "5.4.2"
   },
-  "packageManager": "yarn@4.1.0"
+  "packageManager": "yarn@4.1.1"
 }
