@@ -41,9 +41,9 @@ jobs:
             expected: "Love"
             api_key: "N_A" # pragma: allowlist secret
           - provider: "mymemory"
-            lang: "en|it"
+            lang: "en|sw"
             source: "Love"
-            expected: "L'amore"
+            expected: "Upendo"
             api_key: "N_A" # pragma: allowlist secret
           - provider: "mymemory"
             lang: "en|pt"
