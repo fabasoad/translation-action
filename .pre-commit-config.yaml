@@ -44,13 +44,13 @@ repos:
     hooks:
       - id: gitleaks
   - repo: https://github.com/fabasoad/pre-commit-snyk
-    rev: v0.5.0
+    rev: v0.6.1
     hooks:
       - id: snyk-test
         stages: ["push"]
   # Markdown
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.39.0
+    rev: v0.40.0
     hooks:
       - id: markdownlint-fix
         stages: ["commit"]
