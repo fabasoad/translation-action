@@ -2,58 +2,15 @@
 name: Security
 
 on: # yamllint disable-line rule:truthy
+  pull_request: {}
   push:
     branches:
       - main
-  pull_request:
-
-defaults:
-  run:
-    shell: sh
 
 jobs:
-  code-scanning:
-    name: Code scanning
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout ${{ github.repository }}
-        uses: actions/checkout@v4
-      - name: Initialize CodeQL
-        uses: github/codeql-action/init@v3
-        with:
-          languages: "javascript"
-      - name: Perform CodeQL Analysis
-        id: codeql-analysis
-        uses: github/codeql-action/analyze@v3
-      - name: Upload to GHAS
-        if: always()
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          category: "code-scanning"
-          sarif_file: "${{ steps.codeql-analysis.outputs.sarif-output }}"
-  yarn-audit:
-    name: Yarn audit
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout ${{ github.repository }}
-        uses: actions/checkout@v4
-      - name: Yarn audit
-        run: yarn npm audit --all
-  directory-scanning:
-    name: Directory scanning
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout ${{ github.repository }}
-        uses: actions/checkout@v4
-      - name: Scan current project
-        id: scan-directory
-        uses: anchore/scan-action@v3
-        with:
-          by-cve: "true"
-          path: "."
-      - name: Upload to GHAS
-        if: always()
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          category: "directory-scanning"
-          sarif_file: "${{ steps.scan-directory.outputs.sarif }}"
+  sast:
+    name: SAST
+    permissions:
+      contents: read
+      security-events: write
+    uses: fabasoad/reusable-workflows/.github/workflows/wf-security-sast.yml@main

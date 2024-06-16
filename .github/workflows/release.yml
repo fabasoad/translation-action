@@ -7,30 +7,6 @@ on:
       - 'v*.*.*'
 
 jobs:
-  create-release:
-    name: Create release
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout ${{ github.repository }}
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Get changelog
-        id: changelog
-        uses: simbo/changes-since-last-release-action@v1
-      - name: Create release
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.ref }}
-          name: ${{ github.ref_name }}
-          token: ${{ secrets.GITHUB_TOKEN }}
-          body: |
-            # Changelog
-
-            ${{ steps.changelog.outputs.log }}
-          draft: false
-          prerelease: false
-      - name: Bump tags
-        uses: fischerscode/tagger@v0
-        with:
-          prefix: v
+  github:
+    name: GitHub
+    uses: fabasoad/reusable-workflows/.github/workflows/wf-github-release.yml@main
