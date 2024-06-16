@@ -1,23 +1,13 @@
 ---
-name: Sync labels
+name: Labels
 
 on: # yamllint disable-line rule:truthy
   push:
     branches:
       - main
-    paths:
-      - .github/labels.yml
-      - .github/workflows/sync-labels.yml
-  workflow_dispatch:
+  workflow_dispatch: {}
 
 jobs:
-  sync-labels:
-    name: Sync labels
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout ${{ github.repository }}
-        uses: actions/checkout@v4
-      - name: Run Label Syncer
-        uses: micnncim/action-label-syncer@v1
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+  maintenance:
+    name: Maintenance
+    uses: fabasoad/reusable-workflows/.github/workflows/wf-sync-labels.yml@main

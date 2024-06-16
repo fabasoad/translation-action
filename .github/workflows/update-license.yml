@@ -1,30 +1,11 @@
 ---
-name: Update license
+name: License
 
-on:
+on: # yamllint disable-line rule:truthy
   schedule:
-    - cron: '0 5 1 1 *'
+    - cron: "0 5 1 1 *"
 
 jobs:
-  run:
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout ${{ github.repository }}
-        uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - name: Update LICENSE file
-        uses: FantasticFiasco/action-update-license-year@v3
-        with:
-          token: ${{ secrets.GITHUB_TOKEN }}
-          assignees: ${{ github.repository_owner }}
-          labels: enhancement
-          prTitle: Update license copyright year to {{currentYear}}
-          prBody: |
-            ## Changelog
-
-            - Update license copyright year to {{currentYear}}
-
-            ---
-
-            Powered by [FantasticFiasco/action-update-license-year](https://github.com/FantasticFiasco/action-update-license-year)
+  maintenance:
+    name: Maintenance
+    uses: fabasoad/reusable-workflows/.github/workflows/wf-update-license.yml@main
