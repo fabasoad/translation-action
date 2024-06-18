@@ -8,47 +8,9 @@ on: # yamllint disable-line rule:truthy
       - main
 
 jobs:
-  eslint:
-    name: ESLint
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout ${{ github.repository }}
-        uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
-        with:
-          node-version-file: ".tool-versions"
-      - name: Cache yarn dependencies
-        id: yarn-cache
-        uses: actions/cache@v4
-        with:
-          path: |
-            .yarn/cache
-            node_modules
-          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}-${{ hashFiles('**/.yarnrc.yml') }}
-          restore-keys: |
-            ${{ runner.os }}-yarn-
-      - name: Compile
-        if: ${{ steps.yarn-cache.outputs.cache-hit != 'true' }}
-        run: yarn install
-      - name: Run ESLint
-        uses: sibiraj-s/action-eslint@v3
-        with:
-          all-files: "true"
-          ignore-patterns: |
-            .github
-            .yarn
-            coverage
-            dist
-            node_modules
-          eslint-args: "-o eslint-results.sarif -f ${{ github.workspace }}/node_modules/@microsoft/eslint-formatter-sarif/sarif.js"
-          extensions: "js,jsx,ts,tsx"
-          annotations: true
-      - name: Upload to GHAS
-        if: always()
-        uses: github/codeql-action/upload-sarif@v3
-        with:
-          category: "eslint"
-          sarif_file: "eslint-results.sarif"
+  js-lint:
+    name: JS Lint
+    uses: fabasoad/reusable-workflows/.github/workflows/wf-js-lint.yml@main
   pre-commit:
     name: Pre-commit
     uses: fabasoad/reusable-workflows/.github/workflows/wf-pre-commit.yml@main
