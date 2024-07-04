@@ -13,7 +13,7 @@ repos:
         pass_filenames: false
         verbose: true
         stages: ["push"]
-      - id: eslint
+      - id: lint
         name: Lint
         entry: yarn run lint
         language: system
@@ -47,6 +47,14 @@ repos:
     rev: v0.6.2
     hooks:
       - id: snyk-test
+        stages: ["push"]
+  - repo: https://github.com/fabasoad/pre-commit-grype
+    rev: v0.3.1
+    hooks:
+      - id: grype-dir
+        args:
+          - --grype-args=--by-cve --fail-on=low
+          - --hook-args=--log-level debug
         stages: ["push"]
   # Markdown
   - repo: https://github.com/igorshubovych/markdownlint-cli

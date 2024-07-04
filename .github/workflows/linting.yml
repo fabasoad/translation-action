@@ -15,4 +15,4 @@ jobs:
     name: Pre-commit
     uses: fabasoad/reusable-workflows/.github/workflows/wf-pre-commit.yml@main
     with:
-      skip-hooks: "audit, build, eslint, test, snyk-test"
+      skip-hooks: "audit, build, lint, test"

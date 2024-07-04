@@ -29,10 +29,10 @@
     "cross-fetch": "4.0.0",
     "deepl-node": "1.13.0",
     "google-translate-api-x": "10.6.8",
-    "typed-rest-client": "2.0.0"
+    "typed-rest-client": "2.0.1"
   },
   "devDependencies": {
-    "@biomejs/biome": "1.8.1",
+    "@biomejs/biome": "1.8.3",
     "@types/jest": "29.5.12",
     "@vercel/ncc": "0.38.1",
     "dotenv": "16.4.5",
@@ -40,7 +40,7 @@
     "jest-circus": "29.7.0",
     "mocha-param": "2.0.1",
     "ts-jest": "29.1.5",
-    "typescript": "5.4.5"
+    "typescript": "5.5.3"
   },
-  "packageManager": "yarn@4.3.0"
+  "packageManager": "yarn@4.3.1"
 }
