@@ -72,7 +72,7 @@
         "useValidTypeof": "error"
       }
     },
-    "ignore": ["src/libs", "**/TestUtils.ts"]
+    "ignore": ["dist/**"]
   },
   "javascript": {
     "globals": ["Atomics", "SharedArrayBuffer", "jest", "afterEach", "beforeAll", "beforeEach", "expect", "test", "describe"]

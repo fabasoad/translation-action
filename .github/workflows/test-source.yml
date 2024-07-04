@@ -1,7 +1,7 @@
 ---
 name: Test source
 
-on:
+on: # yamllint disable-line rule:truthy
   pull_request:
     paths:
       - .github/workflows/test-source.yml
