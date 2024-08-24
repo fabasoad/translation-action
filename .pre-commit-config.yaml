@@ -44,17 +44,28 @@ repos:
     hooks:
       - id: gitleaks
   - repo: https://github.com/fabasoad/pre-commit-snyk
-    rev: v0.6.2
+    rev: v1.0.0
     hooks:
       - id: snyk-test
+        args:
+          - --snyk-args=--all-projects --severity-threshold=low
+          - --hook-args=--log-level debug
         stages: ["push"]
   - repo: https://github.com/fabasoad/pre-commit-grype
-    rev: v0.3.1
+    rev: v0.6.1
     hooks:
       - id: grype-dir
         args:
-          - --grype-args=--by-cve --fail-on=low
+          - --grype-args=--by-cve --fail-on=low --exclude=**/node_modules
           - --hook-args=--log-level debug
+        stages: ["push"]
+  - repo: https://github.com/google/osv-scanner
+    rev: v1.8.4
+    hooks:
+      - id: osv-scanner
+        args:
+          - --lockfile=yarn.lock
+        verbose: true
         stages: ["push"]
   # Markdown
   - repo: https://github.com/igorshubovych/markdownlint-cli
