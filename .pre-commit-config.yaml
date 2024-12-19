@@ -1,6 +1,6 @@
 ---
 default_install_hook_types: ["pre-commit", "pre-push"]
-default_stages: ["commit", "push"]
+default_stages: ["pre-commit", "pre-push"]
 exclude: ^(dist/.*\.js|\.yarn/.*)$
 minimum_pre_commit_version: 2.18.0
 repos:
@@ -12,21 +12,21 @@ repos:
         language: system
         pass_filenames: false
         verbose: true
-        stages: ["push"]
+        stages: ["pre-push"]
       - id: lint
         name: Lint
         entry: yarn run lint
         language: system
         pass_filenames: false
         verbose: false
-        stages: ["push"]
+        stages: ["pre-push"]
       - id: test
         name: Unit tests
         entry: yarn test
         language: system
         pass_filenames: false
         verbose: true
-        stages: ["push"]
+        stages: ["pre-push"]
   # Security
       - id: audit
         name: Yarn audit
@@ -34,13 +34,13 @@ repos:
         language: system
         pass_filenames: false
         verbose: false
-        stages: ["push"]
+        stages: ["pre-push"]
   - repo: https://github.com/Yelp/detect-secrets
     rev: v1.5.0
     hooks:
       - id: detect-secrets
   - repo: https://github.com/gitleaks/gitleaks
-    rev: v8.18.4
+    rev: v8.21.3
     hooks:
       - id: gitleaks
   - repo: https://github.com/fabasoad/pre-commit-snyk
@@ -50,7 +50,7 @@ repos:
         args:
           - --snyk-args=--all-projects --severity-threshold=low
           - --hook-args=--log-level debug
-        stages: ["push"]
+        stages: ["pre-push"]
   - repo: https://github.com/fabasoad/pre-commit-grype
     rev: v0.6.1
     hooks:
@@ -58,47 +58,47 @@ repos:
         args:
           - --grype-args=--by-cve --fail-on=low --exclude=**/node_modules
           - --hook-args=--log-level debug
-        stages: ["push"]
+        stages: ["pre-push"]
   - repo: https://github.com/google/osv-scanner
-    rev: v1.8.4
+    rev: v1.9.1
     hooks:
       - id: osv-scanner
         args:
           - --lockfile=yarn.lock
         verbose: true
-        stages: ["push"]
+        stages: ["pre-push"]
   # Markdown
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.41.0
+    rev: v0.43.0
     hooks:
       - id: markdownlint-fix
-        stages: ["commit"]
+        stages: ["pre-commit"]
   # Yaml
   - repo: https://github.com/adrienverge/yamllint
     rev: v1.35.1
     hooks:
       - id: yamllint
-        stages: ["push"]
+        stages: ["pre-push"]
   # GitHub Actions
   - repo: https://github.com/rhysd/actionlint
-    rev: v1.7.1
+    rev: v1.7.4
     hooks:
       - id: actionlint
         args: ["-pyflakes="]
-        stages: ["commit"]
+        stages: ["pre-commit"]
   # Other
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v4.6.0
+    rev: v5.0.0
     hooks:
       - id: check-merge-conflict
       - id: check-json
-        stages: ["push"]
+        stages: ["pre-push"]
       - id: check-toml
-        stages: ["push"]
+        stages: ["pre-push"]
       - id: detect-private-key
       - id: end-of-file-fixer
       - id: mixed-line-ending
         args: ["--fix=lf"]
       - id: no-commit-to-branch
-        stages: ["commit"]
+        stages: ["pre-commit"]
       - id: trailing-whitespace
