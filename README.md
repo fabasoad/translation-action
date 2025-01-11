@@ -34,13 +34,13 @@ more details for each provider below.
 
 ## Inputs
 
-| Name                     | Required | Description                                                                                      | Default | Possible values                                                                                                                                                           |
-|--------------------------|----------|--------------------------------------------------------------------------------------------------|---------|---------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| source                   | Yes      | Can be text or path to the file for translation                                                  |         | _&lt;Path&gt;_,_&lt;String&gt;_                                                                                                                                           |
+| Name                     | Required | Description                                                                                      | Default | Possible values                                                                                                                                                                         |
+|--------------------------|----------|--------------------------------------------------------------------------------------------------|---------|-----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| source                   | Yes      | Can be text or path to the file for translation                                                  |         | _&lt;Path&gt;_,_&lt;String&gt;_                                                                                                                                                         |
 | provider                 | Yes      | Provider identifier                                                                              |         | [deepl](#deepl), [google](#google), [libretranslate](#libretranslate), [linguatools](#linguatools), [microsoft](#microsoft), [mymemory](#mymemory), [funtranslations](#funtranslations) |
-| api_key                  | No       | API key that should be used for chosen [provider](#providers)                                    | `""`    | _&lt;String&gt;_                                                                                                                                                          |
-| api_additional_parameter | No       | Additional parameter for the API. eg the region for Microsoft: `canadacentral`                   | `""`    | _&lt;String&gt;_                                                                                                                                                          |
-| lang                     | Yes      | The translation direction. Should be one of the option proposed by chosen [provider](#providers) |         | _&lt;String&gt;_                                                                                                                                                          |
+| api_key                  | No       | API key that should be used for chosen [provider](#providers)                                    | `""`    | _&lt;String&gt;_                                                                                                                                                                        |
+| api_additional_parameter | No       | Additional parameter for the API. eg the region for Microsoft: `canadacentral`                   | `""`    | _&lt;String&gt;_                                                                                                                                                                        |
+| lang                     | Yes      | The translation direction. Should be one of the option proposed by chosen [provider](#providers) |         | _&lt;String&gt;_                                                                                                                                                                        |
 
 ## Outputs
 
@@ -228,3 +228,7 @@ found [here](https://funtranslations.com/api/). Example:
     lang: 'klingon'
     source: 'Who are you'
 ```
+
+## Contributions
+
+![Alt](https://repobeats.axiom.co/api/embed/666b4ed5b82273f6ecae26db931e5c9dd71b65b1.svg "Repobeats analytics image")

@@ -1,6 +1,6 @@
 {
   "name": "translation-action",
-  "version": "3.1.4",
+  "version": "3.1.5",
   "description": "This GitHub action translates any text from any language to any language.",
   "main": "dist/index.js",
   "scripts": {
@@ -26,9 +26,9 @@
   "homepage": "https://github.com/fabasoad/translation-action#readme",
   "dependencies": {
     "@actions/core": "1.11.1",
-    "cross-fetch": "4.0.0",
+    "cross-fetch": "4.1.0",
     "deepl-node": "1.15.0",
-    "google-translate-api-x": "10.7.1",
+    "google-translate-api-x": "10.7.2",
     "typed-rest-client": "2.1.0"
   },
   "devDependencies": {
@@ -40,7 +40,7 @@
     "jest-circus": "29.7.0",
     "mocha-param": "2.0.1",
     "ts-jest": "29.2.5",
-    "typescript": "5.7.2"
+    "typescript": "5.7.3"
   },
-  "packageManager": "yarn@4.5.3"
+  "packageManager": "yarn@4.6.0"
 }
