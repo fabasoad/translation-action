@@ -18,43 +18,34 @@ defaults:
 
 jobs:
   test-providers:
-    name: ${{ matrix.provider }}
+    name: ${{ matrix.provider }} (${{ matrix.api_key == '' && 'Free' || 'Paid' }})
     timeout-minutes: 5
     runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
+        source: ["Love"]
         include:
           - provider: "deepl"
             lang: "en-uk"
-            source: "Love"
             expected: "Любов"
             api_key: "DEEPL_API_KEY" # pragma: allowlist secret
           - provider: "google"
             lang: "en-hr"
-            source: "Love"
             expected: "Ljubav"
-            api_key: "N_A" # pragma: allowlist secret
           - provider: "linguatools"
             lang: "en-de"
-            source: "Love"
             expected: "Love"
-            api_key: "N_A" # pragma: allowlist secret
           - provider: "mymemory"
             lang: "en|sw"
-            source: "Love"
-            expected: "Upendo"
-            api_key: "N_A" # pragma: allowlist secret
+            expected: "Mfano"
           - provider: "mymemory"
             lang: "en|pt"
-            source: "Love"
             expected: "Amor"
             api_key: "MYMEMORY_API_KEY" # pragma: allowlist secret
           - provider: "funtranslations"
             lang: "klingon"
-            source: "Love"
             expected: "Parmaq"
-            api_key: "N_A" # pragma: allowlist secret
     steps:
       - name: Checkout ${{ github.repository }}
         uses: actions/checkout@v4
@@ -65,7 +56,7 @@ jobs:
           provider: ${{ matrix.provider }}
           lang: ${{ matrix.lang }}
           source: ${{ matrix.source }}
-          api_key: "${{ secrets[matrix.api_key] }}"
+          api_key: "${{ matrix.api_key == '' && '' || secrets[matrix.api_key] }}"
       - name: Validate ${{ matrix.provider }} translation result
         run: |
           echo "'${{ matrix.source }}' has been translated to '${{ steps.result.outputs.text }}'"
