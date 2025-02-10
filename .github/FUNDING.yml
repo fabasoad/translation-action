@@ -1,8 +1,9 @@
 ---
-custom: [
-  'https://www.bitcoinqrcodemaker.com/?style=bitcoin&address=145HwyQAcv4vrzUumJhu7nWGAVBysX9jJH&prefix=on',
-  'https://paypal.me/fabasoad'
-]
-github: ['fabasoad']
+custom:
+  [
+    "https://www.bitcoinqrcodemaker.com/?style=bitcoin&address=145HwyQAcv4vrzUumJhu7nWGAVBysX9jJH&prefix=on",
+    "https://paypal.me/fabasoad",
+  ]
+github: ["fabasoad"]
 ko_fi: fabasoad
 liberapay: fabasoad
