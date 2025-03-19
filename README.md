@@ -1,7 +1,7 @@
 # Translation action
 
 [![Stand With Ukraine](https://raw.githubusercontent.com/vshymanskyy/StandWithUkraine/main/badges/StandWithUkraine.svg)](https://stand-with-ukraine.pp.ua)
-![GitHub release (latest SemVer including pre-releases)](https://img.shields.io/github/v/release/fabasoad/translation-action?include_prereleases)
+![Releases](https://img.shields.io/github/v/release/fabasoad/translation-action?include_prereleases)
 ![unit-tests](https://github.com/fabasoad/translation-action/actions/workflows/unit-tests.yml/badge.svg)
 ![test-providers](https://github.com/fabasoad/translation-action/actions/workflows/test-providers.yml/badge.svg)
 ![test-source](https://github.com/fabasoad/translation-action/actions/workflows/test-source.yml/badge.svg)
@@ -9,7 +9,6 @@
 ![linting](https://github.com/fabasoad/translation-action/actions/workflows/linting.yml/badge.svg)
 [![Maintainability](https://api.codeclimate.com/v1/badges/84bb3beceb9503272bc9/maintainability)](https://codeclimate.com/github/fabasoad/translation-action/maintainability)
 [![Test Coverage](https://api.codeclimate.com/v1/badges/84bb3beceb9503272bc9/test_coverage)](https://codeclimate.com/github/fabasoad/translation-action/test_coverage)
-[![Known Vulnerabilities](https://snyk.io/test/github/fabasoad/translation-action/badge.svg?targetFile=package.json)](https://snyk.io/test/github/fabasoad/translation-action?targetFile=package.json)
 
 This action translates any text to any language supported by chosen provider.
 There is a list of providers that can be used for text translation. Please find

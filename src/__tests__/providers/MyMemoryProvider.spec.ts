@@ -1,4 +1,3 @@
-import itParam from 'mocha-param'
 import MyMemoryProvider from '../../providers/MyMemoryProvider'
 import { config } from 'dotenv'
 import ProviderTester from './ProviderTester'
@@ -21,18 +20,15 @@ describe('MyMemoryProvider', () => {
     type: 'Registered'
   }]
 
-  itParam<ProviderTesterWrapper>(
-    '[${value.type}] should get correct translation',
-    fixture,
-    async ({ providerTester }: ProviderTesterWrapper) =>
-      providerTester.positive({
-        text: 'Night', lang: 'en|be', expected: 'Ноч'
-      })
+  test.each(fixture)(
+    '[$type] should get correct translation',
+    ({ providerTester }: ProviderTesterWrapper) => providerTester.positive({
+      text: 'Night', lang: 'en|be', expected: 'Ноч'
+    })
   )
 
-  itParam<ProviderTesterWrapper>(
-    '[${value.type}] should fail because of invalid lang',
-    fixture,
+  test.each(fixture)(
+    '[$type] should fail because of invalid lang',
     async ({ providerTester }: ProviderTesterWrapper) =>
       providerTester.negative()
   )

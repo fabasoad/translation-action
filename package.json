@@ -1,6 +1,6 @@
 {
   "name": "translation-action",
-  "version": "3.1.5",
+  "version": "3.1.6",
   "description": "This GitHub action translates any text from any language to any language.",
   "main": "dist/index.js",
   "scripts": {
@@ -27,7 +27,7 @@
   "dependencies": {
     "@actions/core": "1.11.1",
     "cross-fetch": "4.1.0",
-    "deepl-node": "1.15.0",
+    "deepl-node": "1.17.3",
     "google-translate-api-x": "10.7.2",
     "typed-rest-client": "2.1.0"
   },
@@ -38,9 +38,8 @@
     "dotenv": "16.4.7",
     "jest": "29.7.0",
     "jest-circus": "29.7.0",
-    "mocha-param": "2.0.1",
-    "ts-jest": "29.2.5",
-    "typescript": "5.7.3"
+    "ts-jest": "29.2.6",
+    "typescript": "5.8.2"
   },
-  "packageManager": "yarn@4.6.0"
+  "packageManager": "yarn@4.7.0"
 }
