@@ -10,14 +10,13 @@ export default class FunTranslationsProvider extends ProviderBase {
 
   async translate(text: string, lang: string): Promise<string[]> {
     const url = `/translate/${lang}.json?text=${text}`
-    return this.api<FunTranslationsResponse>({ url, method: 'GET' })
-      .then(({ success, contents }) => {
-        if (success && success.total > 0) {
-          return [contents.translated]
-        }
-        console.warn(
-          'Result is either not success or doesn\'t have any translations')
-        return [text]
-      })
+    const { success, contents }: FunTranslationsResponse =
+      await this.api<FunTranslationsResponse>({ url, method: 'GET' })
+    if (success && success.total > 0) {
+      return [contents.translated]
+    }
+    console.warn(
+      'Result is either not success or doesn\'t have any translations')
+    return [text]
   }
 }

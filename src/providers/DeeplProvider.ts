@@ -1,5 +1,10 @@
 import ProviderBase from './ProviderBase'
-import {SourceLanguageCode, TargetLanguageCode, Translator} from 'deepl-node'
+import {
+  SourceLanguageCode,
+  TargetLanguageCode,
+  TextResult,
+  Translator
+} from 'deepl-node'
 
 export default class DeeplProvider extends ProviderBase {
   private translator: Translator
@@ -11,7 +16,7 @@ export default class DeeplProvider extends ProviderBase {
 
   async translate(text: string, lang: string): Promise<string[]> {
     const l: string[] = lang.split('-')
-    const result = await this.translator.translateText<string>(
+    const result: TextResult = await this.translator.translateText<string>(
       text, l[0] as SourceLanguageCode, l[1] as TargetLanguageCode
     )
     return Promise.resolve([result.text])
