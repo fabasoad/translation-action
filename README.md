@@ -52,7 +52,8 @@ more details for each provider below.
 ### DeepL
 
 * Identifier is `deepl`.
-* Supported translation directions can be found [here](https://www.deepl.com/docs-api/general/get-languages/).
+* See [supported translation directions](https://www.deepl.com/docs-api/general/get-languages/)
+  for more details.
   * Be aware that source and target languages should be separated by `-` (hyphen)
   character while using them in `lang` input. For example, `en-uk` should be used
   in case you want to translate text from English into Ukrainian. See example
@@ -92,7 +93,8 @@ Translation is 'Любов'
 ### Google
 
 * Identifier is `google`.
-* Supported translation directions can be found [here](https://github.com/AidanWelch/google-translate-api/blob/master/index.d.ts#L67).
+* See [supported translation directions](https://github.com/AidanWelch/google-translate-api/blob/master/index.d.ts#L67)
+  for more details.
   * Be aware that source and target languages should be separated by `-` (hyphen)
   character while using them in `lang` input. For example, `ms-en` should be used
   in case you want to translate text from Malay into English. See example below
@@ -128,7 +130,8 @@ Translation is 'Victory'
 ### LibreTranslate
 
 * Identifier is `libretranslate`.
-* Supported translation directions can be found [here](https://libretranslate.com/languages).
+* See [supported translation directions](https://libretranslate.com/languages)
+  for more details.
   * Be aware that source and target languages should be separated by `-` (hyphen)
     character while using them in `lang` input. For example, `en-es` should be used
     in case you want to translate text from English into Spanish. See example
@@ -199,10 +202,10 @@ with:
 ### MyMemory
 
 * Identifier is `mymemory`.
-* Supported translation directions:
+* [Supported translation directions](https://mymemory.translated.net/doc/spec.php):
 
 Language direction should be separated by `|` character. For example, `en|it`
-(from English to Italian). More details [here](https://mymemory.translated.net/doc/spec.php).
+(from English to Italian).
 
 * How to get API key:
 
@@ -215,10 +218,11 @@ and generate a new key.
 ### FunTranslations
 
 * Identifier is `funtranslations`.
-* Supported translation directions:
+* [Supported translation directions](https://funtranslations.com/api/):
 
-`from` direction is English only at this moment, so `lang` parameter can be
-found [here](https://funtranslations.com/api/). Example:
+> `from` direction is English only at this moment.
+
+Example:
 
 ```yaml
 - uses: fabasoad/translation-action@main
