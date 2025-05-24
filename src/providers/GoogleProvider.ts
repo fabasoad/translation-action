@@ -1,6 +1,7 @@
 import ProviderBase from './ProviderBase'
-import { translate } from 'google-translate-api-x'
+import { googleTranslateApi, translate } from 'google-translate-api-x'
 import fetch from 'cross-fetch'
+import TranslationResponse = googleTranslateApi.TranslationResponse
 
 export default class GoogleProvider extends ProviderBase {
   constructor() {
@@ -9,8 +10,9 @@ export default class GoogleProvider extends ProviderBase {
 
   async translate(text: string, lang: string): Promise<string[]> {
     const [from, to]: string[] = lang.split('-')
-    return translate<string>(text, {
+    const response: TranslationResponse = await translate<string>(text, {
       from, to, requestFunction: fetch
-    }).then(({ text }) => [text])
+    })
+    return [response.text]
   }
 }
