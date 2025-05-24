@@ -8,9 +8,9 @@ async function run() {
     const source: string = extract(core.getInput('source'))
     const providerFactory: ProviderFactory = new ProviderFactory()
     const provider: ProviderBase = providerFactory.getProvider(
-      core.getInput('provider') as ProviderType,
-      core.getInput('api_key'),
-      core.getInput('api_additional_parameter')
+      core.getInput('provider', { required: true, trimWhitespace: true }) as ProviderType,
+      core.getInput('api_key', { required: false, trimWhitespace: true }),
+      core.getInput('api_additional_parameter', { required: false, trimWhitespace: true })
     )
     let text: string
     try {

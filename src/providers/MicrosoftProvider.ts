@@ -1,6 +1,6 @@
 import ProviderBase from './ProviderBase'
 
-type MicrosoftResponse = { translations: { text: string }[] }[]
+type MicrosoftResponse = { translations: { text: string }[] }
 
 export default class MicrosoftProvider extends ProviderBase {
   private readonly apiKey: string
@@ -12,9 +12,9 @@ export default class MicrosoftProvider extends ProviderBase {
     this.addParam = addParam
   }
 
-  translate(text: string, lang: string): Promise<string[]> {
+  async translate(text: string, lang: string): Promise<string[]> {
     const url = `/translate?api-version=3.0&to=${lang}`
-    return this.api<MicrosoftResponse>({
+    const response: MicrosoftResponse[] = await this.api<MicrosoftResponse[]>({
       url,
       headers: {
         'ocp-apim-subscription-key': this.apiKey,
@@ -23,6 +23,7 @@ export default class MicrosoftProvider extends ProviderBase {
       },
       method: 'POST',
       data: { Text: text }
-    }).then((resp) => resp[0].translations.map(({ text }) => text))
+    })
+    return response[0].translations.map(({ text }) => text)
   }
 }

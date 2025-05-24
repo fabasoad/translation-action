@@ -10,13 +10,11 @@ export default class MyMemoryProvider extends ProviderBase {
     this.apiKey = apiKey;
   }
 
-  translate(text: string, lang: string): Promise<string[]> {
+  async translate(text: string, lang: string): Promise<string[]> {
     let url = `/get?q=${text}&langpair=${lang}`;
     url += (this.apiKey ? `&key=${this.apiKey}` : '');
-    return this.api<MyMemoryResponse>({ url, method: 'GET' })
-      .then(({ matches }) => {
-        matches.sort((a, b) => a.match > b.match ? -1 : 1);
-        return matches.map(({ translation }) => translation);
-      });
+    const { matches }: MyMemoryResponse = await this.api<MyMemoryResponse>({ url, method: 'GET' })
+    matches.sort((a, b) => a.match > b.match ? -1 : 1);
+    return matches.map(({ translation }) => translation);
   }
 }

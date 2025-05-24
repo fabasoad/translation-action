@@ -11,7 +11,7 @@ export default class LibreTranslateProvider extends ProviderBase {
     this.apiKey = apiKey
   }
 
-  translate(text: string, lang: string): Promise<string[]> {
+  async translate(text: string, lang: string): Promise<string[]> {
     const [source, target] = lang.split('-', 2)
     const data = {
       q: text,
@@ -20,7 +20,8 @@ export default class LibreTranslateProvider extends ProviderBase {
       format: 'text',
       api_key: this.apiKey
     }
-    return this.api<LibreTranslateResponse>({ data, url: '/', method: 'POST' })
-      .then(({ translatedText }) => [translatedText])
+    const { translatedText }: LibreTranslateResponse =
+      await this.api<LibreTranslateResponse>({ data, url: '/', method: 'POST' })
+    return [translatedText]
   }
 }
