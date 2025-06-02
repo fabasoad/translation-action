@@ -28,6 +28,7 @@ more details for each provider below.
     * [Microsoft](#microsoft)
     * [MyMemory](#mymemory)
     * [FunTranslations](#funtranslations)
+  * [Contributions](#contributions)
 <!-- TOC -->
 
 ## Inputs
