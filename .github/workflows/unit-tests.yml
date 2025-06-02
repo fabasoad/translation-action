@@ -11,6 +11,7 @@ on: # yamllint disable-line rule:truthy
     branches:
       - main
       - feat/codecov
+  workflow_dispatch: {}
 
 defaults:
   run:
