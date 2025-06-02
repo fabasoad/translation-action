@@ -7,7 +7,7 @@
 ![test-source](https://github.com/fabasoad/translation-action/actions/workflows/test-source.yml/badge.svg)
 ![security](https://github.com/fabasoad/translation-action/actions/workflows/security.yml/badge.svg)
 ![linting](https://github.com/fabasoad/translation-action/actions/workflows/linting.yml/badge.svg)
-[![codecov](https://codecov.io/gh/fabasoad/translation-action/graph/badge.svg?token=X0W90WW07U)](https://codecov.io/gh/fabasoad/translation-action)
+[![codecov](https://codecov.io/gh/fabasoad/translation-action/branch/main/graph/badge.svg?token=X0W90WW07U)](https://codecov.io/gh/fabasoad/translation-action)
 
 This action translates any text to any language supported by chosen provider.
 There is a list of providers that can be used for text translation. Please find
