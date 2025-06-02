@@ -10,7 +10,6 @@ on: # yamllint disable-line rule:truthy
   push:
     branches:
       - main
-      - feat/codecov
   workflow_dispatch: {}
 
 defaults:
@@ -20,7 +19,5 @@ defaults:
 jobs:
   jest:
     name: Jest
-    uses: fabasoad/reusable-workflows/.github/workflows/wf-js-unit-tests.yml@feat/codecov
+    uses: fabasoad/reusable-workflows/.github/workflows/wf-js-unit-tests.yml@main
     secrets: inherit # pragma: allowlist secret
-    with:
-      report-coverage: true
