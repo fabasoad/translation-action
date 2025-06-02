@@ -13,3 +13,6 @@ yarn-error.log
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+# jest
+jest-report.json

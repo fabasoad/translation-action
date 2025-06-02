@@ -7,8 +7,7 @@
 ![test-source](https://github.com/fabasoad/translation-action/actions/workflows/test-source.yml/badge.svg)
 ![security](https://github.com/fabasoad/translation-action/actions/workflows/security.yml/badge.svg)
 ![linting](https://github.com/fabasoad/translation-action/actions/workflows/linting.yml/badge.svg)
-[![Maintainability](https://api.codeclimate.com/v1/badges/84bb3beceb9503272bc9/maintainability)](https://codeclimate.com/github/fabasoad/translation-action/maintainability)
-[![Test Coverage](https://api.codeclimate.com/v1/badges/84bb3beceb9503272bc9/test_coverage)](https://codeclimate.com/github/fabasoad/translation-action/test_coverage)
+[![codecov](https://codecov.io/gh/fabasoad/translation-action/graph/badge.svg?token=X0W90WW07U)](https://codecov.io/gh/fabasoad/translation-action)
 
 This action translates any text to any language supported by chosen provider.
 There is a list of providers that can be used for text translation. Please find
@@ -29,6 +28,7 @@ more details for each provider below.
     * [Microsoft](#microsoft)
     * [MyMemory](#mymemory)
     * [FunTranslations](#funtranslations)
+  * [Contributions](#contributions)
 <!-- TOC -->
 
 ## Inputs
