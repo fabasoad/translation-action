@@ -8,21 +8,21 @@ repos:
     hooks:
       - id: build
         name: Build
-        entry: yarn run build
+        entry: make build
         language: system
         pass_filenames: false
         verbose: true
         stages: ["pre-push"]
       - id: lint
         name: Lint
-        entry: yarn run lint
+        entry: make lint
         language: system
         pass_filenames: false
         verbose: false
         stages: ["pre-push"]
       - id: test
         name: Unit tests
-        entry: yarn test
+        entry: make test
         language: system
         pass_filenames: false
         verbose: true
@@ -30,7 +30,7 @@ repos:
   # Security
       - id: audit
         name: Yarn audit
-        entry: yarn npm audit --all
+        entry: make audit
         language: system
         pass_filenames: false
         verbose: false
