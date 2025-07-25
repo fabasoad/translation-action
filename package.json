@@ -27,7 +27,7 @@
   "dependencies": {
     "@actions/core": "1.11.1",
     "cross-fetch": "4.1.0",
-    "deepl-node": "1.18.0",
+    "deepl-node": "1.19.0",
     "google-translate-api-x": "10.7.2",
     "typed-rest-client": "2.1.0"
   },
@@ -35,7 +35,7 @@
     "@biomejs/biome": "1.9.4",
     "@types/jest": "30.0.0",
     "@vercel/ncc": "0.38.3",
-    "dotenv": "16.5.0",
+    "dotenv": "17.2.1",
     "jest": "30.0.2",
     "jest-circus": "30.0.2",
     "ts-jest": "29.4.0",
