@@ -3,12 +3,12 @@
     "enabled": true,
     "rules": {
       "recommended": false,
-      "a11y": { "noBlankTarget": "error" },
+      "a11y": "off",
       "complexity": {
+        "noAdjacentSpacesInRegex": "error",
+        "noArguments": "error",
         "noExtraBooleanCast": "error",
-        "noMultipleSpacesInRegularExpressionLiterals": "error",
-        "noUselessCatch": "error",
-        "noWith": "error"
+        "noUselessCatch": "error"
       },
       "correctness": {
         "noChildrenProp": "error",
@@ -19,7 +19,7 @@
         "noGlobalObjectCalls": "error",
         "noInnerDeclarations": "error",
         "noInvalidConstructorSuper": "error",
-        "noNewSymbol": "error",
+        "noInvalidBuiltinInstantiation": "error",
         "noNonoctalDecimalEscape": "error",
         "noPrecisionLoss": "error",
         "noSelfAssign": "error",
@@ -35,12 +35,14 @@
         "useIsNan": "error",
         "useJsxKeyInIterable": "error",
         "useValidForDirection": "error",
+        "useValidTypeof": "error",
         "useYield": "error"
       },
-      "security": { "noDangerouslySetInnerHtml": "error" },
+      "security": {
+        "noBlankTarget": "error",
+        "noDangerouslySetInnerHtml": "error"
+      },
       "style": {
-        "noArguments": "error",
-        "noVar": "error",
         "useBlockStatements": "error",
         "useConst": "error",
         "useSingleVarDeclarator": "error"
@@ -67,15 +69,16 @@
         "noPrototypeBuiltins": "error",
         "noRedeclare": "error",
         "noShadowRestrictedNames": "error",
+        "noVar": "error",
+        "noWith": "error",
         "noUnsafeNegation": "error",
-        "useGetterReturn": "error",
-        "useValidTypeof": "error"
+        "useGetterReturn": "error"
       }
     },
-    "ignore": ["dist/**"]
+    "includes": ["src/**"]
   },
   "javascript": {
     "globals": ["Atomics", "SharedArrayBuffer", "jest", "afterEach", "beforeAll", "beforeEach", "expect", "test", "describe"]
   },
-  "overrides": [{ "include": ["**/*.spec.ts", "**/*.spec.tsx"] }]
+  "overrides": [{ "includes": ["**/*.spec.ts", "**/*.spec.tsx"] }]
 }
