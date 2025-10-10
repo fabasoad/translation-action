@@ -50331,12 +50331,12 @@ var require_node_ponyfill = __commonJS({
 var core = __toESM(require_core());
 
 // src/extract.ts
-var import_fs = __toESM(require("fs"));
+var import_node_fs = __toESM(require("node:fs"));
 var import_core = __toESM(require_core());
 var extract = (source) => {
-  if (import_fs.default.existsSync(source)) {
+  if (import_node_fs.default.existsSync(source)) {
     (0, import_core.debug)(`${source} file exists. Reading from file...`);
-    const text = import_fs.default.readFileSync(source, "utf-8").trim();
+    const text = import_node_fs.default.readFileSync(source, "utf-8").trim();
     (0, import_core.debug)(`File content: ${text}`);
     return text;
   }
@@ -50505,9 +50505,6 @@ var DeeplProvider = class extends ProviderBase {
 var import_google_translate_api_x = __toESM(require_google_translate_api_x());
 var import_cross_fetch = __toESM(require_node_ponyfill());
 var GoogleProvider = class extends ProviderBase {
-  constructor() {
-    super();
-  }
   async translate(text, lang) {
     const [from, to] = lang.split("-");
     const response = await (0, import_google_translate_api_x.translate)(text, {
