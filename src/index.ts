@@ -1,7 +1,8 @@
 import * as core from '@actions/core'
 import extract from './extract'
-import ProviderBase, { ProviderError } from './providers/ProviderBase'
-import ProviderFactory, { ProviderType } from './providers/ProviderFactory'
+import type ProviderBase from './providers/ProviderBase'
+import { ProviderError } from './providers/ProviderBase'
+import ProviderFactory, { type ProviderType } from './providers/ProviderFactory'
 
 async function run() {
   try {

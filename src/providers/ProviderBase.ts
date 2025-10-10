@@ -1,5 +1,5 @@
-import { IRestResponse, RestClient } from 'typed-rest-client/RestClient'
-import { IHeaders } from 'typed-rest-client/Interfaces'
+import { type IRestResponse, RestClient } from 'typed-rest-client/RestClient'
+import type { IHeaders } from 'typed-rest-client/Interfaces'
 
 export class ProviderError extends Error {
   private readonly _status: number

@@ -1,4 +1,4 @@
-import ProviderBase from './ProviderBase'
+import type ProviderBase from './ProviderBase'
 import FunTranslationsProvider from './FunTranslationsProvider'
 import LibreTranslateProvider from './LibreTranslateProvider'
 import LinguaToolsProvider from './LinguaToolsProvider'
