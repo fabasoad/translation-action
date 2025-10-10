@@ -50505,6 +50505,10 @@ var DeeplProvider = class extends ProviderBase {
 var import_google_translate_api_x = __toESM(require_google_translate_api_x());
 var import_cross_fetch = __toESM(require_node_ponyfill());
 var GoogleProvider = class extends ProviderBase {
+  // biome-ignore lint/complexity/noUselessConstructor: ProviderFactory requires it
+  constructor() {
+    super();
+  }
   async translate(text, lang) {
     const [from, to] = lang.split("-");
     const response = await (0, import_google_translate_api_x.translate)(text, {
