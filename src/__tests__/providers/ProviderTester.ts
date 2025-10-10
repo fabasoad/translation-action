@@ -1,4 +1,5 @@
-import ProviderBase, { ProviderError } from '../../providers/ProviderBase'
+import type ProviderBase from '../../providers/ProviderBase'
+import { ProviderError } from '../../providers/ProviderBase'
 
 type NegativeOptions = {
   lang: string

@@ -6,6 +6,14 @@ on: # yamllint disable-line rule:truthy
   push:
     branches:
       - main
+  workflow_dispatch:
+    inputs:
+      security-type:
+        description: What Security scanning you would like to run?
+        required: false
+        default: "all"
+        type: choice
+        options: ["all", "sca", "code-scanning"]
 
 jobs:
   sast:
@@ -15,5 +23,5 @@ jobs:
       security-events: write
     uses: fabasoad/reusable-workflows/.github/workflows/wf-security-sast.yml@main
     with:
-      code-scanning: true
-      sca: true
+      code-scanning: ${{ (inputs.security-type || 'all') == 'all' || inputs.security-type == 'code-scanning' }}
+      sca: ${{ (inputs.security-type || 'all') == 'all' || inputs.security-type == 'sca' }}

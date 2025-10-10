@@ -1,4 +1,4 @@
-import fs from 'fs'
+import fs from 'node:fs'
 import { debug } from '@actions/core'
 
 const extract = (source: string): string => {

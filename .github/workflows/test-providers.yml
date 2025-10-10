@@ -53,7 +53,7 @@ jobs:
             expected: "Parmaq"
     steps:
       - name: Checkout ${{ github.repository }}
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
       - name: Translate (${{ matrix.provider }}, ${{ matrix.lang }})
         uses: ./
         id: result

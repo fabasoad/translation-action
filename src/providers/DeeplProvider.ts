@@ -1,8 +1,8 @@
 import ProviderBase from './ProviderBase'
 import {
-  SourceLanguageCode,
-  TargetLanguageCode,
-  TextResult,
+  type SourceLanguageCode,
+  type TargetLanguageCode,
+  type TextResult,
   Translator
 } from 'deepl-node'
 

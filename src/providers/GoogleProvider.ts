@@ -4,6 +4,7 @@ import fetch from 'cross-fetch'
 import TranslationResponse = googleTranslateApi.TranslationResponse
 
 export default class GoogleProvider extends ProviderBase {
+  // biome-ignore lint/complexity/noUselessConstructor: ProviderFactory requires it
   constructor() {
     super()
   }
