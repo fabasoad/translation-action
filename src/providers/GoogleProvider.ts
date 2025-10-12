@@ -10,7 +10,7 @@ export default class GoogleProvider extends ProviderBase {
   }
 
   async translate(text: string, lang: string): Promise<string[]> {
-    const [from, to]: string[] = lang.split('-')
+    const [from, to]: string[] = lang.split('|')
     const response: TranslationResponse = await translate<string>(text, {
       from, to, requestFunction: fetch
     })

@@ -50510,7 +50510,7 @@ var GoogleProvider = class extends ProviderBase {
     super();
   }
   async translate(text, lang) {
-    const [from, to] = lang.split("-");
+    const [from, to] = lang.split("|");
     const response = await (0, import_google_translate_api_x.translate)(text, {
       from,
       to,

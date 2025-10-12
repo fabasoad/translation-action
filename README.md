@@ -70,8 +70,8 @@ jobs:
     name: DeepL
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: fabasoad/translation-action@main
+      - uses: actions/checkout@v5
+      - uses: fabasoad/translation-action@v4
         id: deepl-step
         with:
           provider: deepl
@@ -93,10 +93,10 @@ Translation is 'Любов'
 ### Google
 
 * Identifier is `google`.
-* See [supported translation directions](https://github.com/AidanWelch/google-translate-api/blob/master/index.d.ts#L67)
+* See [supported translation directions](https://github.com/AidanWelch/google-translate-api/blob/v10.7.2/index.d.ts#L123)
   for more details.
-  * Be aware that source and target languages should be separated by `-` (hyphen)
-  character while using them in `lang` input. For example, `ms-en` should be used
+  * Be aware that source and target languages should be separated by `|` (pipe)
+  character while using them in `lang` input. For example, `ms|en` should be used
   in case you want to translate text from Malay into English. See example below
   for more details.
 
@@ -108,12 +108,12 @@ jobs:
     name: Google
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: fabasoad/translation-action@main
+      - uses: actions/checkout@v5
+      - uses: fabasoad/translation-action@v4
         id: google-step
         with:
           provider: google
-          lang: ms-en
+          lang: ms|en
           source: Kemenangan
       - name: Print the result
         run: echo "Translation is '${{ steps.google-step.outputs.text }}'"
@@ -148,8 +148,8 @@ jobs:
     name: LibreTranslate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
-      - uses: fabasoad/translation-action@main
+      - uses: actions/checkout@v5
+      - uses: fabasoad/translation-action@v4
         id: libretranslate-step
         with:
           provider: libretranslate
@@ -225,7 +225,7 @@ and generate a new key.
 Example:
 
 ```yaml
-- uses: fabasoad/translation-action@main
+- uses: fabasoad/translation-action@v4
   with:
     provider: funtranslations
     lang: 'klingon'
