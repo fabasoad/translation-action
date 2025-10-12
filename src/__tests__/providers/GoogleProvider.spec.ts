@@ -12,11 +12,18 @@ describe('GoogleProvider', () => {
 
   test(
     'should get correct translation',
-    async () => providerTester.positive()
+    async () => providerTester.positive({
+      text: 'Poem',
+      lang: 'en|uk',
+      expected: 'Вірш'
+    })
   )
 
   test(
     'should fail because of invalid lang',
-    async () => providerTester.negative()
+    async () => providerTester.negative({
+      text: 'Anything',
+      lang: 'en|abc123'
+    })
   )
 })

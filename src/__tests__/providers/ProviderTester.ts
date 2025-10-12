@@ -11,7 +11,8 @@ type PositiveOptions = NegativeOptions & {
 }
 
 export default class ProviderTester {
-  private provider: ProviderBase
+  private readonly provider: ProviderBase
+
   constructor(provider: ProviderBase) {
     this.provider = provider
   }
