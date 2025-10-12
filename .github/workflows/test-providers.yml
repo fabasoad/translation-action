@@ -31,9 +31,9 @@ jobs:
             expected: "Любов"
             api_key: "DEEPL_API_KEY" # pragma: allowlist secret
           - provider: "google"
-            lang: "en-hr"
+            lang: "en|zh-CN"
             source: "Love"
-            expected: "Ljubav"
+            expected: "爱"
           - provider: "linguatools"
             lang: "en-de"
             source: "Love"

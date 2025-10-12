@@ -1,10 +1,10 @@
 {
   "name": "translation-action",
-  "version": "3.1.8",
+  "version": "4.0.0",
   "description": "This GitHub action translates any text from any language to any language.",
   "main": "dist/index.js",
   "scripts": {
-    "build": "esbuild src/index.ts --bundle --platform=node --target=node20 --outfile=dist/index.js",
+    "build": "esbuild src/index.ts --bundle --platform=node --target=node24 --outfile=dist/index.js",
     "lint": "biome lint --write src",
     "test": "jest --config=jest.config.json --json --outputFile=jest-report.json --coverage"
   },
