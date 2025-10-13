@@ -27,7 +27,7 @@ repos:
         pass_filenames: false
         verbose: true
         stages: ["pre-push"]
-  # Security
+        # Security
       - id: audit
         name: Yarn audit
         entry: make audit
