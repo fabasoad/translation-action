@@ -1,6 +1,6 @@
 {
   "name": "translation-action",
-  "version": "4.0.0",
+  "version": "4.0.1",
   "description": "This GitHub action translates any text from any language to any language.",
   "main": "dist/index.js",
   "scripts": {
@@ -32,7 +32,7 @@
     "typed-rest-client": "2.1.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "2.2.7",
+    "@biomejs/biome": "2.3.0",
     "@types/jest": "30.0.0",
     "dotenv": "17.2.3",
     "esbuild": "0.25.11",
