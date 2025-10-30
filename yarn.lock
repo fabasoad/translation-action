@@ -417,18 +417,18 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@biomejs/biome@npm:2.3.0":
-  version: 2.3.0
-  resolution: "@biomejs/biome@npm:2.3.0"
+"@biomejs/biome@npm:2.3.2":
+  version: 2.3.2
+  resolution: "@biomejs/biome@npm:2.3.2"
   dependencies:
-    "@biomejs/cli-darwin-arm64": "npm:2.3.0"
-    "@biomejs/cli-darwin-x64": "npm:2.3.0"
-    "@biomejs/cli-linux-arm64": "npm:2.3.0"
-    "@biomejs/cli-linux-arm64-musl": "npm:2.3.0"
-    "@biomejs/cli-linux-x64": "npm:2.3.0"
-    "@biomejs/cli-linux-x64-musl": "npm:2.3.0"
-    "@biomejs/cli-win32-arm64": "npm:2.3.0"
-    "@biomejs/cli-win32-x64": "npm:2.3.0"
+    "@biomejs/cli-darwin-arm64": "npm:2.3.2"
+    "@biomejs/cli-darwin-x64": "npm:2.3.2"
+    "@biomejs/cli-linux-arm64": "npm:2.3.2"
+    "@biomejs/cli-linux-arm64-musl": "npm:2.3.2"
+    "@biomejs/cli-linux-x64": "npm:2.3.2"
+    "@biomejs/cli-linux-x64-musl": "npm:2.3.2"
+    "@biomejs/cli-win32-arm64": "npm:2.3.2"
+    "@biomejs/cli-win32-x64": "npm:2.3.2"
   dependenciesMeta:
     "@biomejs/cli-darwin-arm64":
       optional: true
@@ -448,62 +448,62 @@ __metadata:
       optional: true
   bin:
     biome: bin/biome
-  checksum: 10c0/e51770543c80e8309f76b7e1326df4108dad66a3f2ef86c8d4558ad5c43d269c3c0ad4882cbafc57cc2dd58feac1c98efd4a34c8d253d2a516412fda9d50016a
+  checksum: 10c0/f9f132e87fd6ab00bcac7f24dffa89a838087b04ff983398f6ce5d2b2de6a45ee05ba05140a9718153780e5e7dc02ed18955e7a1fde4769484ed4a80df82efe1
   languageName: node
   linkType: hard
 
-"@biomejs/cli-darwin-arm64@npm:2.3.0":
-  version: 2.3.0
-  resolution: "@biomejs/cli-darwin-arm64@npm:2.3.0"
+"@biomejs/cli-darwin-arm64@npm:2.3.2":
+  version: 2.3.2
+  resolution: "@biomejs/cli-darwin-arm64@npm:2.3.2"
   conditions: os=darwin & cpu=arm64
   languageName: node
   linkType: hard
 
-"@biomejs/cli-darwin-x64@npm:2.3.0":
-  version: 2.3.0
-  resolution: "@biomejs/cli-darwin-x64@npm:2.3.0"
+"@biomejs/cli-darwin-x64@npm:2.3.2":
+  version: 2.3.2
+  resolution: "@biomejs/cli-darwin-x64@npm:2.3.2"
   conditions: os=darwin & cpu=x64
   languageName: node
   linkType: hard
 
-"@biomejs/cli-linux-arm64-musl@npm:2.3.0":
-  version: 2.3.0
-  resolution: "@biomejs/cli-linux-arm64-musl@npm:2.3.0"
+"@biomejs/cli-linux-arm64-musl@npm:2.3.2":
+  version: 2.3.2
+  resolution: "@biomejs/cli-linux-arm64-musl@npm:2.3.2"
   conditions: os=linux & cpu=arm64 & libc=musl
   languageName: node
   linkType: hard
 
-"@biomejs/cli-linux-arm64@npm:2.3.0":
-  version: 2.3.0
-  resolution: "@biomejs/cli-linux-arm64@npm:2.3.0"
+"@biomejs/cli-linux-arm64@npm:2.3.2":
+  version: 2.3.2
+  resolution: "@biomejs/cli-linux-arm64@npm:2.3.2"
   conditions: os=linux & cpu=arm64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@biomejs/cli-linux-x64-musl@npm:2.3.0":
-  version: 2.3.0
-  resolution: "@biomejs/cli-linux-x64-musl@npm:2.3.0"
+"@biomejs/cli-linux-x64-musl@npm:2.3.2":
+  version: 2.3.2
+  resolution: "@biomejs/cli-linux-x64-musl@npm:2.3.2"
   conditions: os=linux & cpu=x64 & libc=musl
   languageName: node
   linkType: hard
 
-"@biomejs/cli-linux-x64@npm:2.3.0":
-  version: 2.3.0
-  resolution: "@biomejs/cli-linux-x64@npm:2.3.0"
+"@biomejs/cli-linux-x64@npm:2.3.2":
+  version: 2.3.2
+  resolution: "@biomejs/cli-linux-x64@npm:2.3.2"
   conditions: os=linux & cpu=x64 & libc=glibc
   languageName: node
   linkType: hard
 
-"@biomejs/cli-win32-arm64@npm:2.3.0":
-  version: 2.3.0
-  resolution: "@biomejs/cli-win32-arm64@npm:2.3.0"
+"@biomejs/cli-win32-arm64@npm:2.3.2":
+  version: 2.3.2
+  resolution: "@biomejs/cli-win32-arm64@npm:2.3.2"
   conditions: os=win32 & cpu=arm64
   languageName: node
   linkType: hard
 
-"@biomejs/cli-win32-x64@npm:2.3.0":
-  version: 2.3.0
-  resolution: "@biomejs/cli-win32-x64@npm:2.3.0"
+"@biomejs/cli-win32-x64@npm:2.3.2":
+  version: 2.3.2
+  resolution: "@biomejs/cli-win32-x64@npm:2.3.2"
   conditions: os=win32 & cpu=x64
   languageName: node
   linkType: hard
@@ -4167,7 +4167,7 @@ __metadata:
   resolution: "translation-action@workspace:."
   dependencies:
     "@actions/core": "npm:1.11.1"
-    "@biomejs/biome": "npm:2.3.0"
+    "@biomejs/biome": "npm:2.3.2"
     "@types/jest": "npm:30.0.0"
     cross-fetch: "npm:4.1.0"
     deepl-node: "npm:1.20.0"
