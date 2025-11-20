@@ -2,28 +2,28 @@
 default_install_hook_types: ["pre-commit", "pre-push"]
 default_stages: ["pre-commit", "pre-push"]
 exclude: ^(dist/.*\.js|\.yarn/.*)$
-minimum_pre_commit_version: 4.0.0
+minimum_pre_commit_version: 4.4.0
 repos:
   - repo: local
     hooks:
       - id: build
         name: Build
         entry: make build
-        language: system
+        language: unsupported
         pass_filenames: false
         verbose: true
         stages: ["pre-push"]
       - id: lint
         name: Lint
         entry: make lint
-        language: system
+        language: unsupported
         pass_filenames: false
         verbose: false
         stages: ["pre-push"]
       - id: test
         name: Unit tests
         entry: make test
-        language: system
+        language: unsupported
         pass_filenames: false
         verbose: true
         stages: ["pre-push"]
@@ -31,7 +31,7 @@ repos:
       - id: audit
         name: Yarn audit
         entry: make audit
-        language: system
+        language: unsupported
         pass_filenames: false
         verbose: false
         stages: ["pre-push"]

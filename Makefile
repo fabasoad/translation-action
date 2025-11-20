@@ -1,4 +1,4 @@
-.PHONY: audit build clean install reinstall lint test upgrade
+.PHONY: audit build clean install reinstall lint test outdated upgrade
 
 .DEFAULT_GOAL := build
 
@@ -22,6 +22,9 @@ lint:
 
 test:
 	@yarn run test
+
+outdated:
+	@yarn outdated
 
 upgrade:
 	@pre-commit autoupdate

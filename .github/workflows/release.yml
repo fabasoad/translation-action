@@ -10,3 +10,5 @@ jobs:
   github:
     name: GitHub
     uses: fabasoad/reusable-workflows/.github/workflows/wf-github-release.yml@main
+    permissions:
+      contents: write
