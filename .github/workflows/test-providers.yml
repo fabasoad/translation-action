@@ -41,7 +41,7 @@ jobs:
           - provider: "mymemory"
             lang: "en|sw"
             source: "Love"
-            expected: "Mfano"
+            expected: "Upendo"
           - provider: "mymemory"
             lang: "en|pt"
             source: "Love"
