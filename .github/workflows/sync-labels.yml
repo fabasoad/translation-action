@@ -11,3 +11,7 @@ jobs:
   maintenance:
     name: Maintenance
     uses: fabasoad/reusable-workflows/.github/workflows/wf-sync-labels.yml@main
+    permissions:
+      contents: write
+      issues: write
+      pull-requests: write
