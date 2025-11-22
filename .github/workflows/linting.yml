@@ -7,16 +7,15 @@ on: # yamllint disable-line rule:truthy
     branches:
       - main
 
+permissions:
+  contents: read
+
 jobs:
   js-lint:
     name: JS Lint
     uses: fabasoad/reusable-workflows/.github/workflows/wf-js-lint.yml@main
-    permissions:
-      contents: read
   pre-commit:
     name: Pre-commit
     uses: fabasoad/reusable-workflows/.github/workflows/wf-pre-commit.yml@main
-    permissions:
-      contents: read
     with:
       skip-hooks: "audit, build, lint, test"
