@@ -12,3 +12,4 @@ jobs:
     uses: fabasoad/reusable-workflows/.github/workflows/wf-update-license.yml@main
     permissions:
       contents: write
+      pull-requests: write
