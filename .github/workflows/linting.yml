@@ -16,6 +16,6 @@ jobs:
     uses: fabasoad/reusable-workflows/.github/workflows/wf-js-lint.yml@main
   pre-commit:
     name: Pre-commit
-    uses: fabasoad/reusable-workflows/.github/workflows/wf-pre-commit.yml@main
+    uses: fabasoad/reusable-workflows/.github/workflows/wf-pre-commit.yml@ci/pre-commit
     with:
       skip-hooks: "audit, build, lint, test"
