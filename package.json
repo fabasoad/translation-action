@@ -25,14 +25,14 @@
   },
   "homepage": "https://github.com/fabasoad/translation-action#readme",
   "dependencies": {
-    "@actions/core": "~2.0.1",
+    "@actions/core": "~2.0.2",
     "cross-fetch": "~4.1.0",
     "deepl-node": "~1.24.0",
     "google-translate-api-x": "~10.7.2",
     "typed-rest-client": "~2.1.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "~2.3.10",
+    "@biomejs/biome": "~2.3.11",
     "@types/jest": "~30.0.0",
     "dotenv": "~17.2.3",
     "esbuild": "~0.27.2",
