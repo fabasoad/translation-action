@@ -60,7 +60,7 @@ repos:
           - --hook-args=--log-level debug
         stages: ["pre-push"]
   - repo: https://github.com/google/osv-scanner
-    rev: v2.3.1
+    rev: v2.3.2
     hooks:
       - id: osv-scanner
         args:
@@ -75,7 +75,7 @@ repos:
         stages: ["pre-commit"]
   # Yaml
   - repo: https://github.com/adrienverge/yamllint
-    rev: v1.37.1
+    rev: v1.38.0
     hooks:
       - id: yamllint
         stages: ["pre-push"]
