@@ -29,7 +29,7 @@
     "cross-fetch": "~4.1.0",
     "deepl-node": "~1.24.0",
     "google-translate-api-x": "~10.7.2",
-    "typed-rest-client": "~2.1.0"
+    "typed-rest-client": "~2.2.0"
   },
   "devDependencies": {
     "@biomejs/biome": "~2.3.11",
