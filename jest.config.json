@@ -20,6 +20,9 @@
     "js",
     "ts"
   ],
+  "moduleNameMapper": {
+    "^@actions/(.*)$": "<rootDir>/node_modules/@actions/$1"
+  },
   "testEnvironment": "node",
   "testMatch": [
     "**/*.spec.ts"
@@ -27,7 +30,15 @@
   "testRunner": "jest-circus/runner",
   "testTimeout": 20000,
   "transform": {
-    "^.+\\.ts$": "ts-jest"
+    "^.+\\.tsx?$": ["ts-jest", {
+      "useESM": true
+    }],
+    "^.+\\.jsx?$": ["ts-jest", {
+      "useESM": true
+    }]
   },
+  "transformIgnorePatterns": [
+    "node_modules/(?!(@actions)/)"
+  ],
   "verbose": true
 }
