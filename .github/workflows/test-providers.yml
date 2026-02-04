@@ -22,6 +22,8 @@ jobs:
     name: ${{ matrix.provider }} (${{ matrix.api_key == '' && 'Free' || 'Paid' }})
     timeout-minutes: 5
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     strategy:
       fail-fast: false
       matrix:
@@ -54,7 +56,7 @@ jobs:
             expected: "Parmaq"
     steps:
       - name: Checkout ${{ github.repository }}
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Translate (${{ matrix.provider }}, ${{ matrix.lang }})
         uses: ./
         id: result

@@ -21,6 +21,8 @@ jobs:
     name: Source as ${{ matrix.source }}
     timeout-minutes: 5
     runs-on: ubuntu-latest
+    permissions:
+      contents: read
     env:
       TEXT: "Love"
       EXPECTED: "Любов"
@@ -29,7 +31,7 @@ jobs:
         source: ["file", "text"]
     steps:
       - name: Checkout ${{ github.repository }}
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
       - name: Prepare source
         id: params
         run: |
