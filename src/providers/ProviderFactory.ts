@@ -26,7 +26,7 @@ export default class ProviderFactory {
     case 'google':
       return new GoogleProvider()
     case 'funtranslations':
-      return new FunTranslationsProvider()
+      return new FunTranslationsProvider(apiKey)
     case 'libretranslate':
       return new LibreTranslateProvider(apiKey)
     case 'linguatools':

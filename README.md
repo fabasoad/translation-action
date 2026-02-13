@@ -227,9 +227,10 @@ Example:
 ```yaml
 - uses: fabasoad/translation-action@v4
   with:
-    provider: funtranslations
-    lang: 'klingon'
-    source: 'Who are you'
+    provider: "funtranslations"
+    lang: "klingon"
+    source: "Who are you"
+    api_key: "${{ secrets.FUNTRANSLATIONS_API_KEY }}"
 ```
 
 ## Contributions
