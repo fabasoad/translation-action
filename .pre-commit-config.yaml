@@ -69,7 +69,7 @@ repos:
         stages: ["pre-push"]
   # Markdown
   - repo: https://github.com/igorshubovych/markdownlint-cli
-    rev: v0.47.0
+    rev: v0.48.0
     hooks:
       - id: markdownlint-fix
         stages: ["pre-commit"]
