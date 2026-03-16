@@ -2,7 +2,7 @@ import ProviderBase from './ProviderBase';
 import {
   TranslateClient,
   TranslateTextCommand,
-  TranslateTextCommandOutput,
+  type TranslateTextCommandOutput,
 } from '@aws-sdk/client-translate';
 
 export default class AwsProvider extends ProviderBase {
