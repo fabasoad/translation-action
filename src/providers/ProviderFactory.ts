@@ -6,8 +6,10 @@ import MicrosoftProvider from './MicrosoftProvider'
 import MyMemoryProvider from './MyMemoryProvider'
 import DeeplProvider from './DeeplProvider'
 import GoogleProvider from './GoogleProvider'
+import AwsProvider from './AwsProvider';
 
 export type ProviderType =
+  'aws' |
   'deepl' |
   'google' |
   'funtranslations' |
@@ -21,6 +23,8 @@ export default class ProviderFactory {
     type: ProviderType, apiKey: string, apiAdditionalParam: string
   ): ProviderBase {
     switch (type) {
+    case 'aws':
+      return new AwsProvider(apiKey, apiAdditionalParam);
     case 'deepl':
       return new DeeplProvider(apiKey)
     case 'google':

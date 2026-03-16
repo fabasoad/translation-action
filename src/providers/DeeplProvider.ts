@@ -7,7 +7,7 @@ import {
 } from 'deepl-node'
 
 export default class DeeplProvider extends ProviderBase {
-  private translator: Translator
+  private readonly translator: Translator
 
   constructor(apiKey: string) {
     super()

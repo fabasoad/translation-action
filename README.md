@@ -21,6 +21,7 @@ more details for each provider below.
   * [Inputs](#inputs)
   * [Outputs](#outputs)
   * [Providers](#providers)
+    * [AWS](#aws)
     * [DeepL](#deepl)
     * [Google](#google)
     * [LibreTranslate](#libretranslate)
@@ -38,7 +39,7 @@ more details for each provider below.
 | source                   | Yes      | Can be text or path to the file for translation                                                  |         | _&lt;Path&gt;_,_&lt;String&gt;_                                                                                                                                                         |
 | provider                 | Yes      | Provider identifier                                                                              |         | [deepl](#deepl), [google](#google), [libretranslate](#libretranslate), [linguatools](#linguatools), [microsoft](#microsoft), [mymemory](#mymemory), [funtranslations](#funtranslations) |
 | api_key                  | No       | API key that should be used for chosen [provider](#providers)                                    | `""`    | _&lt;String&gt;_                                                                                                                                                                        |
-| api_additional_parameter | No       | Additional parameter for the API. eg the region for Microsoft: `canadacentral`                   | `""`    | _&lt;String&gt;_                                                                                                                                                                        |
+| api_additional_parameter | No       | Additional parameter for the API, e.g. the region for Microsoft: `canadacentral`                 | `""`    | _&lt;String&gt;_                                                                                                                                                                        |
 | lang                     | Yes      | The translation direction. Should be one of the option proposed by chosen [provider](#providers) |         | _&lt;String&gt;_                                                                                                                                                                        |
 
 ## Outputs
@@ -48,6 +49,23 @@ more details for each provider below.
 | text | Yes      | Translated text |
 
 ## Providers
+
+### AWS
+
+* Identifier is `aws`.
+* [Supported translation directions](https://docs.aws.amazon.com/translate/latest/dg/what-is-languages.html)
+* How to get API key: Please follow the steps described in [this](https://docs.aws.amazon.com/keyspaces/latest/devguide/create.keypair.html)
+  article.
+* How to use:
+  * You will need to define Access Key ID and Secret Access Key in `api_key` parameter
+    separated by `|` (pipe) character.
+  * You will also need to provide the region of the key using the `api_additional_parameter`.
+
+```YAML
+with:
+  api_key: "${{ secrets.ACCESS_KEY_ID }}|${{ secrets.SECRET_ACCESS_KEY }}"
+  api_additional_parameter: "ap-northeast-1" # AWS region
+```
 
 ### DeepL
 
@@ -196,7 +214,7 @@ You will also need to provide the region of the key using the
 
 ```YAML
 with:
-  api_additional_parameter: canadacentral
+  api_additional_parameter: "canadacentral"
 ```
 
 ### MyMemory
