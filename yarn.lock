@@ -87,9 +87,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@aws-sdk/client-translate@npm:~3.1009.0":
-  version: 3.1009.0
-  resolution: "@aws-sdk/client-translate@npm:3.1009.0"
+"@aws-sdk/client-translate@npm:~3.1010.0":
+  version: 3.1010.0
+  resolution: "@aws-sdk/client-translate@npm:3.1010.0"
   dependencies:
     "@aws-crypto/sha256-browser": "npm:5.2.0"
     "@aws-crypto/sha256-js": "npm:5.2.0"
@@ -130,7 +130,7 @@ __metadata:
     "@smithy/util-retry": "npm:^4.2.12"
     "@smithy/util-utf8": "npm:^4.2.2"
     tslib: "npm:^2.6.2"
-  checksum: 10c0/0821efea6c5768ada3f9fd7c23f00f0386986b04a65611231d1f046eb028786c235c1bb0277cbcd6ddca0e3c4efc0a45d3f51db7bfca1a8448e958f1e91061f0
+  checksum: 10c0/447580d4effc8df33fc84e58a15572f1590c52d955eb018457851f502736484011724c9344679b080ad9af31122bf37d70a83055a99eb180001c906bd8b7f65d
   languageName: node
   linkType: hard
 
@@ -5135,7 +5135,7 @@ __metadata:
   resolution: "translation-action@workspace:."
   dependencies:
     "@actions/core": "npm:~3.0.0"
-    "@aws-sdk/client-translate": "npm:~3.1009.0"
+    "@aws-sdk/client-translate": "npm:~3.1010.0"
     "@biomejs/biome": "npm:~2.4.7"
     "@types/jest": "npm:~30.0.0"
     cross-fetch: "npm:~4.1.0"

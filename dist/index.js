@@ -61207,7 +61207,7 @@ var require_package = __commonJS({
     module2.exports = {
       name: "@aws-sdk/client-translate",
       description: "AWS SDK for JavaScript Translate Client for Node.js, Browser and React Native",
-      version: "3.1009.0",
+      version: "3.1010.0",
       scripts: {
         build: "concurrently 'yarn:build:types' 'yarn:build:es' && yarn build:cjs",
         "build:cjs": "node ../../scripts/compilation/inline client-translate",
@@ -69448,7 +69448,7 @@ var LinguaToolsProvider = class extends ProviderBase {
   constructor() {
     super("https://lt-translate-test.herokuapp.com");
   }
-  translate(text, lang) {
+  async translate(text, lang) {
     const url = `/?langpair=${lang}&query=${text}`;
     return this.api({ url, method: "GET" }).then((translations) => {
       translations.sort((a5, b5) => a5.freq > b5.freq ? 1 : -1);
@@ -69460,11 +69460,11 @@ var LinguaToolsProvider = class extends ProviderBase {
 // src/providers/MicrosoftProvider.ts
 var MicrosoftProvider = class extends ProviderBase {
   apiKey;
-  addParam;
-  constructor(apiKey, addParam) {
+  region;
+  constructor(apiKey, region) {
     super("https://api.cognitive.microsofttranslator.com");
     this.apiKey = apiKey;
-    this.addParam = addParam;
+    this.region = region;
   }
   async translate(text, lang) {
     const url = `/translate?api-version=3.0&to=${lang}`;
@@ -69472,7 +69472,7 @@ var MicrosoftProvider = class extends ProviderBase {
       url,
       headers: {
         "ocp-apim-subscription-key": this.apiKey,
-        "ocp-apim-subscription-region": this.addParam,
+        "ocp-apim-subscription-region": this.region,
         "Content-Type": "application/json"
       },
       method: "POST",
@@ -69540,11 +69540,11 @@ var GoogleProvider = class extends ProviderBase {
 var import_client_translate = __toESM(require_dist_cjs53());
 var AwsProvider = class extends ProviderBase {
   translator;
-  constructor(apiKey, addParam) {
+  constructor(apiKey, region) {
     super();
     const [accessKeyId, secretAccessKey] = apiKey.split("|");
     this.translator = new import_client_translate.TranslateClient({
-      region: addParam,
+      region,
       credentials: { accessKeyId, secretAccessKey }
     });
   }

@@ -8,17 +8,17 @@ import {
 export default class AwsProvider extends ProviderBase {
   private readonly translator: TranslateClient;
 
-  constructor(apiKey: string, addParam: string) {
+  constructor(apiKey: string, region: string) {
     super();
     const [accessKeyId, secretAccessKey] = apiKey.split('|');
     this.translator = new TranslateClient({
-      region: addParam,
+      region,
       credentials: { accessKeyId, secretAccessKey },
     });
   }
 
   async translate(text: string, lang: string): Promise<string[]> {
-    const l: string[] = lang.split('-')
+    const l: string[] = lang.split('-');
     const command = new TranslateTextCommand({
       Text: text,
       SourceLanguageCode: l[0],
