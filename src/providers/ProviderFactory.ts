@@ -1,13 +1,15 @@
-import type ProviderBase from './ProviderBase'
-import FunTranslationsProvider from './FunTranslationsProvider'
-import LibreTranslateProvider from './LibreTranslateProvider'
-import LinguaToolsProvider from './LinguaToolsProvider'
-import MicrosoftProvider from './MicrosoftProvider'
-import MyMemoryProvider from './MyMemoryProvider'
-import DeeplProvider from './DeeplProvider'
-import GoogleProvider from './GoogleProvider'
+import type ProviderBase from './ProviderBase';
+import FunTranslationsProvider from './FunTranslationsProvider';
+import LibreTranslateProvider from './LibreTranslateProvider';
+import LinguaToolsProvider from './LinguaToolsProvider';
+import MicrosoftProvider from './MicrosoftProvider';
+import MyMemoryProvider from './MyMemoryProvider';
+import DeeplProvider from './DeeplProvider';
+import GoogleProvider from './GoogleProvider';
+import AwsProvider from './AwsProvider';
 
 export type ProviderType =
+  'aws' |
   'deepl' |
   'google' |
   'funtranslations' |
@@ -18,25 +20,27 @@ export type ProviderType =
 
 export default class ProviderFactory {
   getProvider(
-    type: ProviderType, apiKey: string, apiAdditionalParam: string
+    type: ProviderType, apiKey: string, apiAdditionalParam: string,
   ): ProviderBase {
     switch (type) {
+    case 'aws':
+      return new AwsProvider(apiKey, apiAdditionalParam);
     case 'deepl':
-      return new DeeplProvider(apiKey)
+      return new DeeplProvider(apiKey);
     case 'google':
-      return new GoogleProvider()
+      return new GoogleProvider();
     case 'funtranslations':
-      return new FunTranslationsProvider(apiKey)
+      return new FunTranslationsProvider(apiKey);
     case 'libretranslate':
-      return new LibreTranslateProvider(apiKey)
+      return new LibreTranslateProvider(apiKey);
     case 'linguatools':
-      return new LinguaToolsProvider()
+      return new LinguaToolsProvider();
     case 'microsoft':
-      return new MicrosoftProvider(apiKey, apiAdditionalParam)
+      return new MicrosoftProvider(apiKey, apiAdditionalParam);
     case 'mymemory':
-      return new MyMemoryProvider(apiKey)
+      return new MyMemoryProvider(apiKey);
     default:
-      throw new Error(`${type} is not supported`)
+      throw new Error(`${type} is not supported`);
     }
   }
 }

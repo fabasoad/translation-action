@@ -1,25 +1,31 @@
-import DeeplProvider from '../../providers/DeeplProvider'
-import { config } from 'dotenv'
-import ProviderTester from './ProviderTester'
+import DeeplProvider from '../../providers/DeeplProvider';
+import { Translator } from 'deepl-node';
 
-config()
+jest.mock('deepl-node', () => ({
+  Translator: jest.fn(),
+}))
 
 describe('DeeplProvider', () => {
-  let providerTester: ProviderTester
+  let mockTranslateText: jest.Mock;
+  let provider: DeeplProvider;
 
-  beforeAll(() => {
-    providerTester = new ProviderTester(
-      new DeeplProvider(process.env.DEEPL_API_KEY || '')
-    )
+  beforeEach(() => {
+    mockTranslateText = jest.fn();
+    // biome-ignore lint/suspicious/noExplicitAny: Required for mocking
+    jest.mocked(Translator).mockImplementation(() => ({ translateText: mockTranslateText }) as any);
+    provider = new DeeplProvider('test-api-key');
   })
 
-  test(
-    'should get correct translation',
-    async () => providerTester.positive()
-  )
+  it('translates text using source and target language split by dash', async () => {
+    mockTranslateText.mockResolvedValue({ text: 'Hallo' });
 
-  test(
-    'should fail because of invalid lang',
-    async () => providerTester.negative()
-  )
+    const result: string[] = await provider.translate('Hello', 'en-DE');
+
+    expect(result).toEqual(['Hallo']);
+    expect(mockTranslateText).toHaveBeenCalledWith('Hello', 'en', 'DE');
+  })
+
+  it('constructs Translator with the provided api key', () => {
+    expect(Translator).toHaveBeenCalledWith('test-api-key');
+  })
 })
