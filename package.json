@@ -33,7 +33,7 @@
   },
   "devDependencies": {
     "@aws-sdk/client-translate": "~3.1010.0",
-    "@biomejs/biome": "~2.4.7",
+    "@biomejs/biome": "~2.4.8",
     "@types/jest": "~30.0.0",
     "dotenv": "~17.3.1",
     "esbuild": "~0.27.4",
