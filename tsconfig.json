@@ -14,7 +14,8 @@
     "rootDir": "./src",
     "strict": true,
     "noImplicitAny": false,
-    "esModuleInterop": true
+    "esModuleInterop": true,
+    "types": ["jest", "node"]
   },
   "exclude": ["node_modules", "src/__tests__"]
 }
