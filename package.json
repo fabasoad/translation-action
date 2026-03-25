@@ -1,6 +1,6 @@
 {
   "name": "translation-action",
-  "version": "4.2.0",
+  "version": "4.2.1",
   "description": "This GitHub action translates any text from any language to any language.",
   "main": "dist/index.js",
   "scripts": {
@@ -32,15 +32,15 @@
     "typed-rest-client": "~2.2.0"
   },
   "devDependencies": {
-    "@aws-sdk/client-translate": "~3.1010.0",
-    "@biomejs/biome": "~2.4.8",
+    "@aws-sdk/client-translate": "~3.1016.0",
+    "@biomejs/biome": "~2.4.9",
     "@types/jest": "~30.0.0",
     "dotenv": "~17.3.1",
     "esbuild": "~0.27.4",
     "jest": "~30.3.0",
     "jest-circus": "~30.3.0",
     "ts-jest": "~29.4.6",
-    "typescript": "~5.9.3"
+    "typescript": "~6.0.2"
   },
   "packageManager": "yarn@4.13.0"
 }
