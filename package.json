@@ -1,6 +1,6 @@
 {
   "name": "translation-action",
-  "version": "4.2.1",
+  "version": "4.2.2",
   "description": "This GitHub action translates any text from any language to any language.",
   "main": "dist/index.js",
   "scripts": {
@@ -27,16 +27,16 @@
   "dependencies": {
     "@actions/core": "~3.0.0",
     "cross-fetch": "~4.1.0",
-    "deepl-node": "~1.24.0",
+    "deepl-node": "~1.26.0",
     "google-translate-api-x": "~10.7.2",
-    "typed-rest-client": "~2.2.0"
+    "typed-rest-client": "~2.3.0"
   },
   "devDependencies": {
-    "@aws-sdk/client-translate": "~3.1019.0",
+    "@aws-sdk/client-translate": "~3.1029.0",
     "@biomejs/biome": "~2.4.11",
     "@types/jest": "~30.0.0",
-    "dotenv": "~17.3.1",
-    "esbuild": "~0.27.7",
+    "dotenv": "~17.4.1",
+    "esbuild": "~0.28.0",
     "jest": "~30.3.0",
     "jest-circus": "~30.3.0",
     "ts-jest": "~29.4.9",
