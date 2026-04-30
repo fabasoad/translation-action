@@ -4747,7 +4747,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"qs@npm:^6.14.1":
+"qs@npm:6.15.1":
   version: 6.15.1
   resolution: "qs@npm:6.15.1"
   dependencies:
@@ -5135,7 +5135,7 @@ __metadata:
     jest: "npm:~30.3.0"
     jest-circus: "npm:~30.3.0"
     ts-jest: "npm:~29.4.9"
-    typed-rest-client: "npm:~2.3.0"
+    typed-rest-client: "npm:~2.3.1"
     typescript: "npm:~6.0.3"
   languageName: unknown
   linkType: soft
@@ -5215,16 +5215,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"typed-rest-client@npm:~2.3.0":
-  version: 2.3.0
-  resolution: "typed-rest-client@npm:2.3.0"
+"typed-rest-client@npm:~2.3.1":
+  version: 2.3.1
+  resolution: "typed-rest-client@npm:2.3.1"
   dependencies:
     des.js: "npm:^1.1.0"
     js-md4: "npm:^0.3.2"
-    qs: "npm:^6.14.1"
+    qs: "npm:6.15.1"
     tunnel: "npm:0.0.6"
     underscore: "npm:^1.13.8"
-  checksum: 10c0/47160b96addc05d121499d79a864c9d0e69776d8b3f975f0c9d1013b07eb37a55c28427f74433e02ca88d90a06c0dac2b4611fc9d9e1d15b91ff8080946f9e0b
+  checksum: 10c0/f7b2b0301c9e6e7663f1fbbb021d72395decb69aec2367291551bb6faf1eaf3494452dc8856db25653fb7b1c5da3e868a30fdd5e1af502ec23084f0f0233db8f
   languageName: node
   linkType: hard
 
