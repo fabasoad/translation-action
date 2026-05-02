@@ -1,4 +1,0 @@
-[allowlist]
-paths = [
-    '''.yarn/.*'''
-]

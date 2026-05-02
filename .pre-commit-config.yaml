@@ -1,7 +1,7 @@
 ---
 default_install_hook_types: ["pre-commit", "pre-push"]
 default_stages: ["pre-commit", "pre-push"]
-exclude: ^(dist/.*\.js|\.yarn/.*)$
+exclude: ^dist/.*\.js$
 minimum_pre_commit_version: 4.4.0
 repos:
   - repo: local
@@ -64,7 +64,7 @@ repos:
     hooks:
       - id: osv-scanner
         args:
-          - --lockfile=yarn.lock
+          - --lockfile=package-lock.json
         verbose: true
         stages: ["pre-push"]
   # Markdown
