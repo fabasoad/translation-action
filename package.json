@@ -1,12 +1,14 @@
 {
   "name": "translation-action",
-  "version": "4.2.2",
+  "version": "4.2.3",
   "description": "This GitHub action translates any text from any language to any language.",
   "main": "dist/index.js",
   "scripts": {
     "build": "esbuild src/index.ts --bundle --platform=node --target=node24 --outfile=dist/index.js",
     "lint": "biome lint --write src",
-    "test": "jest --config=jest.config.json --json --outputFile=jest-report.json --coverage"
+    "test": "jest --config=jest.config.json --json --outputFile=jest-report.json --coverage",
+    "clean": "rm -rf coverage && rm -rf temp",
+    "clean:unsafe": "rm -f package-lock.json && rm -rf node_modules && rm -rf dist"
   },
   "repository": {
     "type": "git",
@@ -27,12 +29,12 @@
   "dependencies": {
     "@actions/core": "~3.0.1",
     "cross-fetch": "~4.1.0",
-    "deepl-node": "~1.26.0",
+    "deepl-node": "~1.27.0",
     "google-translate-api-x": "~10.7.2",
     "typed-rest-client": "~2.3.1"
   },
   "devDependencies": {
-    "@aws-sdk/client-translate": "~3.1029.0",
+    "@aws-sdk/client-translate": "~3.1041.0",
     "@biomejs/biome": "~2.4.13",
     "@types/jest": "~30.0.0",
     "dotenv": "~17.4.2",
@@ -41,6 +43,5 @@
     "jest-circus": "~30.3.0",
     "ts-jest": "~29.4.9",
     "typescript": "~6.0.3"
-  },
-  "packageManager": "yarn@4.13.0"
+  }
 }

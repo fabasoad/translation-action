@@ -8,8 +8,8 @@ Please check if your PR fulfills the following requirements:
 doc.
 - [ ] Tests for the changes have been added (for bug fixes / features).
 - [ ] Docs have been reviewed and added / updated if needed (for bug fixes / features).
-- [ ] Build (`yarn run build`) was run locally and any changes were pushed.
-- [ ] Tests (`yarn test`) has passed locally and any fixes were made for failures.
+- [ ] Build (`make build`) was run locally and any changes were pushed.
+- [ ] Tests (`make test`) has passed locally and any fixes were made for failures.
 
 ## Pull request type
 
