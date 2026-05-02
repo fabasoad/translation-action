@@ -1,3 +1,4 @@
+.claude/settings.local.json
 .nyc_output
 .vscode/*
 !.vscode/settings.json
