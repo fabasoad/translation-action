@@ -34,13 +34,13 @@
     "typed-rest-client": "~2.3.1"
   },
   "devDependencies": {
-    "@aws-sdk/client-translate": "~3.1041.0",
-    "@biomejs/biome": "~2.4.14",
+    "@aws-sdk/client-translate": "~3.1045.0",
+    "@biomejs/biome": "~2.4.15",
     "@types/jest": "~30.0.0",
     "dotenv": "~17.4.2",
     "esbuild": "~0.28.0",
-    "jest": "~30.3.0",
-    "jest-circus": "~30.3.0",
+    "jest": "~30.4.2",
+    "jest-circus": "~30.4.2",
     "ts-jest": "~29.4.9",
     "typescript": "~6.0.3"
   }
