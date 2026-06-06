@@ -1,19 +1,20 @@
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import AwsProvider from '../../providers/AwsProvider'
 import { TranslateClient, TranslateTextCommand } from '@aws-sdk/client-translate'
 
-jest.mock('@aws-sdk/client-translate', () => ({
-  TranslateClient: jest.fn(),
-  TranslateTextCommand: jest.fn().mockImplementation((params) => params),
+vi.mock('@aws-sdk/client-translate', () => ({
+  TranslateClient: vi.fn(),
+  TranslateTextCommand: vi.fn().mockImplementation((params) => params),
 }))
 
 describe('AwsProvider', () => {
-  let mockSend: jest.Mock
+  let mockSend: ReturnType<typeof vi.fn>
   let provider: AwsProvider
 
   beforeEach(() => {
-    mockSend = jest.fn()
+    mockSend = vi.fn()
     // biome-ignore lint/suspicious/noExplicitAny: Required for mocking
-    jest.mocked(TranslateClient).mockImplementation(() => ({ send: mockSend }) as any)
+    vi.mocked(TranslateClient).mockImplementation((() => ({ send: mockSend })) as any)
     provider = new AwsProvider('accessKeyId|secretAccessKey', 'us-east-1')
   })
 

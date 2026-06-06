@@ -15,7 +15,7 @@
     "strict": true,
     "noImplicitAny": false,
     "esModuleInterop": true,
-    "types": ["jest", "node"]
+    "types": ["node"]
   },
   "exclude": ["node_modules", "src/__tests__"]
 }

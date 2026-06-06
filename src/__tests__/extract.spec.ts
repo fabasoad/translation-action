@@ -1,17 +1,18 @@
 import fs from 'node:fs';
 import * as core from '@actions/core';
+import { vi, describe, it, expect, afterEach } from 'vitest';
 import extract from '../extract';
 
-jest.mock('@actions/core');
+vi.mock('@actions/core');
 
 describe('extract', () => {
   afterEach(() => {
-    jest.restoreAllMocks();
+    vi.restoreAllMocks();
   })
 
   it('returns trimmed file content when file exists', () => {
-    jest.spyOn(fs, 'existsSync').mockReturnValue(true);
-    jest.spyOn(fs, 'readFileSync').mockReturnValue('  hello world  ');
+    vi.spyOn(fs, 'existsSync').mockReturnValue(true);
+    vi.spyOn(fs, 'readFileSync').mockReturnValue('  hello world  ');
 
     const result: string = extract('/path/to/file.txt');
 
@@ -22,7 +23,7 @@ describe('extract', () => {
   })
 
   it('returns source string when file does not exist', () => {
-    jest.spyOn(fs, 'existsSync').mockReturnValue(false);
+    vi.spyOn(fs, 'existsSync').mockReturnValue(false);
 
     const result: string = extract('hello world');
 

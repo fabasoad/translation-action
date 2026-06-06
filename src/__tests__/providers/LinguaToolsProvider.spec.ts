@@ -1,18 +1,19 @@
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import LinguaToolsProvider from '../../providers/LinguaToolsProvider';
 import { RestClient } from 'typed-rest-client/RestClient';
 
-jest.mock('typed-rest-client/RestClient', () => ({
-  RestClient: jest.fn(),
+vi.mock('typed-rest-client/RestClient', () => ({
+  RestClient: vi.fn(),
 }))
 
 describe('LinguaToolsProvider', () => {
-  let mockGet: jest.Mock;
+  let mockGet: ReturnType<typeof vi.fn>;
   let provider: LinguaToolsProvider;
 
   beforeEach(() => {
-    mockGet = jest.fn();
+    mockGet = vi.fn();
     // biome-ignore lint/suspicious/noExplicitAny: Required for mocking
-    jest.mocked(RestClient).mockImplementation(() => ({ get: mockGet, create: jest.fn() }) as any);
+    vi.mocked(RestClient).mockImplementation((() => ({ get: mockGet, create: vi.fn() })) as any);
     provider = new LinguaToolsProvider();
   })
 

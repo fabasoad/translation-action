@@ -1,18 +1,19 @@
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import MicrosoftProvider from '../../providers/MicrosoftProvider';
 import { RestClient } from 'typed-rest-client/RestClient';
 
-jest.mock('typed-rest-client/RestClient', () => ({
-  RestClient: jest.fn(),
+vi.mock('typed-rest-client/RestClient', () => ({
+  RestClient: vi.fn(),
 }));
 
 describe('MicrosoftProvider', () => {
-  let mockCreate: jest.Mock;
+  let mockCreate: ReturnType<typeof vi.fn>;
   let provider: MicrosoftProvider;
 
   beforeEach(() => {
-    mockCreate = jest.fn();
+    mockCreate = vi.fn();
     // biome-ignore lint/suspicious/noExplicitAny: Required for mocking
-    jest.mocked(RestClient).mockImplementation(() => ({ get: jest.fn(), create: mockCreate }) as any);
+    vi.mocked(RestClient).mockImplementation((() => ({ get: vi.fn(), create: mockCreate })) as any);
     provider = new MicrosoftProvider('ms-api-key', 'westeurope');
   })
 

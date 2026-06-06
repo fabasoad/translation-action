@@ -1,17 +1,18 @@
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import MyMemoryProvider from '../../providers/MyMemoryProvider';
 import { RestClient } from 'typed-rest-client/RestClient';
 
-jest.mock('typed-rest-client/RestClient', () => ({
-  RestClient: jest.fn(),
+vi.mock('typed-rest-client/RestClient', () => ({
+  RestClient: vi.fn(),
 }))
 
 describe('MyMemoryProvider', () => {
-  let mockGet: jest.Mock;
+  let mockGet: ReturnType<typeof vi.fn>;
 
   beforeEach(() => {
-    mockGet = jest.fn();
+    mockGet = vi.fn();
     // biome-ignore lint/suspicious/noExplicitAny: Required for mocking
-    jest.mocked(RestClient).mockImplementation(() => ({ get: mockGet, create: jest.fn() }) as any);
+    vi.mocked(RestClient).mockImplementation((() => ({ get: mockGet, create: vi.fn() })) as any);
   })
 
   it('translates and returns results sorted by match descending', async () => {
