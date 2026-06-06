@@ -12,7 +12,7 @@ describe('MyMemoryProvider', () => {
   beforeEach(() => {
     mockGet = vi.fn();
     // biome-ignore lint/suspicious/noExplicitAny: Required for mocking
-    vi.mocked(RestClient).mockImplementation((() => ({ get: mockGet, create: vi.fn() })) as any);
+    vi.mocked(RestClient).mockImplementation(class { get = mockGet; create = vi.fn(); } as any);
   })
 
   it('translates and returns results sorted by match descending', async () => {

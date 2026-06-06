@@ -11,6 +11,7 @@ describe('run', () => {
     const mockSetOutput = vi.fn();
     const mockSetFailed = vi.fn();
     const mockTranslate = vi.fn().mockResolvedValue(['translated text']);
+    const mockGetProvider = vi.fn().mockReturnValue({ translate: mockTranslate });
 
     vi.doMock('@actions/core', () => ({
       getInput: vi.fn().mockReturnValue('test'),
@@ -21,7 +22,7 @@ describe('run', () => {
       default: vi.fn().mockReturnValue('source text'),
     }));
     vi.doMock('../providers/ProviderFactory', () => ({
-      default: vi.fn().mockImplementation(() => ({ getProvider: vi.fn().mockReturnValue({ translate: mockTranslate }) })),
+      default: vi.fn().mockImplementation(class { getProvider = mockGetProvider; } as any),
     }));
     vi.doMock('../providers/ProviderBase', async () => vi.importActual('../providers/ProviderBase'));
 
@@ -38,6 +39,7 @@ describe('run', () => {
     const mockSetOutput = vi.fn();
     const mockSetFailed = vi.fn();
     const mockTranslate = vi.fn().mockRejectedValue(new ProviderError(429, 'Rate limited'));
+    const mockGetProvider = vi.fn().mockReturnValue({ translate: mockTranslate });
 
     vi.doMock('@actions/core', () => ({
       getInput: vi.fn().mockReturnValue('test'),
@@ -48,7 +50,7 @@ describe('run', () => {
       default: vi.fn().mockReturnValue('source text'),
     }));
     vi.doMock('../providers/ProviderFactory', () => ({
-      default: vi.fn().mockImplementation(() => ({ getProvider: vi.fn().mockReturnValue({ translate: mockTranslate }) })),
+      default: vi.fn().mockImplementation(class { getProvider = mockGetProvider; } as any),
     }));
 
     await import('../index');
@@ -60,6 +62,7 @@ describe('run', () => {
   it('calls setFailed when a non-ProviderError is thrown from translate', async () => {
     const mockSetFailed = vi.fn();
     const mockTranslate = vi.fn().mockRejectedValue(new Error('Network error'));
+    const mockGetProvider = vi.fn().mockReturnValue({ translate: mockTranslate });
 
     vi.doMock('@actions/core', () => ({
       getInput: vi.fn().mockReturnValue('test'),
@@ -70,7 +73,7 @@ describe('run', () => {
       default: vi.fn().mockReturnValue('source text'),
     }));
     vi.doMock('../providers/ProviderFactory', () => ({
-      default: vi.fn().mockImplementation(() => ({ getProvider: vi.fn().mockReturnValue({ translate: mockTranslate }) })),
+      default: vi.fn().mockImplementation(class { getProvider = mockGetProvider; } as any),
     }));
     vi.doMock('../providers/ProviderBase', async () => vi.importActual('../providers/ProviderBase'));
 
@@ -82,6 +85,9 @@ describe('run', () => {
 
   it('calls setFailed when getProvider throws', async () => {
     const mockSetFailed = vi.fn();
+    const mockGetProvider = vi.fn().mockImplementation(() => {
+      throw new Error('Unsupported provider');
+    });
 
     vi.doMock('@actions/core', () => ({
       getInput: vi.fn().mockReturnValue('test'),
@@ -92,12 +98,8 @@ describe('run', () => {
       default: vi.fn().mockReturnValue('source text'),
     }));
     vi.doMock('../providers/ProviderFactory', () => ({
-      default: vi.fn().mockImplementation(() => ({
-          getProvider: vi.fn().mockImplementation(() => {
-            throw new Error('Unsupported provider');
-          }),
-        })),
-    }))
+      default: vi.fn().mockImplementation(class { getProvider = mockGetProvider; } as any),
+    }));
     vi.doMock('../providers/ProviderBase', async () => vi.importActual('../providers/ProviderBase'));
 
     await import('../index');

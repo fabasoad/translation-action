@@ -4,7 +4,7 @@ import { TranslateClient, TranslateTextCommand } from '@aws-sdk/client-translate
 
 vi.mock('@aws-sdk/client-translate', () => ({
   TranslateClient: vi.fn(),
-  TranslateTextCommand: vi.fn().mockImplementation((params) => params),
+  TranslateTextCommand: vi.fn().mockImplementation(class {} as any),
 }))
 
 describe('AwsProvider', () => {
@@ -14,7 +14,7 @@ describe('AwsProvider', () => {
   beforeEach(() => {
     mockSend = vi.fn()
     // biome-ignore lint/suspicious/noExplicitAny: Required for mocking
-    vi.mocked(TranslateClient).mockImplementation((() => ({ send: mockSend })) as any)
+    vi.mocked(TranslateClient).mockImplementation(class { send = mockSend; } as any)
     provider = new AwsProvider('accessKeyId|secretAccessKey', 'us-east-1')
   })
 

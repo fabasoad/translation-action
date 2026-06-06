@@ -13,7 +13,7 @@ describe('LinguaToolsProvider', () => {
   beforeEach(() => {
     mockGet = vi.fn();
     // biome-ignore lint/suspicious/noExplicitAny: Required for mocking
-    vi.mocked(RestClient).mockImplementation((() => ({ get: mockGet, create: vi.fn() })) as any);
+    vi.mocked(RestClient).mockImplementation(class { get = mockGet; create = vi.fn(); } as any);
     provider = new LinguaToolsProvider();
   })
 

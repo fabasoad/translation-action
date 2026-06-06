@@ -13,7 +13,7 @@ describe('FunTranslationsProvider', () => {
   beforeEach(() => {
     mockCreate = vi.fn();
     // biome-ignore lint/suspicious/noExplicitAny: Required for mocking
-    vi.mocked(RestClient).mockImplementation((() => ({ get: vi.fn(), create: mockCreate })) as any);
+    vi.mocked(RestClient).mockImplementation(class { get = vi.fn(); create = mockCreate; } as any);
     provider = new FunTranslationsProvider('fun-api-key');
   })
 

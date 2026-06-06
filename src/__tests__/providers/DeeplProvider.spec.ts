@@ -13,7 +13,7 @@ describe('DeeplProvider', () => {
   beforeEach(() => {
     mockTranslateText = vi.fn();
     // biome-ignore lint/suspicious/noExplicitAny: Required for mocking
-    vi.mocked(Translator).mockImplementation((() => ({ translateText: mockTranslateText })) as any);
+    vi.mocked(Translator).mockImplementation(class { translateText = mockTranslateText; } as any);
     provider = new DeeplProvider('test-api-key');
   })
 

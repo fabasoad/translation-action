@@ -40,7 +40,7 @@ describe('ProviderBase.api()', () => {
     mockGet = vi.fn();
     mockCreate = vi.fn();
     // biome-ignore lint/suspicious/noExplicitAny: Required for mocking
-    vi.mocked(RestClient).mockImplementation((() => ({ get: mockGet, create: mockCreate })) as any);
+    vi.mocked(RestClient).mockImplementation(class { get = mockGet; create = mockCreate; } as any);
     provider = new TestProvider('https://example.com');
   })
 
@@ -108,7 +108,7 @@ describe('ProviderBase.api()', () => {
 
   it('works without baseUrl', async () => {
     // biome-ignore lint/suspicious/noExplicitAny: Required for mocking
-    vi.mocked(RestClient).mockImplementation((() => ({ get: mockGet, create: mockCreate })) as any);
+    vi.mocked(RestClient).mockImplementation(class { get = mockGet; create = mockCreate; } as any);
     const noBaseProvider = new TestProvider();
     mockGet.mockResolvedValue({ statusCode: 200, result: 'ok' });
 
