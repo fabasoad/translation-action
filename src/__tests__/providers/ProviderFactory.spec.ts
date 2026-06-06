@@ -1,3 +1,4 @@
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import ProviderFactory from '../../providers/ProviderFactory';
 import AwsProvider from '../../providers/AwsProvider';
 import DeeplProvider from '../../providers/DeeplProvider';
@@ -8,14 +9,14 @@ import LinguaToolsProvider from '../../providers/LinguaToolsProvider';
 import MicrosoftProvider from '../../providers/MicrosoftProvider';
 import MyMemoryProvider from '../../providers/MyMemoryProvider';
 
-jest.mock('../../providers/AwsProvider');
-jest.mock('../../providers/DeeplProvider');
-jest.mock('../../providers/GoogleProvider');
-jest.mock('../../providers/FunTranslationsProvider');
-jest.mock('../../providers/LibreTranslateProvider');
-jest.mock('../../providers/LinguaToolsProvider');
-jest.mock('../../providers/MicrosoftProvider');
-jest.mock('../../providers/MyMemoryProvider');
+vi.mock('../../providers/AwsProvider');
+vi.mock('../../providers/DeeplProvider');
+vi.mock('../../providers/GoogleProvider');
+vi.mock('../../providers/FunTranslationsProvider');
+vi.mock('../../providers/LibreTranslateProvider');
+vi.mock('../../providers/LinguaToolsProvider');
+vi.mock('../../providers/MicrosoftProvider');
+vi.mock('../../providers/MyMemoryProvider');
 
 describe('ProviderFactory', () => {
   let factory: ProviderFactory;

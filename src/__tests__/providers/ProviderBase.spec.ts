@@ -1,8 +1,9 @@
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import ProviderBase, { ProviderError, type ApiProps } from '../../providers/ProviderBase';
 import { RestClient } from 'typed-rest-client/RestClient';
 
-jest.mock('typed-rest-client/RestClient', () => ({
-  RestClient: jest.fn(),
+vi.mock('typed-rest-client/RestClient', () => ({
+  RestClient: vi.fn(),
 }));
 
 class TestProvider extends ProviderBase {
@@ -31,15 +32,15 @@ describe('ProviderError', () => {
 })
 
 describe('ProviderBase.api()', () => {
-  let mockGet: jest.Mock;
-  let mockCreate: jest.Mock;
+  let mockGet: ReturnType<typeof vi.fn>;
+  let mockCreate: ReturnType<typeof vi.fn>;
   let provider: TestProvider;
 
   beforeEach(() => {
-    mockGet = jest.fn();
-    mockCreate = jest.fn();
+    mockGet = vi.fn();
+    mockCreate = vi.fn();
     // biome-ignore lint/suspicious/noExplicitAny: Required for mocking
-    jest.mocked(RestClient).mockImplementation(() => ({ get: mockGet, create: mockCreate }) as any);
+    vi.mocked(RestClient).mockImplementation(class { get = mockGet; create = mockCreate; } as any);
     provider = new TestProvider('https://example.com');
   })
 
@@ -107,7 +108,7 @@ describe('ProviderBase.api()', () => {
 
   it('works without baseUrl', async () => {
     // biome-ignore lint/suspicious/noExplicitAny: Required for mocking
-    jest.mocked(RestClient).mockImplementation(() => ({ get: mockGet, create: mockCreate }) as any);
+    vi.mocked(RestClient).mockImplementation(class { get = mockGet; create = mockCreate; } as any);
     const noBaseProvider = new TestProvider();
     mockGet.mockResolvedValue({ statusCode: 200, result: 'ok' });
 

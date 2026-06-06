@@ -1,18 +1,19 @@
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import FunTranslationsProvider from '../../providers/FunTranslationsProvider'
 import { RestClient } from 'typed-rest-client/RestClient'
 
-jest.mock('typed-rest-client/RestClient', () => ({
-  RestClient: jest.fn(),
+vi.mock('typed-rest-client/RestClient', () => ({
+  RestClient: vi.fn(),
 }))
 
 describe('FunTranslationsProvider', () => {
-  let mockCreate: jest.Mock;
+  let mockCreate: ReturnType<typeof vi.fn>;
   let provider: FunTranslationsProvider;
 
   beforeEach(() => {
-    mockCreate = jest.fn();
+    mockCreate = vi.fn();
     // biome-ignore lint/suspicious/noExplicitAny: Required for mocking
-    jest.mocked(RestClient).mockImplementation(() => ({ get: jest.fn(), create: mockCreate }) as any);
+    vi.mocked(RestClient).mockImplementation(class { get = vi.fn(); create = mockCreate; } as any);
     provider = new FunTranslationsProvider('fun-api-key');
   })
 
@@ -28,7 +29,7 @@ describe('FunTranslationsProvider', () => {
   })
 
   it('returns original text when success is undefined', async () => {
-    const warnSpy = jest.spyOn(console, 'warn')
+    const warnSpy = vi.spyOn(console, 'warn')
       .mockImplementation(() => { /* intentional empty block */ });
     mockCreate.mockResolvedValue({
       statusCode: 200,
@@ -43,7 +44,7 @@ describe('FunTranslationsProvider', () => {
   })
 
   it('returns original text when success.total is 0', async () => {
-    const warnSpy = jest.spyOn(console, 'warn')
+    const warnSpy = vi.spyOn(console, 'warn')
       .mockImplementation(() => { /* intentional empty block */ });
     mockCreate.mockResolvedValue({
       statusCode: 200,

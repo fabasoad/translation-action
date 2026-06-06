@@ -1,12 +1,12 @@
 {
   "name": "translation-action",
-  "version": "4.2.3",
+  "version": "4.2.4",
   "description": "This GitHub action translates any text from any language to any language.",
   "main": "dist/index.js",
   "scripts": {
     "build": "esbuild src/index.ts --bundle --platform=node --target=node24 --outfile=dist/index.js",
     "lint": "biome lint --write src",
-    "test": "jest --config=jest.config.json --json --outputFile=jest-report.json --coverage",
+    "test": "vitest run --coverage",
     "clean": "rm -rf coverage && rm -rf temp",
     "clean:unsafe": "rm -f package-lock.json && rm -rf node_modules && rm -rf dist"
   },
@@ -31,17 +31,15 @@
     "cross-fetch": "~4.1.0",
     "deepl-node": "~1.27.0",
     "google-translate-api-x": "~10.7.3",
-    "typed-rest-client": "~2.3.1"
+    "typed-rest-client": "~3.0.0"
   },
   "devDependencies": {
-    "@aws-sdk/client-translate": "~3.1045.0",
+    "@aws-sdk/client-translate": "~3.1063.0",
     "@biomejs/biome": "~2.4.16",
-    "@types/jest": "~30.0.0",
+    "@vitest/coverage-v8": "~4.1.8",
     "dotenv": "~17.4.2",
     "esbuild": "~0.28.0",
-    "jest": "~30.4.2",
-    "jest-circus": "~30.4.2",
-    "ts-jest": "~29.4.11",
-    "typescript": "~6.0.3"
+    "typescript": "~6.0.3",
+    "vitest": "~4.1.8"
   }
 }

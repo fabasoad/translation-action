@@ -6,7 +6,7 @@ on: # yamllint disable-line rule:truthy
     paths:
       - dist/**
       - src/**
-      - jest.config.json
+      - vitest.config.ts
   push:
     branches:
       - main
@@ -17,8 +17,8 @@ defaults:
     shell: sh
 
 jobs:
-  jest:
-    name: Jest
+  vitest:
+    name: Vitest
     uses: fabasoad/reusable-workflows/.github/workflows/wf-js-unit-tests.yml@main
     permissions:
       contents: read

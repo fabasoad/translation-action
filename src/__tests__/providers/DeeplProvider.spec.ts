@@ -1,18 +1,19 @@
+import { vi, describe, it, expect, beforeEach } from 'vitest';
 import DeeplProvider from '../../providers/DeeplProvider';
 import { Translator } from 'deepl-node';
 
-jest.mock('deepl-node', () => ({
-  Translator: jest.fn(),
+vi.mock('deepl-node', () => ({
+  Translator: vi.fn(),
 }))
 
 describe('DeeplProvider', () => {
-  let mockTranslateText: jest.Mock;
+  let mockTranslateText: ReturnType<typeof vi.fn>;
   let provider: DeeplProvider;
 
   beforeEach(() => {
-    mockTranslateText = jest.fn();
+    mockTranslateText = vi.fn();
     // biome-ignore lint/suspicious/noExplicitAny: Required for mocking
-    jest.mocked(Translator).mockImplementation(() => ({ translateText: mockTranslateText }) as any);
+    vi.mocked(Translator).mockImplementation(class { translateText = mockTranslateText; } as any);
     provider = new DeeplProvider('test-api-key');
   })
 
