@@ -34,12 +34,16 @@
     "typed-rest-client": "~3.0.0"
   },
   "devDependencies": {
-    "@aws-sdk/client-translate": "~3.1063.0",
-    "@biomejs/biome": "~2.4.16",
+    "@aws-sdk/client-translate": "~3.1071.0",
+    "@biomejs/biome": "~2.5.0",
     "@vitest/coverage-v8": "~4.1.8",
     "dotenv": "~17.4.2",
-    "esbuild": "~0.28.0",
+    "esbuild": "~0.28.1",
     "typescript": "~6.0.3",
     "vitest": "~4.1.8"
+  },
+  "allowScripts": {
+    "esbuild@0.28.1": true,
+    "fsevents@2.3.3": true
   }
 }
