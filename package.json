@@ -36,11 +36,11 @@
   "devDependencies": {
     "@aws-sdk/client-translate": "~3.1071.0",
     "@biomejs/biome": "~2.5.0",
-    "@vitest/coverage-v8": "~4.1.8",
+    "@vitest/coverage-v8": "~4.1.9",
     "dotenv": "~17.4.2",
     "esbuild": "~0.28.1",
     "typescript": "~6.0.3",
-    "vitest": "~4.1.8"
+    "vitest": "~4.1.9"
   },
   "allowScripts": {
     "esbuild@0.28.1": true,
