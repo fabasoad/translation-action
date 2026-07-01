@@ -52,7 +52,7 @@ jobs:
             api_key: "MYMEMORY_API_KEY" # pragma: allowlist secret
     steps:
       - name: Checkout ${{ github.repository }}
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
       - name: Translate (${{ matrix.provider }}, ${{ matrix.lang }})
         uses: ./
         id: result
