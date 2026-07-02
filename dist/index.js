@@ -20416,7 +20416,6 @@ var require_utils2 = __commonJS({
     "use strict";
     var formats = require_formats();
     var getSideChannel = require_side_channel();
-    var defineProperty = require_es_define_property();
     var has = Object.prototype.hasOwnProperty;
     var isArray = Array.isArray;
     var overflowChannel = getSideChannel();
@@ -20464,18 +20463,6 @@ var require_utils2 = __commonJS({
       }
       return obj;
     };
-    var setProperty = function setProperty2(obj, key, value) {
-      if (key === "__proto__" && defineProperty) {
-        defineProperty(obj, key, {
-          configurable: true,
-          enumerable: true,
-          value,
-          writable: true
-        });
-      } else {
-        obj[key] = value;
-      }
-    };
     var merge2 = function merge3(target, source, options) {
       if (!source) {
         return target;
@@ -20483,10 +20470,7 @@ var require_utils2 = __commonJS({
       if (typeof source !== "object" && typeof source !== "function") {
         if (isArray(target)) {
           var nextIndex = target.length;
-          if (options && typeof options.arrayLimit === "number" && nextIndex >= options.arrayLimit) {
-            if (options.throwOnLimitExceeded) {
-              throw new RangeError("Array limit exceeded. Only " + options.arrayLimit + " element" + (options.arrayLimit === 1 ? "" : "s") + " allowed in an array.");
-            }
+          if (options && typeof options.arrayLimit === "number" && nextIndex > options.arrayLimit) {
             return markOverflow(arrayToObject(target.concat(source), options), nextIndex);
           }
           target[nextIndex] = source;
@@ -20517,9 +20501,6 @@ var require_utils2 = __commonJS({
         }
         var combined = [target].concat(source);
         if (options && typeof options.arrayLimit === "number" && combined.length > options.arrayLimit) {
-          if (options.throwOnLimitExceeded) {
-            throw new RangeError("Array limit exceeded. Only " + options.arrayLimit + " element" + (options.arrayLimit === 1 ? "" : "s") + " allowed in an array.");
-          }
           return markOverflow(arrayToObject(combined, options), combined.length - 1);
         }
         return combined;
@@ -20541,20 +20522,14 @@ var require_utils2 = __commonJS({
             target[i5] = item;
           }
         });
-        if (options && typeof options.arrayLimit === "number" && target.length > options.arrayLimit) {
-          if (options.throwOnLimitExceeded) {
-            throw new RangeError("Array limit exceeded. Only " + options.arrayLimit + " element" + (options.arrayLimit === 1 ? "" : "s") + " allowed in an array.");
-          }
-          return markOverflow(arrayToObject(target, options), target.length - 1);
-        }
         return target;
       }
       return Object.keys(source).reduce(function(acc, key) {
         var value = source[key];
         if (has.call(acc, key)) {
-          setProperty(acc, key, merge3(acc[key], value, options));
+          acc[key] = merge3(acc[key], value, options);
         } else {
-          setProperty(acc, key, value);
+          acc[key] = value;
         }
         if (isOverflow(source) && !isOverflow(acc)) {
           markOverflow(acc, getMaxIndex(source));
@@ -20570,7 +20545,7 @@ var require_utils2 = __commonJS({
     };
     var assign = function assignSingleSource(target, source) {
       return Object.keys(source).reduce(function(acc, key) {
-        setProperty(acc, key, source[key]);
+        acc[key] = source[key];
         return acc;
       }, target);
     };
@@ -20604,13 +20579,6 @@ var require_utils2 = __commonJS({
       var out = "";
       for (var j5 = 0; j5 < string.length; j5 += limit) {
         var segment = string.length >= limit ? string.slice(j5, j5 + limit) : string;
-        if (j5 + limit < string.length) {
-          var last = segment.charCodeAt(segment.length - 1);
-          if (last >= 55296 && last <= 56319) {
-            segment = segment.slice(0, -1);
-            j5 -= 1;
-          }
-        }
         var arr = [];
         for (var i5 = 0; i5 < segment.length; ++i5) {
           var c5 = segment.charCodeAt(i5);
@@ -20640,7 +20608,7 @@ var require_utils2 = __commonJS({
     };
     var compact = function compact2(value) {
       var queue = [{ obj: { o: value }, prop: "o" }];
-      var refs = getSideChannel();
+      var refs = [];
       for (var i5 = 0; i5 < queue.length; ++i5) {
         var item = queue[i5];
         var obj = item.obj[item.prop];
@@ -20648,9 +20616,9 @@ var require_utils2 = __commonJS({
         for (var j5 = 0; j5 < keys.length; ++j5) {
           var key = keys[j5];
           var val = obj[key];
-          if (typeof val === "object" && val !== null && !refs.has(val)) {
+          if (typeof val === "object" && val !== null && refs.indexOf(val) === -1) {
             queue[queue.length] = { obj, prop: key };
-            refs.set(val, true);
+            refs[refs.length] = val;
           }
         }
       }
@@ -20666,11 +20634,8 @@ var require_utils2 = __commonJS({
       }
       return !!(obj.constructor && obj.constructor.isBuffer && obj.constructor.isBuffer(obj));
     };
-    var combine = function combine2(a5, b5, arrayLimit, plainObjects, throwOnLimitExceeded) {
+    var combine = function combine2(a5, b5, arrayLimit, plainObjects) {
       if (isOverflow(a5)) {
-        if (throwOnLimitExceeded) {
-          throw new RangeError("Array limit exceeded. Only " + arrayLimit + " element" + (arrayLimit === 1 ? "" : "s") + " allowed in an array.");
-        }
         var newIndex = getMaxIndex(a5) + 1;
         a5[newIndex] = b5;
         setMaxIndex(a5, newIndex);
@@ -20678,9 +20643,6 @@ var require_utils2 = __commonJS({
       }
       var result = [].concat(a5, b5);
       if (result.length > arrayLimit) {
-        if (throwOnLimitExceeded) {
-          throw new RangeError("Array limit exceeded. Only " + arrayLimit + " element" + (arrayLimit === 1 ? "" : "s") + " allowed in an array.");
-        }
         return markOverflow(arrayToObject(result, { plainObjects }), result.length - 1);
       }
       return result;
@@ -20800,7 +20762,7 @@ var require_stringify = __commonJS({
       }
       if (obj === null) {
         if (strictNullHandling) {
-          return formatter(encoder && !encodeValuesOnly ? encoder(prefix, defaults.encoder, charset, "key", format2) : prefix);
+          return encoder && !encodeValuesOnly ? encoder(prefix, defaults.encoder, charset, "key", format2) : prefix;
         }
         obj = "";
       }
@@ -20818,9 +20780,7 @@ var require_stringify = __commonJS({
       var objKeys;
       if (generateArrayPrefix === "comma" && isArray(obj)) {
         if (encodeValuesOnly && encoder) {
-          obj = utils.maybeMap(obj, function(v) {
-            return v == null ? v : encoder(v);
-          });
+          obj = utils.maybeMap(obj, encoder);
         }
         objKeys = [{ value: obj.length > 0 ? obj.join(",") || null : void 0 }];
       } else if (isArray(filter)) {
@@ -20958,9 +20918,6 @@ var require_stringify = __commonJS({
       var sideChannel = getSideChannel();
       for (var i5 = 0; i5 < objKeys.length; ++i5) {
         var key = objKeys[i5];
-        if (typeof key === "undefined" || key === null) {
-          continue;
-        }
         var value = obj[key];
         if (options.skipNulls && value === null) {
           continue;
@@ -20990,9 +20947,9 @@ var require_stringify = __commonJS({
       var prefix = options.addQueryPrefix === true ? "?" : "";
       if (options.charsetSentinel) {
         if (options.charset === "iso-8859-1") {
-          prefix += "utf8=%26%2310003%3B" + options.delimiter;
+          prefix += "utf8=%26%2310003%3B&";
         } else {
-          prefix += "utf8=%E2%9C%93" + options.delimiter;
+          prefix += "utf8=%E2%9C%93&";
         }
       }
       return joined.length > 0 ? prefix + joined : "";
@@ -21036,19 +20993,8 @@ var require_parse2 = __commonJS({
         return String.fromCharCode(parseInt(numberStr, 10));
       });
     };
-    var parseArrayValue = function(val, options, currentArrayLength, isFlatArrayValue) {
+    var parseArrayValue = function(val, options, currentArrayLength) {
       if (val && typeof val === "string" && options.comma && val.indexOf(",") > -1) {
-        if (isFlatArrayValue && options.throwOnLimitExceeded) {
-          var commaCount = 0;
-          var commaIndex = val.indexOf(",");
-          while (commaIndex > -1) {
-            commaCount += 1;
-            if (commaCount >= options.arrayLimit) {
-              throw new RangeError("Array limit exceeded. Only " + options.arrayLimit + " element" + (options.arrayLimit === 1 ? "" : "s") + " allowed in an array.");
-            }
-            commaIndex = val.indexOf(",", commaIndex + 1);
-          }
-        }
         return val.split(",");
       }
       if (options.throwOnLimitExceeded && currentArrayLength >= options.arrayLimit) {
@@ -21105,8 +21051,7 @@ var require_parse2 = __commonJS({
               parseArrayValue(
                 part.slice(pos + 1),
                 options,
-                isArray(obj[key]) ? obj[key].length : 0,
-                part.indexOf("[]=") === -1
+                isArray(obj[key]) ? obj[key].length : 0
               ),
               function(encodedVal) {
                 return options.decoder(encodedVal, defaults.decoder, charset, "value");
@@ -21121,7 +21066,10 @@ var require_parse2 = __commonJS({
           val = isArray(val) ? [val] : val;
         }
         if (options.comma && isArray(val) && val.length > options.arrayLimit) {
-          val = utils.combine([], val, options.arrayLimit, options.plainObjects, options.throwOnLimitExceeded);
+          if (options.throwOnLimitExceeded) {
+            throw new RangeError("Array limit exceeded. Only " + options.arrayLimit + " element" + (options.arrayLimit === 1 ? "" : "s") + " allowed in an array.");
+          }
+          val = utils.combine([], val, options.arrayLimit, options.plainObjects);
         }
         if (key !== null) {
           var existing = has.call(obj, key);
@@ -21130,8 +21078,7 @@ var require_parse2 = __commonJS({
               obj[key],
               val,
               options.arrayLimit,
-              options.plainObjects,
-              options.throwOnLimitExceeded
+              options.plainObjects
             );
           } else if (!existing || options.duplicates === "last") {
             obj[key] = val;
@@ -21158,8 +21105,7 @@ var require_parse2 = __commonJS({
               [],
               leaf,
               options.arrayLimit,
-              options.plainObjects,
-              options.throwOnLimitExceeded
+              options.plainObjects
             );
           }
         } else {
@@ -21186,8 +21132,8 @@ var require_parse2 = __commonJS({
       }
       return leaf;
     };
-    var splitKeyIntoSegments = function splitKeyIntoSegments2(originalKey, options) {
-      var key = options.allowDots ? originalKey.replace(/\.([^.[]+)/g, "[$1]") : originalKey;
+    var splitKeyIntoSegments = function splitKeyIntoSegments2(givenKey, options) {
+      var key = options.allowDots ? givenKey.replace(/\.([^.[]+)/g, "[$1]") : givenKey;
       if (options.depth <= 0) {
         if (!options.plainObjects && has.call(Object.prototype, key)) {
           if (!options.allowPrototypes) {
@@ -21196,56 +21142,37 @@ var require_parse2 = __commonJS({
         }
         return [key];
       }
-      var segments = [];
-      var first = key.indexOf("[");
-      var parent = first >= 0 ? key.slice(0, first) : key;
+      var brackets = /(\[[^[\]]*])/;
+      var child = /(\[[^[\]]*])/g;
+      var segment = brackets.exec(key);
+      var parent = segment ? key.slice(0, segment.index) : key;
+      var keys = [];
       if (parent) {
         if (!options.plainObjects && has.call(Object.prototype, parent)) {
           if (!options.allowPrototypes) {
             return;
           }
         }
-        segments[segments.length] = parent;
+        keys[keys.length] = parent;
       }
-      var n3 = key.length;
-      var open2 = first;
-      var collected = 0;
-      while (open2 >= 0 && collected < options.depth) {
-        var level = 1;
-        var i5 = open2 + 1;
-        var close = -1;
-        while (i5 < n3 && close < 0) {
-          var cu = key.charCodeAt(i5);
-          if (cu === 91) {
-            level += 1;
-          } else if (cu === 93) {
-            level -= 1;
-            if (level === 0) {
-              close = i5;
-            }
+      var i5 = 0;
+      while ((segment = child.exec(key)) !== null && i5 < options.depth) {
+        i5 += 1;
+        var segmentContent = segment[1].slice(1, -1);
+        if (!options.plainObjects && has.call(Object.prototype, segmentContent)) {
+          if (!options.allowPrototypes) {
+            return;
           }
-          i5 += 1;
         }
-        if (close < 0) {
-          segments[segments.length] = "[" + key.slice(open2) + "]";
-          return segments;
-        }
-        var seg = key.slice(open2, close + 1);
-        var content = seg.slice(1, -1);
-        if (!options.plainObjects && has.call(Object.prototype, content) && !options.allowPrototypes) {
-          return;
-        }
-        segments[segments.length] = seg;
-        collected += 1;
-        open2 = key.indexOf("[", close + 1);
+        keys[keys.length] = segment[1];
       }
-      if (open2 >= 0) {
+      if (segment) {
         if (options.strictDepth === true) {
           throw new RangeError("Input depth exceeded depth option of " + options.depth + " and strictDepth is true");
         }
-        segments[segments.length] = "[" + key.slice(open2) + "]";
+        keys[keys.length] = "[" + key.slice(segment.index) + "]";
       }
-      return segments;
+      return keys;
     };
     var parseKeys = function parseQueryStringKeys(givenKey, val, options, valuesParsed) {
       if (!givenKey) {
