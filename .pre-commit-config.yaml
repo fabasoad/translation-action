@@ -1,7 +1,7 @@
 ---
 default_install_hook_types: ["pre-commit", "pre-push"]
 default_stages: ["pre-commit", "pre-push"]
-exclude: ^dist/.*\.js$
+exclude: ^((dist|node_modules)/.*|pnpm-lock.yaml)$
 minimum_pre_commit_version: 4.4.0
 repos:
   - repo: local
