@@ -1,0 +1,7 @@
+allowBuilds:
+  esbuild: true
+  fsevents: true
+minimumReleaseAgeExclude:
+  - qs@6.15.2
+overrides:
+  qs@>=6.11.1 <=6.15.1: ^6.15.2

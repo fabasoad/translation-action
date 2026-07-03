@@ -29,7 +29,7 @@ repos:
         stages: ["pre-push"]
         # Security
       - id: audit
-        name: npm audit
+        name: pnpm audit
         entry: make audit
         language: unsupported
         pass_filenames: false
@@ -64,7 +64,7 @@ repos:
     hooks:
       - id: osv-scanner
         args:
-          - --lockfile=package-lock.json
+          - --lockfile=pnpm-lock.yaml
         verbose: true
         stages: ["pre-push"]
   # Markdown
