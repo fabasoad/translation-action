@@ -19,7 +19,7 @@ defaults:
 jobs:
   vitest:
     name: Vitest
-    uses: fabasoad/reusable-workflows/.github/workflows/wf-js-unit-tests.yml@eugene/b8752a94
+    uses: fabasoad/reusable-workflows/.github/workflows/wf-js-unit-tests.yml@main
     permissions:
       contents: read
     secrets: inherit # pragma: allowlist secret

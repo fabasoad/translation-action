@@ -4,6 +4,7 @@ import { TranslateClient, TranslateTextCommand } from '@aws-sdk/client-translate
 
 vi.mock('@aws-sdk/client-translate', () => ({
   TranslateClient: vi.fn(),
+  // biome-ignore lint/suspicious/noExplicitAny: Required for mocking
   TranslateTextCommand: vi.fn().mockImplementation(class {} as any),
 }))
 
