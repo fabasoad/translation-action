@@ -8,7 +8,7 @@
     "lint": "biome lint --write src",
     "test": "vitest run --coverage",
     "clean": "rm -rf coverage && rm -rf temp",
-    "clean:unsafe": "rm -f package-lock.json && rm -rf node_modules && rm -rf dist"
+    "clean:unsafe": "rm -f pnpm-lock.yaml && rm -rf node_modules && rm -rf dist"
   },
   "repository": {
     "type": "git",
@@ -32,7 +32,7 @@
     "cross-fetch": "~4.1.0",
     "deepl-node": "~1.27.0",
     "google-translate-api-x": "~10.7.3",
-    "typed-rest-client": "^2.3.1"
+    "typed-rest-client": "~3.0.0"
   },
   "devDependencies": {
     "@biomejs/biome": "~2.5.2",
@@ -42,6 +42,7 @@
     "typescript": "~6.0.3",
     "vitest": "~4.1.9"
   },
+  "packageManager": "pnpm@11.9.0",
   "allowScripts": {
     "esbuild@0.28.1": true,
     "fsevents@2.3.3": true

@@ -14,6 +14,7 @@ jobs:
   js-lint:
     name: JS Lint
     uses: fabasoad/reusable-workflows/.github/workflows/wf-js-lint.yml@main
+
   pre-commit:
     name: Pre-commit
     uses: fabasoad/reusable-workflows/.github/workflows/wf-pre-commit.yml@main

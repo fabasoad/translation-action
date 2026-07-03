@@ -22,6 +22,7 @@ describe('run', () => {
       default: vi.fn().mockReturnValue('source text'),
     }));
     vi.doMock('../providers/ProviderFactory', () => ({
+      // biome-ignore lint/suspicious/noExplicitAny: Required for mocking
       default: vi.fn().mockImplementation(class { getProvider = mockGetProvider; } as any),
     }));
     vi.doMock('../providers/ProviderBase', async () => vi.importActual('../providers/ProviderBase'));
@@ -50,6 +51,7 @@ describe('run', () => {
       default: vi.fn().mockReturnValue('source text'),
     }));
     vi.doMock('../providers/ProviderFactory', () => ({
+      // biome-ignore lint/suspicious/noExplicitAny: Required for mocking
       default: vi.fn().mockImplementation(class { getProvider = mockGetProvider; } as any),
     }));
 
@@ -73,6 +75,7 @@ describe('run', () => {
       default: vi.fn().mockReturnValue('source text'),
     }));
     vi.doMock('../providers/ProviderFactory', () => ({
+      // biome-ignore lint/suspicious/noExplicitAny: Required for mocking
       default: vi.fn().mockImplementation(class { getProvider = mockGetProvider; } as any),
     }));
     vi.doMock('../providers/ProviderBase', async () => vi.importActual('../providers/ProviderBase'));
@@ -98,6 +101,7 @@ describe('run', () => {
       default: vi.fn().mockReturnValue('source text'),
     }));
     vi.doMock('../providers/ProviderFactory', () => ({
+      // biome-ignore lint/suspicious/noExplicitAny: Required for mocking
       default: vi.fn().mockImplementation(class { getProvider = mockGetProvider; } as any),
     }));
     vi.doMock('../providers/ProviderBase', async () => vi.importActual('../providers/ProviderBase'));
