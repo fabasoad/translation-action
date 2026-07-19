@@ -28,7 +28,7 @@
   "homepage": "https://github.com/fabasoad/translation-action#readme",
   "dependencies": {
     "@actions/core": "~3.0.1",
-    "@aws-sdk/client-translate": "~3.1077.0",
+    "@aws-sdk/client-translate": "~3.1090.0",
     "cross-fetch": "~4.1.0",
     "deepl-node": "~1.27.0",
     "google-translate-api-x": "~10.7.3",
@@ -39,12 +39,12 @@
     "@vitest/coverage-v8": "~4.1.10",
     "dotenv": "~17.4.2",
     "esbuild": "~0.28.1",
-    "typescript": "~6.0.3",
+    "typescript": "~7.0.2",
     "vitest": "~4.1.10"
   },
-  "packageManager": "pnpm@11.9.0",
   "allowScripts": {
     "esbuild@0.28.1": true,
     "fsevents@2.3.3": true
-  }
+  },
+  "packageManager": "pnpm@11.15.0"
 }
