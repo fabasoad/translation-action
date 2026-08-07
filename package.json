@@ -28,7 +28,7 @@
   "homepage": "https://github.com/fabasoad/translation-action#readme",
   "dependencies": {
     "@actions/core": "~3.0.1",
-    "@aws-sdk/client-translate": "~3.1090.0",
+    "@aws-sdk/client-translate": "~3.1104.0",
     "cross-fetch": "~4.1.0",
     "deepl-node": "~1.27.0",
     "google-translate-api-x": "~10.7.3",
