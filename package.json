@@ -35,12 +35,12 @@
     "typed-rest-client": "~3.0.0"
   },
   "devDependencies": {
-    "@biomejs/biome": "~2.5.8",
-    "@vitest/coverage-v8": "~4.1.10",
+    "@biomejs/biome": "~2.5.9",
+    "@vitest/coverage-v8": "~4.1.11",
     "dotenv": "~17.4.2",
     "esbuild": "~0.28.2",
     "typescript": "~7.0.2",
-    "vitest": "~4.1.10"
+    "vitest": "~4.1.11"
   },
   "allowScripts": {
     "esbuild@0.28.1": true,
