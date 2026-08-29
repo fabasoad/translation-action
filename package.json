@@ -1,6 +1,6 @@
 {
   "name": "translation-action",
-  "version": "4.2.7",
+  "version": "4.2.8",
   "description": "This GitHub action translates any text from any language to any language.",
   "main": "dist/index.js",
   "scripts": {
