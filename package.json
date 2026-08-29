@@ -1,6 +1,6 @@
 {
   "name": "translation-action",
-  "version": "4.2.7",
+  "version": "4.2.8",
   "description": "This GitHub action translates any text from any language to any language.",
   "main": "dist/index.js",
   "scripts": {
@@ -28,7 +28,7 @@
   "homepage": "https://github.com/fabasoad/translation-action#readme",
   "dependencies": {
     "@actions/core": "~3.0.1",
-    "@aws-sdk/client-translate": "~3.1116.0",
+    "@aws-sdk/client-translate": "~3.1120.0",
     "cross-fetch": "~4.1.0",
     "deepl-node": "~1.28.0",
     "google-translate-api-x": "~10.7.3",
@@ -46,5 +46,5 @@
     "esbuild@0.28.1": true,
     "fsevents@2.3.3": true
   },
-  "packageManager": "pnpm@11.23.0"
+  "packageManager": "pnpm@11.24.0"
 }
