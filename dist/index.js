@@ -20466,9 +20466,9 @@ var require_side_channel = __commonJS({
   }
 });
 
-// node_modules/.pnpm/qs@6.15.3/node_modules/qs/lib/formats.js
+// node_modules/.pnpm/qs@6.16.0/node_modules/qs/lib/formats.js
 var require_formats = __commonJS({
-  "node_modules/.pnpm/qs@6.15.3/node_modules/qs/lib/formats.js"(exports2, module2) {
+  "node_modules/.pnpm/qs@6.16.0/node_modules/qs/lib/formats.js"(exports2, module2) {
     "use strict";
     var replace = String.prototype.replace;
     var percentTwenties = /%20/g;
@@ -20492,9 +20492,9 @@ var require_formats = __commonJS({
   }
 });
 
-// node_modules/.pnpm/qs@6.15.3/node_modules/qs/lib/utils.js
+// node_modules/.pnpm/qs@6.16.0/node_modules/qs/lib/utils.js
 var require_utils2 = __commonJS({
-  "node_modules/.pnpm/qs@6.15.3/node_modules/qs/lib/utils.js"(exports2, module2) {
+  "node_modules/.pnpm/qs@6.16.0/node_modules/qs/lib/utils.js"(exports2, module2) {
     "use strict";
     var formats = require_formats();
     var getSideChannel = require_side_channel();
@@ -20746,15 +20746,19 @@ var require_utils2 = __commonJS({
       if (!obj || typeof obj !== "object") {
         return false;
       }
-      return !!(obj.constructor && obj.constructor.isBuffer && obj.constructor.isBuffer(obj));
+      return !!(obj.constructor && typeof obj.constructor.isBuffer === "function" && obj.constructor.isBuffer(obj));
     };
     var combine = function combine2(a5, b5, arrayLimit, plainObjects, throwOnLimitExceeded) {
       if (isOverflow(a5)) {
         if (throwOnLimitExceeded) {
           throw new RangeError("Array limit exceeded. Only " + arrayLimit + " element" + (arrayLimit === 1 ? "" : "s") + " allowed in an array.");
         }
-        var newIndex = getMaxIndex(a5) + 1;
-        a5[newIndex] = b5;
+        var bValues = isArray(b5) ? b5 : [b5];
+        var newIndex = getMaxIndex(a5);
+        for (var i5 = 0; i5 < bValues.length; ++i5) {
+          newIndex += 1;
+          a5[newIndex] = bValues[i5];
+        }
         setMaxIndex(a5, newIndex);
         return a5;
       }
@@ -20794,9 +20798,9 @@ var require_utils2 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/qs@6.15.3/node_modules/qs/lib/stringify.js
+// node_modules/.pnpm/qs@6.16.0/node_modules/qs/lib/stringify.js
 var require_stringify = __commonJS({
-  "node_modules/.pnpm/qs@6.15.3/node_modules/qs/lib/stringify.js"(exports2, module2) {
+  "node_modules/.pnpm/qs@6.16.0/node_modules/qs/lib/stringify.js"(exports2, module2) {
     "use strict";
     var getSideChannel = require_side_channel();
     var utils = require_utils2();
@@ -20830,6 +20834,7 @@ var require_stringify = __commonJS({
       charsetSentinel: false,
       commaRoundTrip: false,
       delimiter: "&",
+      depth: Infinity,
       encode: true,
       encodeDotInKeys: false,
       encoder: utils.encode,
@@ -20849,8 +20854,11 @@ var require_stringify = __commonJS({
       return typeof v === "string" || typeof v === "number" || typeof v === "boolean" || typeof v === "symbol" || typeof v === "bigint";
     };
     var sentinel = {};
-    var stringify = function stringify2(object, prefix, generateArrayPrefix, commaRoundTrip, allowEmptyArrays, strictNullHandling, skipNulls, encodeDotInKeys, encoder2, filter, sort, allowDots, serializeDate, format2, formatter, encodeValuesOnly, charset, sideChannel) {
+    var stringify = function stringify2(object, prefix, generateArrayPrefix, commaRoundTrip, allowEmptyArrays, strictNullHandling, skipNulls, encodeDotInKeys, encoder2, filter, sort, allowDots, serializeDate, format2, formatter, encodeValuesOnly, charset, sideChannel, depth, currentDepth) {
       var obj = object;
+      if (currentDepth > depth) {
+        throw new RangeError("Input depth exceeded depth option of " + depth);
+      }
       var tmpSc = sideChannel;
       var step = 0;
       var findFlag = false;
@@ -20868,9 +20876,8 @@ var require_stringify = __commonJS({
           step = 0;
         }
       }
-      if (typeof filter === "function") {
-        obj = filter(prefix, obj);
-      } else if (obj instanceof Date) {
+      obj = typeof filter === "function" ? filter(prefix, obj) : obj;
+      if (obj instanceof Date) {
         obj = serializeDate(obj);
       } else if (generateArrayPrefix === "comma" && isArray(obj)) {
         obj = utils.maybeMap(obj, function(value2) {
@@ -20913,7 +20920,7 @@ var require_stringify = __commonJS({
       }
       var encodedPrefix = encodeDotInKeys ? String(prefix).replace(/\./g, "%2E") : String(prefix);
       var adjustedPrefix = commaRoundTrip && isArray(obj) && obj.length === 1 ? encodedPrefix + "[]" : encodedPrefix;
-      if (allowEmptyArrays && isArray(obj) && obj.length === 0) {
+      if (allowEmptyArrays && isArray(obj) && obj.length === 0 && Object.keys(obj).length === 0) {
         return adjustedPrefix + "[]";
       }
       for (var j5 = 0; j5 < objKeys.length; ++j5) {
@@ -20945,7 +20952,9 @@ var require_stringify = __commonJS({
           formatter,
           encodeValuesOnly,
           charset,
-          valueSideChannel
+          valueSideChannel,
+          depth,
+          currentDepth + 1
         ));
       }
       return values;
@@ -21000,6 +21009,7 @@ var require_stringify = __commonJS({
         charsetSentinel: typeof opts.charsetSentinel === "boolean" ? opts.charsetSentinel : defaults.charsetSentinel,
         commaRoundTrip: !!opts.commaRoundTrip,
         delimiter: typeof opts.delimiter === "undefined" ? defaults.delimiter : opts.delimiter,
+        depth: typeof opts.depth === "number" ? opts.depth : defaults.depth,
         encode: typeof opts.encode === "boolean" ? opts.encode : defaults.encode,
         encodeDotInKeys: typeof opts.encodeDotInKeys === "boolean" ? opts.encodeDotInKeys : defaults.encodeDotInKeys,
         encoder: typeof opts.encoder === "function" ? opts.encoder : defaults.encoder,
@@ -21047,9 +21057,10 @@ var require_stringify = __commonJS({
         if (options.skipNulls && value === null) {
           continue;
         }
+        var encodedKey = options.encodeDotInKeys ? String(key).replace(/\./g, "%2E") : String(key);
         pushToArray(keys, stringify(
           value,
-          key,
+          encodedKey,
           generateArrayPrefix,
           commaRoundTrip,
           options.allowEmptyArrays,
@@ -21065,7 +21076,9 @@ var require_stringify = __commonJS({
           options.formatter,
           options.encodeValuesOnly,
           options.charset,
-          sideChannel
+          sideChannel,
+          options.depth,
+          0
         ));
       }
       var joined = keys.join(options.delimiter);
@@ -21082,9 +21095,9 @@ var require_stringify = __commonJS({
   }
 });
 
-// node_modules/.pnpm/qs@6.15.3/node_modules/qs/lib/parse.js
+// node_modules/.pnpm/qs@6.16.0/node_modules/qs/lib/parse.js
 var require_parse2 = __commonJS({
-  "node_modules/.pnpm/qs@6.15.3/node_modules/qs/lib/parse.js"(exports2, module2) {
+  "node_modules/.pnpm/qs@6.16.0/node_modules/qs/lib/parse.js"(exports2, module2) {
     "use strict";
     var utils = require_utils2();
     var has = Object.prototype.hasOwnProperty;
@@ -21118,9 +21131,9 @@ var require_parse2 = __commonJS({
         return String.fromCharCode(parseInt(numberStr, 10));
       });
     };
-    var parseArrayValue = function(val, options, currentArrayLength, isFlatArrayValue) {
+    var parseArrayValue = function(val, options, currentArrayLength) {
       if (val && typeof val === "string" && options.comma && val.indexOf(",") > -1) {
-        if (isFlatArrayValue && options.throwOnLimitExceeded) {
+        if (options.throwOnLimitExceeded) {
           var commaCount = 0;
           var commaIndex = val.indexOf(",");
           while (commaIndex > -1) {
@@ -21187,8 +21200,7 @@ var require_parse2 = __commonJS({
               parseArrayValue(
                 part.slice(pos2 + 1),
                 options,
-                isArray(obj[key]) ? obj[key].length : 0,
-                part.indexOf("[]=") === -1
+                isArray(obj[key]) ? obj[key].length : 0
               ),
               function(encodedVal) {
                 return options.decoder(encodedVal, defaults.decoder, charset, "value");
@@ -21411,9 +21423,9 @@ var require_parse2 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/qs@6.15.3/node_modules/qs/lib/index.js
+// node_modules/.pnpm/qs@6.16.0/node_modules/qs/lib/index.js
 var require_lib = __commonJS({
-  "node_modules/.pnpm/qs@6.15.3/node_modules/qs/lib/index.js"(exports2, module2) {
+  "node_modules/.pnpm/qs@6.16.0/node_modules/qs/lib/index.js"(exports2, module2) {
     "use strict";
     var stringify = require_stringify();
     var parse = require_parse2();
@@ -22268,9 +22280,9 @@ var require_RestClient = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3_supports-color@7.2.0__supports-color@7.2.0/node_modules/deepl-node/dist/errors.js
+// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/errors.js
 var require_errors2 = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3_supports-color@7.2.0__supports-color@7.2.0/node_modules/deepl-node/dist/errors.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/errors.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.ArgumentError = exports2.DocumentDeminificationError = exports2.DocumentMinificationError = exports2.DocumentNotReadyError = exports2.GlossaryNotFoundError = exports2.DocumentTranslationError = exports2.ConnectionError = exports2.TooManyRequestsError = exports2.QuotaExceededError = exports2.AuthorizationError = exports2.DeepLError = void 0;
@@ -22576,9 +22588,9 @@ var require_loglevel = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3_supports-color@7.2.0__supports-color@7.2.0/node_modules/deepl-node/dist/utils.js
+// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/utils.js
 var require_utils3 = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3_supports-color@7.2.0__supports-color@7.2.0/node_modules/deepl-node/dist/utils.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/utils.js"(exports2) {
     "use strict";
     var __importDefault = exports2 && exports2.__importDefault || function(mod) {
       return mod && mod.__esModule ? mod : { "default": mod };
@@ -22855,9 +22867,9 @@ var require_utils3 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3_supports-color@7.2.0__supports-color@7.2.0/node_modules/deepl-node/dist/glossaryEntries.js
+// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/glossaryEntries.js
 var require_glossaryEntries = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3_supports-color@7.2.0__supports-color@7.2.0/node_modules/deepl-node/dist/glossaryEntries.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/glossaryEntries.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.GlossaryEntries = void 0;
@@ -22952,9 +22964,9 @@ var require_glossaryEntries = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3_supports-color@7.2.0__supports-color@7.2.0/node_modules/deepl-node/dist/types.js
+// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/types.js
 var require_types = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3_supports-color@7.2.0__supports-color@7.2.0/node_modules/deepl-node/dist/types.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/types.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
   }
@@ -32545,9 +32557,9 @@ var require_ms = __commonJS({
   }
 });
 
-// node_modules/.pnpm/debug@4.4.3_supports-color@7.2.0/node_modules/debug/src/common.js
+// node_modules/.pnpm/debug@4.4.3/node_modules/debug/src/common.js
 var require_common = __commonJS({
-  "node_modules/.pnpm/debug@4.4.3_supports-color@7.2.0/node_modules/debug/src/common.js"(exports2, module2) {
+  "node_modules/.pnpm/debug@4.4.3/node_modules/debug/src/common.js"(exports2, module2) {
     function setup(env2) {
       createDebug.debug = createDebug;
       createDebug.default = createDebug;
@@ -32722,9 +32734,9 @@ var require_common = __commonJS({
   }
 });
 
-// node_modules/.pnpm/debug@4.4.3_supports-color@7.2.0/node_modules/debug/src/browser.js
+// node_modules/.pnpm/debug@4.4.3/node_modules/debug/src/browser.js
 var require_browser = __commonJS({
-  "node_modules/.pnpm/debug@4.4.3_supports-color@7.2.0/node_modules/debug/src/browser.js"(exports2, module2) {
+  "node_modules/.pnpm/debug@4.4.3/node_modules/debug/src/browser.js"(exports2, module2) {
     exports2.formatArgs = formatArgs;
     exports2.save = save;
     exports2.load = load;
@@ -32892,124 +32904,9 @@ var require_browser = __commonJS({
   }
 });
 
-// node_modules/.pnpm/has-flag@4.0.0/node_modules/has-flag/index.js
-var require_has_flag = __commonJS({
-  "node_modules/.pnpm/has-flag@4.0.0/node_modules/has-flag/index.js"(exports2, module2) {
-    "use strict";
-    module2.exports = (flag, argv = process.argv) => {
-      const prefix = flag.startsWith("-") ? "" : flag.length === 1 ? "-" : "--";
-      const position = argv.indexOf(prefix + flag);
-      const terminatorPosition = argv.indexOf("--");
-      return position !== -1 && (terminatorPosition === -1 || position < terminatorPosition);
-    };
-  }
-});
-
-// node_modules/.pnpm/supports-color@7.2.0/node_modules/supports-color/index.js
-var require_supports_color = __commonJS({
-  "node_modules/.pnpm/supports-color@7.2.0/node_modules/supports-color/index.js"(exports2, module2) {
-    "use strict";
-    var os5 = require("os");
-    var tty = require("tty");
-    var hasFlag = require_has_flag();
-    var { env: env2 } = process;
-    var forceColor;
-    if (hasFlag("no-color") || hasFlag("no-colors") || hasFlag("color=false") || hasFlag("color=never")) {
-      forceColor = 0;
-    } else if (hasFlag("color") || hasFlag("colors") || hasFlag("color=true") || hasFlag("color=always")) {
-      forceColor = 1;
-    }
-    if ("FORCE_COLOR" in env2) {
-      if (env2.FORCE_COLOR === "true") {
-        forceColor = 1;
-      } else if (env2.FORCE_COLOR === "false") {
-        forceColor = 0;
-      } else {
-        forceColor = env2.FORCE_COLOR.length === 0 ? 1 : Math.min(parseInt(env2.FORCE_COLOR, 10), 3);
-      }
-    }
-    function translateLevel(level) {
-      if (level === 0) {
-        return false;
-      }
-      return {
-        level,
-        hasBasic: true,
-        has256: level >= 2,
-        has16m: level >= 3
-      };
-    }
-    function supportsColor(haveStream, streamIsTTY) {
-      if (forceColor === 0) {
-        return 0;
-      }
-      if (hasFlag("color=16m") || hasFlag("color=full") || hasFlag("color=truecolor")) {
-        return 3;
-      }
-      if (hasFlag("color=256")) {
-        return 2;
-      }
-      if (haveStream && !streamIsTTY && forceColor === void 0) {
-        return 0;
-      }
-      const min = forceColor || 0;
-      if (env2.TERM === "dumb") {
-        return min;
-      }
-      if (process.platform === "win32") {
-        const osRelease = os5.release().split(".");
-        if (Number(osRelease[0]) >= 10 && Number(osRelease[2]) >= 10586) {
-          return Number(osRelease[2]) >= 14931 ? 3 : 2;
-        }
-        return 1;
-      }
-      if ("CI" in env2) {
-        if (["TRAVIS", "CIRCLECI", "APPVEYOR", "GITLAB_CI", "GITHUB_ACTIONS", "BUILDKITE"].some((sign2) => sign2 in env2) || env2.CI_NAME === "codeship") {
-          return 1;
-        }
-        return min;
-      }
-      if ("TEAMCITY_VERSION" in env2) {
-        return /^(9\.(0*[1-9]\d*)\.|\d{2,}\.)/.test(env2.TEAMCITY_VERSION) ? 1 : 0;
-      }
-      if (env2.COLORTERM === "truecolor") {
-        return 3;
-      }
-      if ("TERM_PROGRAM" in env2) {
-        const version = parseInt((env2.TERM_PROGRAM_VERSION || "").split(".")[0], 10);
-        switch (env2.TERM_PROGRAM) {
-          case "iTerm.app":
-            return version >= 3 ? 3 : 2;
-          case "Apple_Terminal":
-            return 2;
-        }
-      }
-      if (/-256(color)?$/i.test(env2.TERM)) {
-        return 2;
-      }
-      if (/^screen|^xterm|^vt100|^vt220|^rxvt|color|ansi|cygwin|linux/i.test(env2.TERM)) {
-        return 1;
-      }
-      if ("COLORTERM" in env2) {
-        return 1;
-      }
-      return min;
-    }
-    function getSupportLevel(stream) {
-      const level = supportsColor(stream, stream && stream.isTTY);
-      return translateLevel(level);
-    }
-    module2.exports = {
-      supportsColor: getSupportLevel,
-      stdout: translateLevel(supportsColor(true, tty.isatty(1))),
-      stderr: translateLevel(supportsColor(true, tty.isatty(2)))
-    };
-  }
-});
-
-// node_modules/.pnpm/debug@4.4.3_supports-color@7.2.0/node_modules/debug/src/node.js
+// node_modules/.pnpm/debug@4.4.3/node_modules/debug/src/node.js
 var require_node = __commonJS({
-  "node_modules/.pnpm/debug@4.4.3_supports-color@7.2.0/node_modules/debug/src/node.js"(exports2, module2) {
+  "node_modules/.pnpm/debug@4.4.3/node_modules/debug/src/node.js"(exports2, module2) {
     var tty = require("tty");
     var util = require("util");
     exports2.init = init;
@@ -33025,7 +32922,7 @@ var require_node = __commonJS({
     );
     exports2.colors = [6, 2, 3, 4, 5, 1];
     try {
-      const supportsColor = require_supports_color();
+      const supportsColor = require("supports-color");
       if (supportsColor && (supportsColor.stderr || supportsColor).level >= 2) {
         exports2.colors = [
           20,
@@ -33181,9 +33078,9 @@ var require_node = __commonJS({
   }
 });
 
-// node_modules/.pnpm/debug@4.4.3_supports-color@7.2.0/node_modules/debug/src/index.js
+// node_modules/.pnpm/debug@4.4.3/node_modules/debug/src/index.js
 var require_src = __commonJS({
-  "node_modules/.pnpm/debug@4.4.3_supports-color@7.2.0/node_modules/debug/src/index.js"(exports2, module2) {
+  "node_modules/.pnpm/debug@4.4.3/node_modules/debug/src/index.js"(exports2, module2) {
     if (typeof process === "undefined" || process.type === "renderer" || process.browser === true || process.__nwjs) {
       module2.exports = require_browser();
     } else {
@@ -33192,9 +33089,9 @@ var require_src = __commonJS({
   }
 });
 
-// node_modules/.pnpm/agent-base@6.0.2_supports-color@7.2.0/node_modules/agent-base/dist/src/promisify.js
+// node_modules/.pnpm/agent-base@6.0.2/node_modules/agent-base/dist/src/promisify.js
 var require_promisify = __commonJS({
-  "node_modules/.pnpm/agent-base@6.0.2_supports-color@7.2.0/node_modules/agent-base/dist/src/promisify.js"(exports2) {
+  "node_modules/.pnpm/agent-base@6.0.2/node_modules/agent-base/dist/src/promisify.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     function promisify(fn) {
@@ -33214,9 +33111,9 @@ var require_promisify = __commonJS({
   }
 });
 
-// node_modules/.pnpm/agent-base@6.0.2_supports-color@7.2.0/node_modules/agent-base/dist/src/index.js
+// node_modules/.pnpm/agent-base@6.0.2/node_modules/agent-base/dist/src/index.js
 var require_src2 = __commonJS({
-  "node_modules/.pnpm/agent-base@6.0.2_supports-color@7.2.0/node_modules/agent-base/dist/src/index.js"(exports2, module2) {
+  "node_modules/.pnpm/agent-base@6.0.2/node_modules/agent-base/dist/src/index.js"(exports2, module2) {
     "use strict";
     var __importDefault = exports2 && exports2.__importDefault || function(mod) {
       return mod && mod.__esModule ? mod : { "default": mod };
@@ -33397,9 +33294,9 @@ var require_src2 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/https-proxy-agent@5.0.1_supports-color@7.2.0/node_modules/https-proxy-agent/dist/parse-proxy-response.js
+// node_modules/.pnpm/https-proxy-agent@5.0.1/node_modules/https-proxy-agent/dist/parse-proxy-response.js
 var require_parse_proxy_response = __commonJS({
-  "node_modules/.pnpm/https-proxy-agent@5.0.1_supports-color@7.2.0/node_modules/https-proxy-agent/dist/parse-proxy-response.js"(exports2) {
+  "node_modules/.pnpm/https-proxy-agent@5.0.1/node_modules/https-proxy-agent/dist/parse-proxy-response.js"(exports2) {
     "use strict";
     var __importDefault = exports2 && exports2.__importDefault || function(mod) {
       return mod && mod.__esModule ? mod : { "default": mod };
@@ -33463,9 +33360,9 @@ var require_parse_proxy_response = __commonJS({
   }
 });
 
-// node_modules/.pnpm/https-proxy-agent@5.0.1_supports-color@7.2.0/node_modules/https-proxy-agent/dist/agent.js
+// node_modules/.pnpm/https-proxy-agent@5.0.1/node_modules/https-proxy-agent/dist/agent.js
 var require_agent2 = __commonJS({
-  "node_modules/.pnpm/https-proxy-agent@5.0.1_supports-color@7.2.0/node_modules/https-proxy-agent/dist/agent.js"(exports2) {
+  "node_modules/.pnpm/https-proxy-agent@5.0.1/node_modules/https-proxy-agent/dist/agent.js"(exports2) {
     "use strict";
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
@@ -33623,9 +33520,9 @@ var require_agent2 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/https-proxy-agent@5.0.1_supports-color@7.2.0/node_modules/https-proxy-agent/dist/index.js
+// node_modules/.pnpm/https-proxy-agent@5.0.1/node_modules/https-proxy-agent/dist/index.js
 var require_dist = __commonJS({
-  "node_modules/.pnpm/https-proxy-agent@5.0.1_supports-color@7.2.0/node_modules/https-proxy-agent/dist/index.js"(exports2, module2) {
+  "node_modules/.pnpm/https-proxy-agent@5.0.1/node_modules/https-proxy-agent/dist/index.js"(exports2, module2) {
     "use strict";
     var __importDefault = exports2 && exports2.__importDefault || function(mod) {
       return mod && mod.__esModule ? mod : { "default": mod };
@@ -33642,9 +33539,9 @@ var require_dist = __commonJS({
   }
 });
 
-// node_modules/.pnpm/follow-redirects@1.16.0_debug@4.4.3_supports-color@7.2.0_/node_modules/follow-redirects/debug.js
+// node_modules/.pnpm/follow-redirects@1.16.0_debug@4.4.3/node_modules/follow-redirects/debug.js
 var require_debug = __commonJS({
-  "node_modules/.pnpm/follow-redirects@1.16.0_debug@4.4.3_supports-color@7.2.0_/node_modules/follow-redirects/debug.js"(exports2, module2) {
+  "node_modules/.pnpm/follow-redirects@1.16.0_debug@4.4.3/node_modules/follow-redirects/debug.js"(exports2, module2) {
     var debug2;
     module2.exports = function() {
       if (!debug2) {
@@ -33662,9 +33559,9 @@ var require_debug = __commonJS({
   }
 });
 
-// node_modules/.pnpm/follow-redirects@1.16.0_debug@4.4.3_supports-color@7.2.0_/node_modules/follow-redirects/index.js
+// node_modules/.pnpm/follow-redirects@1.16.0_debug@4.4.3/node_modules/follow-redirects/index.js
 var require_follow_redirects = __commonJS({
-  "node_modules/.pnpm/follow-redirects@1.16.0_debug@4.4.3_supports-color@7.2.0_/node_modules/follow-redirects/index.js"(exports2, module2) {
+  "node_modules/.pnpm/follow-redirects@1.16.0_debug@4.4.3/node_modules/follow-redirects/index.js"(exports2, module2) {
     var url = require("url");
     var URL2 = url.URL;
     var http = require("http");
@@ -34173,9 +34070,9 @@ var require_follow_redirects = __commonJS({
   }
 });
 
-// node_modules/.pnpm/axios@1.20.0_debug@4.4.3_supports-color@7.2.0__supports-color@7.2.0/node_modules/axios/dist/node/axios.cjs
+// node_modules/.pnpm/axios@1.20.0_debug@4.4.3/node_modules/axios/dist/node/axios.cjs
 var require_axios = __commonJS({
-  "node_modules/.pnpm/axios@1.20.0_debug@4.4.3_supports-color@7.2.0__supports-color@7.2.0/node_modules/axios/dist/node/axios.cjs"(exports2, module2) {
+  "node_modules/.pnpm/axios@1.20.0_debug@4.4.3/node_modules/axios/dist/node/axios.cjs"(exports2, module2) {
     "use strict";
     var FormData$1 = require_form_data();
     var crypto3 = require("crypto");
@@ -39669,9 +39566,9 @@ var require_form_data2 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3_supports-color@7.2.0__supports-color@7.2.0/node_modules/deepl-node/dist/client.js
+// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/client.js
 var require_client2 = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3_supports-color@7.2.0__supports-color@7.2.0/node_modules/deepl-node/dist/client.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/client.js"(exports2) {
     "use strict";
     var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m3, k5, k22) {
       if (k22 === void 0) k22 = k5;
@@ -39894,9 +39791,9 @@ var require_client2 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3_supports-color@7.2.0__supports-color@7.2.0/node_modules/deepl-node/dist/parsing.js
+// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/parsing.js
 var require_parsing = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3_supports-color@7.2.0__supports-color@7.2.0/node_modules/deepl-node/dist/parsing.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/parsing.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.parseTranslationMemoryJob = exports2.parseTranslationMemoryExport = exports2.parseTranslationMemoryImport = exports2.parseTranslationMemorySegments = exports2.parseTranslationMemoryInfoList = exports2.parseTranslationMemoryInfoJson = exports2.parseTranslationMemoryInfo = exports2.parseStyleRuleInfoList = exports2.parseStyleRuleInfo = exports2.parseCustomInstruction = exports2.parseDocumentHandle = exports2.parseGlossaryLanguagePairArray = exports2.parseLanguageArray = exports2.parseWriteResultArray = exports2.parseTextResultArray = exports2.parseUsage = exports2.parseDocumentStatus = exports2.parseGlossaryInfoList = exports2.parseMultilingualGlossaryInfo = exports2.parseGlossaryInfo = exports2.parseListMultilingualGlossaries = exports2.parseMultilingualGlossaryDictionaryEntries = exports2.parseMultilingualGlossaryDictionaryInfo = void 0;
@@ -43024,9 +42921,9 @@ var require_adm_zip = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3_supports-color@7.2.0__supports-color@7.2.0/node_modules/deepl-node/dist/fsHelper.js
+// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/fsHelper.js
 var require_fsHelper = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3_supports-color@7.2.0__supports-color@7.2.0/node_modules/deepl-node/dist/fsHelper.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/fsHelper.js"(exports2) {
     "use strict";
     var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m3, k5, k22) {
       if (k22 === void 0) k22 = k5;
@@ -43103,9 +43000,9 @@ var require_fsHelper = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3_supports-color@7.2.0__supports-color@7.2.0/node_modules/deepl-node/dist/documentMinifier.js
+// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/documentMinifier.js
 var require_documentMinifier = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3_supports-color@7.2.0__supports-color@7.2.0/node_modules/deepl-node/dist/documentMinifier.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/documentMinifier.js"(exports2) {
     "use strict";
     var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m3, k5, k22) {
       if (k22 === void 0) k22 = k5;
@@ -43401,9 +43298,9 @@ var require_documentMinifier = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3_supports-color@7.2.0__supports-color@7.2.0/node_modules/deepl-node/dist/translator.js
+// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/translator.js
 var require_translator = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3_supports-color@7.2.0__supports-color@7.2.0/node_modules/deepl-node/dist/translator.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/translator.js"(exports2) {
     "use strict";
     var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m3, k5, k22) {
       if (k22 === void 0) k22 = k5;
@@ -43877,9 +43774,9 @@ var require_translator = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3_supports-color@7.2.0__supports-color@7.2.0/node_modules/deepl-node/dist/deeplClient.js
+// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/deeplClient.js
 var require_deeplClient = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3_supports-color@7.2.0__supports-color@7.2.0/node_modules/deepl-node/dist/deeplClient.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/deeplClient.js"(exports2) {
     "use strict";
     var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m3, k5, k22) {
       if (k22 === void 0) k22 = k5;
@@ -44855,9 +44752,9 @@ var require_deeplClient = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3_supports-color@7.2.0__supports-color@7.2.0/node_modules/deepl-node/dist/index.js
+// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/index.js
 var require_dist2 = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3_supports-color@7.2.0__supports-color@7.2.0/node_modules/deepl-node/dist/index.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/index.js"(exports2) {
     "use strict";
     var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m3, k5, k22) {
       if (k22 === void 0) k22 = k5;
@@ -48955,9 +48852,9 @@ var init_MiddlewareStack = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+types@4.17.2/node_modules/@smithy/types/dist-cjs/index.js
+// node_modules/.pnpm/@smithy+types@4.18.0/node_modules/@smithy/types/dist-cjs/index.js
 var require_dist_cjs = __commonJS({
-  "node_modules/.pnpm/@smithy+types@4.17.2/node_modules/@smithy/types/dist-cjs/index.js"(exports2) {
+  "node_modules/.pnpm/@smithy+types@4.18.0/node_modules/@smithy/types/dist-cjs/index.js"(exports2) {
     var HttpAuthLocation;
     (function(HttpAuthLocation2) {
       HttpAuthLocation2["HEADER"] = "header";
@@ -63504,9 +63401,9 @@ For more information, please visit: ` + STATIC_STABILITY_DOC_URL);
   }
 });
 
-// node_modules/.pnpm/@smithy+node-http-handler@4.11.3/node_modules/@smithy/node-http-handler/dist-cjs/index.js
+// node_modules/.pnpm/@smithy+node-http-handler@4.12.1/node_modules/@smithy/node-http-handler/dist-cjs/index.js
 var require_dist_cjs5 = __commonJS({
-  "node_modules/.pnpm/@smithy+node-http-handler@4.11.3/node_modules/@smithy/node-http-handler/dist-cjs/index.js"(exports2) {
+  "node_modules/.pnpm/@smithy+node-http-handler@4.12.1/node_modules/@smithy/node-http-handler/dist-cjs/index.js"(exports2) {
     var { hasOwn: hasOwn2 } = (init_serde(), __toCommonJS(serde_exports));
     var { streamCollector: streamCollector7 } = (init_serde(), __toCommonJS(serde_exports));
     exports2.streamCollector = streamCollector7;
@@ -63972,6 +63869,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
       destroy() {
         this.refs = 0;
         if (!this.session.destroyed) {
+          this.session.setTimeout(0);
           this.session.destroy();
         }
       }
@@ -64084,9 +63982,8 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
         session.on("error", ensureDestroyed);
         session.on("frameError", ensureDestroyed);
         session.on("close", ensureDestroyed);
-        if (connectionConfiguration.requestTimeout) {
-          session.setTimeout(connectionConfiguration.requestTimeout, ensureDestroyed);
-        }
+        const timeout = connectionConfiguration.requestTimeout ?? 3e5;
+        session.setTimeout(timeout, ensureDestroyed);
         ref.retain();
         return ref;
       }
@@ -64286,6 +64183,9 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
             resolve({ response: httpResponse });
             if (useIsolatedSession) {
               session.close();
+              clientHttp2Stream.on("end", () => {
+                ref.destroy();
+              });
             }
           });
           clientHttp2Stream.on("close", () => {
@@ -64295,7 +64195,11 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
               this.connectionManager.release(requestContext, ref);
             }
             if (!fulfilled) {
-              rejectWithDestroy(new Error("Unexpected error: http2 request did not get a response"));
+              const error3 = new Error("Unexpected error: http2 request did not get a response");
+              if (session.destroyed) {
+                error3.name = "TimeoutError";
+              }
+              rejectWithDestroy(error3);
             }
           });
           writeRequestBodyPromise = writeRequestBody(clientHttp2Stream, request, effectiveRequestTimeout);
@@ -74377,9 +74281,9 @@ var require_dist_cjs14 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+credential-provider-node@3.972.81/node_modules/@aws-sdk/credential-provider-node/dist-cjs/index.js
+// node_modules/.pnpm/@aws-sdk+credential-provider-node@3.972.82/node_modules/@aws-sdk/credential-provider-node/dist-cjs/index.js
 var require_dist_cjs15 = __commonJS({
-  "node_modules/.pnpm/@aws-sdk+credential-provider-node@3.972.81/node_modules/@aws-sdk/credential-provider-node/dist-cjs/index.js"(exports2) {
+  "node_modules/.pnpm/@aws-sdk+credential-provider-node@3.972.82/node_modules/@aws-sdk/credential-provider-node/dist-cjs/index.js"(exports2) {
     var { ENV_KEY, ENV_SECRET, fromEnv: fromEnv2 } = require_dist_cjs3();
     var { chain: chain2, CredentialsProviderError: CredentialsProviderError2, ENV_PROFILE: ENV_PROFILE2 } = (init_config2(), __toCommonJS(config_exports));
     var ENV_IMDS_DISABLED2 = "AWS_EC2_METADATA_DISABLED";
@@ -74428,6 +74332,7 @@ var require_dist_cjs15 = __commonJS({
             if (!passiveLock) {
               passiveLock = chain3(options).then((c5) => {
                 credentials = c5;
+              }).catch(() => {
               }).finally(() => {
                 passiveLock = void 0;
               });
@@ -74532,9 +74437,9 @@ var require_dist_cjs15 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+client-translate@3.1120.0/node_modules/@aws-sdk/client-translate/dist-cjs/index.js
+// node_modules/.pnpm/@aws-sdk+client-translate@3.1126.0/node_modules/@aws-sdk/client-translate/dist-cjs/index.js
 var require_dist_cjs16 = __commonJS({
-  "node_modules/.pnpm/@aws-sdk+client-translate@3.1120.0/node_modules/@aws-sdk/client-translate/dist-cjs/index.js"(exports2) {
+  "node_modules/.pnpm/@aws-sdk+client-translate@3.1126.0/node_modules/@aws-sdk/client-translate/dist-cjs/index.js"(exports2) {
     var { awsEndpointFunctions: awsEndpointFunctions2, emitWarningIfUnsupportedVersion: emitWarningIfUnsupportedVersion$1, createDefaultUserAgentProvider: createDefaultUserAgentProvider2, NODE_APP_ID_CONFIG_OPTIONS: NODE_APP_ID_CONFIG_OPTIONS2, getAwsRegionExtensionConfiguration: getAwsRegionExtensionConfiguration2, resolveAwsRegionExtensionConfiguration: resolveAwsRegionExtensionConfiguration2, resolveUserAgentConfig: resolveUserAgentConfig2, resolveHostHeaderConfig: resolveHostHeaderConfig2, getUserAgentPlugin: getUserAgentPlugin2, getHostHeaderPlugin: getHostHeaderPlugin2, getLoggerPlugin: getLoggerPlugin2, getRecursionDetectionPlugin: getRecursionDetectionPlugin2 } = (init_client3(), __toCommonJS(client_exports2));
     var { getHttpAuthSchemeEndpointRuleSetPlugin: getHttpAuthSchemeEndpointRuleSetPlugin2, DefaultIdentityProviderConfig: DefaultIdentityProviderConfig2, getHttpSigningPlugin: getHttpSigningPlugin2, createPaginator: createPaginator2 } = (init_dist_es(), __toCommonJS(dist_es_exports));
     var { normalizeProvider: normalizeProvider3, getSmithyContext: getSmithyContext2, ServiceException: ServiceException2, NoOpLogger: NoOpLogger2, emitWarningIfUnsupportedVersion: emitWarningIfUnsupportedVersion3, loadConfigsForDefaultMode: loadConfigsForDefaultMode2, getDefaultExtensionConfiguration: getDefaultExtensionConfiguration2, resolveDefaultRuntimeConfig: resolveDefaultRuntimeConfig2, Client: Client2, makeBuilder: makeBuilder2, createAggregatedClient: createAggregatedClient2 } = (init_client2(), __toCommonJS(client_exports));
@@ -74603,7 +74508,7 @@ var require_dist_cjs16 = __commonJS({
       Region: { type: "builtInParams", name: "region" },
       UseDualStack: { type: "builtInParams", name: "useDualstackEndpoint" }
     };
-    var version = "3.1119.0";
+    var version = "3.1125.0";
     var packageInfo = {
       version
     };

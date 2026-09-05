@@ -36,7 +36,7 @@ pnpm/update:
 
 .PHONY: pre-commit/update
 pre-commit/update:
-	@command -v prek >/dev/null 2>&1 && prek auto-update || pre-commit autoupdate
+	@command -v prek >/dev/null 2>&1 && prek update || pre-commit autoupdate
 
 .PHONY: update
 update: pnpm/update pre-commit/update
