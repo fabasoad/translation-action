@@ -21438,9 +21438,9 @@ var require_lib = __commonJS({
   }
 });
 
-// node_modules/.pnpm/typed-rest-client@3.1.0/node_modules/typed-rest-client/Util.js
+// node_modules/.pnpm/typed-rest-client@3.1.2/node_modules/typed-rest-client/Util.js
 var require_Util = __commonJS({
-  "node_modules/.pnpm/typed-rest-client@3.1.0/node_modules/typed-rest-client/Util.js"(exports2) {
+  "node_modules/.pnpm/typed-rest-client@3.1.2/node_modules/typed-rest-client/Util.js"(exports2) {
     "use strict";
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
@@ -21546,9 +21546,9 @@ var require_Util = __commonJS({
   }
 });
 
-// node_modules/.pnpm/typed-rest-client@3.1.0/node_modules/typed-rest-client/HttpClient.js
+// node_modules/.pnpm/typed-rest-client@3.1.2/node_modules/typed-rest-client/HttpClient.js
 var require_HttpClient = __commonJS({
-  "node_modules/.pnpm/typed-rest-client@3.1.0/node_modules/typed-rest-client/HttpClient.js"(exports2) {
+  "node_modules/.pnpm/typed-rest-client@3.1.2/node_modules/typed-rest-client/HttpClient.js"(exports2) {
     "use strict";
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
@@ -22049,9 +22049,9 @@ var require_HttpClient = __commonJS({
   }
 });
 
-// node_modules/.pnpm/typed-rest-client@3.1.0/node_modules/typed-rest-client/RestClient.js
+// node_modules/.pnpm/typed-rest-client@3.1.2/node_modules/typed-rest-client/RestClient.js
 var require_RestClient = __commonJS({
-  "node_modules/.pnpm/typed-rest-client@3.1.0/node_modules/typed-rest-client/RestClient.js"(exports2) {
+  "node_modules/.pnpm/typed-rest-client@3.1.2/node_modules/typed-rest-client/RestClient.js"(exports2) {
     "use strict";
     var __awaiter2 = exports2 && exports2.__awaiter || function(thisArg, _arguments, P, generator) {
       function adopt(value) {
