@@ -88,7 +88,7 @@ jobs:
     name: DeepL
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: fabasoad/translation-action@v4
         id: deepl-step
         with:
@@ -126,7 +126,7 @@ jobs:
     name: Google
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: fabasoad/translation-action@v4
         id: google-step
         with:
@@ -166,7 +166,7 @@ jobs:
     name: LibreTranslate
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v6
+      - uses: actions/checkout@v7
       - uses: fabasoad/translation-action@v4
         id: libretranslate-step
         with:
