@@ -37,7 +37,7 @@
   "devDependencies": {
     "@biomejs/biome": "~2.5.14",
     "@vitest/coverage-v8": "~5.0.1",
-    "dotenv": "~18.0.0",
+    "dotenv": "~18.0.3",
     "esbuild": "~0.28.2",
     "typescript": "~7.0.2",
     "vitest": "~5.0.1"
