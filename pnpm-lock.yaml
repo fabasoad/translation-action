@@ -196,8 +196,8 @@ importers:
         specifier: ~5.0.3
         version: 5.0.3(vitest@5.0.3)
       dotenv:
-        specifier: ~18.0.5
-        version: 18.0.5
+        specifier: ~18.0.6
+        version: 18.0.6
       esbuild:
         specifier: ~0.28.2
         version: 0.28.2
@@ -886,8 +886,8 @@ packages:
     resolution: {integrity: sha512-Btj2BOOO83o3WyH59e8MgXsxEQVcarkUOpEYrubB0urwnN10yQ364rsiByU11nZlqWYZm05i/of7io4mzihBtQ==}
     engines: {node: '>=8'}
 
-  dotenv@18.0.5:
-    resolution: {integrity: sha512-aBrGvt6KhjxbEnatqMWOMidftwsrCiCvqh1yNIGB9QyF0J+VcWkKDMsvYOEm7ZS82oiV+BT1sTOtIlAmUlTpwQ==}
+  dotenv@18.0.6:
+    resolution: {integrity: sha512-ZMVmohV6CvAJtj++pZNyggluUt6hbRdQAxc2+Z635RL6/AG/ruXv5lHnybUFoxMPL/yrTL/tsF4paZu2l7RA6Q==}
     engines: {node: '>=12'}
     hasBin: true
 
@@ -1872,7 +1872,7 @@ snapshots:
 
   detect-libc@2.1.2: {}
 
-  dotenv@18.0.5: {}
+  dotenv@18.0.6: {}
 
   dunder-proto@1.0.1:
     dependencies:
