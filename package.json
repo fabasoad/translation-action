@@ -30,17 +30,17 @@
     "@actions/core": "~3.0.1",
     "@aws-sdk/client-translate": "~3.1135.0",
     "cross-fetch": "~4.1.0",
-    "deepl-node": "~1.28.0",
+    "deepl-node": "~1.28.1",
     "google-translate-api-x": "~10.7.3",
     "typed-rest-client": "~3.1.2"
   },
   "devDependencies": {
     "@biomejs/biome": "~2.5.15",
-    "@vitest/coverage-v8": "~5.0.3",
-    "dotenv": "~18.0.6",
+    "@vitest/coverage-v8": "~5.0.5",
+    "dotenv": "~18.0.8",
     "esbuild": "~0.28.2",
     "typescript": "~7.0.2",
-    "vitest": "~5.0.3"
+    "vitest": "~5.0.5"
   },
   "allowScripts": {
     "esbuild@0.28.1": true,

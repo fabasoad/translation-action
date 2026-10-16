@@ -22413,9 +22413,9 @@ var require_RestClient = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/errors.js
+// node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/errors.js
 var require_errors2 = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/errors.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/errors.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.ArgumentError = exports2.DocumentDeminificationError = exports2.DocumentMinificationError = exports2.DocumentNotReadyError = exports2.GlossaryNotFoundError = exports2.DocumentTranslationError = exports2.ConnectionError = exports2.TooManyRequestsError = exports2.QuotaExceededError = exports2.AuthorizationError = exports2.DeepLError = void 0;
@@ -22721,9 +22721,9 @@ var require_loglevel = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/utils.js
+// node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/utils.js
 var require_utils3 = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/utils.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/utils.js"(exports2) {
     "use strict";
     var __importDefault = exports2 && exports2.__importDefault || function(mod) {
       return mod && mod.__esModule ? mod : { "default": mod };
@@ -23000,9 +23000,9 @@ var require_utils3 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/glossaryEntries.js
+// node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/glossaryEntries.js
 var require_glossaryEntries = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/glossaryEntries.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/glossaryEntries.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.GlossaryEntries = void 0;
@@ -23097,9 +23097,9 @@ var require_glossaryEntries = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/types.js
+// node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/types.js
 var require_types = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/types.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/types.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
   }
@@ -39699,9 +39699,9 @@ var require_form_data2 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/client.js
+// node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/client.js
 var require_client2 = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/client.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/client.js"(exports2) {
     "use strict";
     var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m3, k5, k22) {
       if (k22 === void 0) k22 = k5;
@@ -39924,9 +39924,9 @@ var require_client2 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/parsing.js
+// node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/parsing.js
 var require_parsing = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/parsing.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/parsing.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.parseTranslationMemoryJob = exports2.parseTranslationMemoryExport = exports2.parseTranslationMemoryImport = exports2.parseTranslationMemorySegments = exports2.parseTranslationMemoryInfoList = exports2.parseTranslationMemoryInfoJson = exports2.parseTranslationMemoryInfo = exports2.parseStyleRuleInfoList = exports2.parseStyleRuleInfo = exports2.parseCustomInstruction = exports2.parseDocumentHandle = exports2.parseGlossaryLanguagePairArray = exports2.parseLanguageArray = exports2.parseWriteResultArray = exports2.parseTextResultArray = exports2.parseUsage = exports2.parseDocumentStatus = exports2.parseGlossaryInfoList = exports2.parseMultilingualGlossaryInfo = exports2.parseGlossaryInfo = exports2.parseListMultilingualGlossaries = exports2.parseMultilingualGlossaryDictionaryEntries = exports2.parseMultilingualGlossaryDictionaryInfo = void 0;
@@ -43164,9 +43164,9 @@ var require_adm_zip = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/fsHelper.js
+// node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/fsHelper.js
 var require_fsHelper = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/fsHelper.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/fsHelper.js"(exports2) {
     "use strict";
     var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m3, k5, k22) {
       if (k22 === void 0) k22 = k5;
@@ -43243,9 +43243,9 @@ var require_fsHelper = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/documentMinifier.js
+// node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/documentMinifier.js
 var require_documentMinifier = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/documentMinifier.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/documentMinifier.js"(exports2) {
     "use strict";
     var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m3, k5, k22) {
       if (k22 === void 0) k22 = k5;
@@ -43541,9 +43541,9 @@ var require_documentMinifier = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/translator.js
+// node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/translator.js
 var require_translator = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/translator.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/translator.js"(exports2) {
     "use strict";
     var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m3, k5, k22) {
       if (k22 === void 0) k22 = k5;
@@ -44000,7 +44000,7 @@ var require_translator = __commonJS({
         return (0, parsing_1.parseGlossaryInfo)(content);
       }
       constructUserAgentString(sendPlatformInfo, appInfo) {
-        let libraryInfoString = "deepl-node/1.28.0";
+        let libraryInfoString = "deepl-node/1.28.1";
         if (sendPlatformInfo) {
           const systemType = os5.type();
           const systemVersion = os5.version();
@@ -44017,9 +44017,9 @@ var require_translator = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/deeplClient.js
+// node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/deeplClient.js
 var require_deeplClient = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/deeplClient.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/deeplClient.js"(exports2) {
     "use strict";
     var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m3, k5, k22) {
       if (k22 === void 0) k22 = k5;
@@ -44995,9 +44995,9 @@ var require_deeplClient = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/index.js
+// node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/index.js
 var require_dist2 = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.0_debug@4.4.3/node_modules/deepl-node/dist/index.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/index.js"(exports2) {
     "use strict";
     var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m3, k5, k22) {
       if (k22 === void 0) k22 = k5;
