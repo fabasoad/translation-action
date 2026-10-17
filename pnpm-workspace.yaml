@@ -3,6 +3,3 @@ allowBuilds:
   esbuild: true
   fsevents: true
 minimumReleaseAgeExclude: []
-overrides:
-  qs@<6.16.0: ^6.16.0
-  adm-zip@<0.6.0: ^0.6.0
