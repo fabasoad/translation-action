@@ -5863,7 +5863,7 @@ var require_client_h1 = __commonJS({
     var TIMEOUT_HEADERS = 2 | USE_FAST_TIMER;
     var TIMEOUT_BODY = 4 | USE_FAST_TIMER;
     var TIMEOUT_KEEP_ALIVE = 8 | USE_NATIVE_TIMER;
-    var Parser = class {
+    var Parser2 = class {
       constructor(client, socket, { exports: exports3 }) {
         assert(Number.isFinite(client[kMaxHeadersSize]) && client[kMaxHeadersSize] > 0);
         this.llhttp = exports3;
@@ -6290,7 +6290,7 @@ var require_client_h1 = __commonJS({
       socket[kIdleSocketValidation] = 0;
       socket[kIdleSocketValidationTimeout] = null;
       socket[kSocketUsed] = false;
-      socket[kParser] = new Parser(client, socket, llhttpInstance);
+      socket[kParser] = new Parser2(client, socket, llhttpInstance);
       addListener(socket, "error", function(err) {
         const parser = this[kParser];
         if (err.code === "ECONNRESET" && parser.statusCode && !parser.shouldKeepAlive) {
@@ -20782,15 +20782,16 @@ var require_side_channel = __commonJS({
   }
 });
 
-// node_modules/.pnpm/qs@6.16.1/node_modules/qs/lib/formats.js
+// node_modules/.pnpm/qs@6.17.1/node_modules/qs/lib/formats.js
 var require_formats = __commonJS({
-  "node_modules/.pnpm/qs@6.16.1/node_modules/qs/lib/formats.js"(exports2, module2) {
+  "node_modules/.pnpm/qs@6.17.1/node_modules/qs/lib/formats.js"(exports2, module2) {
     "use strict";
     var replace = String.prototype.replace;
     var percentTwenties = /%20/g;
     var Format = {
       RFC1738: "RFC1738",
-      RFC3986: "RFC3986"
+      RFC3986: "RFC3986",
+      WHATWG: "WHATWG"
     };
     module2.exports = {
       "default": Format.RFC3986,
@@ -20800,17 +20801,21 @@ var require_formats = __commonJS({
         },
         RFC3986: function(value) {
           return String(value);
+        },
+        WHATWG: function(value) {
+          return replace.call(value, percentTwenties, "+");
         }
       },
       RFC1738: Format.RFC1738,
-      RFC3986: Format.RFC3986
+      RFC3986: Format.RFC3986,
+      WHATWG: Format.WHATWG
     };
   }
 });
 
-// node_modules/.pnpm/qs@6.16.1/node_modules/qs/lib/utils.js
+// node_modules/.pnpm/qs@6.17.1/node_modules/qs/lib/utils.js
 var require_utils2 = __commonJS({
-  "node_modules/.pnpm/qs@6.16.1/node_modules/qs/lib/utils.js"(exports2, module2) {
+  "node_modules/.pnpm/qs@6.17.1/node_modules/qs/lib/utils.js"(exports2, module2) {
     "use strict";
     var formats = require_formats();
     var getSideChannel = require_side_channel();
@@ -20896,6 +20901,15 @@ var require_utils2 = __commonJS({
       }
       return max;
     };
+    var countElements = function countElements2(arr) {
+      var count = 0;
+      for (var i5 = 0; i5 < arr.length; ++i5) {
+        if (has.call(arr, i5)) {
+          count += 1;
+        }
+      }
+      return count;
+    };
     var limitedPair = function limitedPair2(first, second, options) {
       var pair = [first, second];
       if (options && typeof options.arrayLimit === "number" && pair.length > options.arrayLimit) {
@@ -20913,7 +20927,7 @@ var require_utils2 = __commonJS({
       if (typeof source !== "object" && typeof source !== "function") {
         if (isArray(target)) {
           var nextIndex = target.length;
-          if (options && typeof options.arrayLimit === "number" && nextIndex >= options.arrayLimit) {
+          if (options && typeof options.arrayLimit === "number" && countElements(target) >= options.arrayLimit) {
             if (options.throwOnLimitExceeded) {
               throw new RangeError("Array limit exceeded. Only " + options.arrayLimit + " element" + (options.arrayLimit === 1 ? "" : "s") + " allowed in an array.");
             }
@@ -20982,7 +20996,7 @@ var require_utils2 = __commonJS({
             target[i5] = item;
           }
         });
-        if (options && typeof options.arrayLimit === "number" && target.length > options.arrayLimit) {
+        if (options && typeof options.arrayLimit === "number" && countElements(target) > options.arrayLimit) {
           if (options.throwOnLimitExceeded) {
             throw new RangeError("Array limit exceeded. Only " + options.arrayLimit + " element" + (options.arrayLimit === 1 ? "" : "s") + " allowed in an array.");
           }
@@ -21110,7 +21124,7 @@ var require_utils2 = __commonJS({
         var arr = [];
         for (var i5 = 0; i5 < segment.length; ++i5) {
           var c5 = segment.charCodeAt(i5);
-          if (c5 === 45 || c5 === 46 || c5 === 95 || c5 === 126 || c5 >= 48 && c5 <= 57 || c5 >= 65 && c5 <= 90 || c5 >= 97 && c5 <= 122 || format2 === formats.RFC1738 && (c5 === 40 || c5 === 41)) {
+          if (c5 === 45 || c5 === 46 || c5 === 95 || c5 === 126 && format2 !== formats.WHATWG || c5 >= 48 && c5 <= 57 || c5 >= 65 && c5 <= 90 || c5 >= 97 && c5 <= 122 || format2 === formats.RFC1738 && (c5 === 40 || c5 === 41) || format2 === formats.WHATWG && c5 === 42) {
             arr[arr.length] = segment.charAt(i5);
             continue;
           }
@@ -21126,9 +21140,14 @@ var require_utils2 = __commonJS({
             arr[arr.length] = hexTable[224 | c5 >> 12] + hexTable[128 | c5 >> 6 & 63] + hexTable[128 | c5 & 63];
             continue;
           }
-          i5 += 1;
-          c5 = 65536 + ((c5 & 1023) << 10 | segment.charCodeAt(i5) & 1023);
-          arr[arr.length] = hexTable[240 | c5 >> 18] + hexTable[128 | c5 >> 12 & 63] + hexTable[128 | c5 >> 6 & 63] + hexTable[128 | c5 & 63];
+          var next = segment.charCodeAt(i5 + 1);
+          if (c5 <= 56319 && next >= 56320 && next <= 57343) {
+            i5 += 1;
+            c5 = 65536 + ((c5 & 1023) << 10 | next & 1023);
+            arr[arr.length] = hexTable[240 | c5 >> 18] + hexTable[128 | c5 >> 12 & 63] + hexTable[128 | c5 >> 6 & 63] + hexTable[128 | c5 & 63];
+          } else {
+            arr[arr.length] = "%EF%BF%BD";
+          }
         }
         out += arr.join("");
       }
@@ -21208,14 +21227,15 @@ var require_utils2 = __commonJS({
       markOverflow,
       maybeMap,
       merge: merge2,
+      setProperty,
       toCoercible
     };
   }
 });
 
-// node_modules/.pnpm/qs@6.16.1/node_modules/qs/lib/stringify.js
+// node_modules/.pnpm/qs@6.17.1/node_modules/qs/lib/stringify.js
 var require_stringify = __commonJS({
-  "node_modules/.pnpm/qs@6.16.1/node_modules/qs/lib/stringify.js"(exports2, module2) {
+  "node_modules/.pnpm/qs@6.17.1/node_modules/qs/lib/stringify.js"(exports2, module2) {
     "use strict";
     var getSideChannel = require_side_channel();
     var utils = require_utils2();
@@ -21336,7 +21356,7 @@ var require_stringify = __commonJS({
       var encodedPrefix = String(prefix);
       var adjustedPrefix = commaRoundTrip && isArray(obj) && obj.length === 1 ? encodedPrefix + "[]" : encodedPrefix;
       if (allowEmptyArrays && isArray(obj) && obj.length === 0 && Object.keys(obj).length === 0) {
-        return adjustedPrefix + "[]";
+        return formatter(encoder2 && !encodeValuesOnly ? encoder2(adjustedPrefix, defaults.encoder, charset, "key", format2) : adjustedPrefix) + "[]";
       }
       for (var j5 = 0; j5 < objKeys.length; ++j5) {
         var key = objKeys[j5];
@@ -21447,7 +21467,7 @@ var require_stringify = __commonJS({
         filter = options.filter;
         obj = filter("", obj);
       } else if (isArray(options.filter)) {
-        filter = options.filter;
+        filter = options.filter.slice();
         objKeys = filter;
       }
       var keys = [];
@@ -21483,7 +21503,7 @@ var require_stringify = __commonJS({
           options.skipNulls,
           options.encodeDotInKeys,
           options.encode ? options.encoder : null,
-          options.filter,
+          filter,
           options.sort,
           options.allowDots,
           options.serializeDate,
@@ -21510,15 +21530,16 @@ var require_stringify = __commonJS({
   }
 });
 
-// node_modules/.pnpm/qs@6.16.1/node_modules/qs/lib/parse.js
+// node_modules/.pnpm/qs@6.17.1/node_modules/qs/lib/parse.js
 var require_parse2 = __commonJS({
-  "node_modules/.pnpm/qs@6.16.1/node_modules/qs/lib/parse.js"(exports2, module2) {
+  "node_modules/.pnpm/qs@6.17.1/node_modules/qs/lib/parse.js"(exports2, module2) {
     "use strict";
     var getSideChannel = require_side_channel();
     var utils = require_utils2();
     var has = Object.prototype.hasOwnProperty;
     var isArray = Array.isArray;
     var getPrototypeOf = Object.getPrototypeOf;
+    var fromCharCode = String.fromCharCode;
     var isPlainContainer = function isPlainContainer2(value) {
       if (!value || typeof value !== "object") {
         return false;
@@ -21553,9 +21574,9 @@ var require_parse2 = __commonJS({
               copies.set(value, copy);
               queue[queue.length] = { source: value, target: copy };
             }
-            target[keys[j5]] = copies.get(value);
+            utils.setProperty(target, keys[j5], copies.get(value));
           } else {
-            target[keys[j5]] = value;
+            utils.setProperty(target, keys[j5], value);
           }
         }
       }
@@ -21587,7 +21608,12 @@ var require_parse2 = __commonJS({
     };
     var interpretNumericEntities = function(str) {
       return str.replace(/&#(\d+);/g, function($0, numberStr) {
-        return String.fromCharCode(parseInt(numberStr, 10));
+        var c5 = parseInt(numberStr, 10);
+        if (c5 > 65535 && c5 <= 1114111) {
+          c5 -= 65536;
+          return fromCharCode(55296 | c5 >> 10, 56320 | c5 & 1023);
+        }
+        return fromCharCode(c5);
       });
     };
     var parseArrayValue = function(val, options, currentArrayLength) {
@@ -21605,7 +21631,7 @@ var require_parse2 = __commonJS({
         }
         return val.split(",");
       }
-      if (options.throwOnLimitExceeded && currentArrayLength >= options.arrayLimit) {
+      if (options.throwOnLimitExceeded && currentArrayLength >= options.arrayLimit && currentArrayLength > 0) {
         throw new RangeError("Array limit exceeded. Only " + options.arrayLimit + " element" + (options.arrayLimit === 1 ? "" : "s") + " allowed in an array.");
       }
       return val;
@@ -21660,7 +21686,7 @@ var require_parse2 = __commonJS({
               parseArrayValue(
                 part.slice(pos2 + 1),
                 options,
-                isArray(obj[key]) ? obj[key].length : 0
+                isArray(obj[key]) && (options.duplicates === "combine" || isEmptyBracketKey) ? obj[key].length : 0
               ),
               function(encodedVal) {
                 return options.decoder(encodedVal, defaults.decoder, charset, "value");
@@ -21669,7 +21695,9 @@ var require_parse2 = __commonJS({
           }
         }
         if (val && options.interpretNumericEntities && charset === "iso-8859-1") {
-          val = interpretNumericEntities(String(val));
+          val = utils.maybeMap(val, function(value) {
+            return value ? interpretNumericEntities(String(value)) : value;
+          });
         }
         if (isEmptyBracketKey) {
           val = isArray(val) ? [val] : val;
@@ -21693,6 +21721,9 @@ var require_parse2 = __commonJS({
         }
       }
       return obj;
+    };
+    var stripWrappingBrackets = function stripWrappingBrackets2(key) {
+      return key.charAt(0) === "[" && key.charAt(key.length - 1) === "]" ? key.slice(1, -1) : key;
     };
     var parseObject = function(chain2, val, options, valuesParsed) {
       var currentArrayLength = 0;
@@ -21718,12 +21749,12 @@ var require_parse2 = __commonJS({
           }
         } else {
           obj = options.plainObjects ? { __proto__: null } : {};
-          var cleanRoot = root5.charAt(0) === "[" && root5.charAt(root5.length - 1) === "]" ? root5.slice(1, -1) : root5;
-          var decodedRoot = options.decodeDotInKeys ? cleanRoot.replace(/%2E/g, ".") : cleanRoot;
+          var cleanRoot = stripWrappingBrackets(root5);
+          var decodedRoot = options.decodeDotInKeys ? cleanRoot.replace(/%2E/gi, ".") : cleanRoot;
           var index = parseInt(decodedRoot, 10);
           var isValidArrayIndex = !isNaN(index) && root5 !== decodedRoot && String(index) === decodedRoot && index >= 0 && options.parseArrays;
           if (!options.parseArrays && decodedRoot === "") {
-            obj = { 0: leaf };
+            obj[0] = leaf;
           } else if (isValidArrayIndex && index < options.arrayLimit) {
             obj = [];
             obj[index] = leaf;
@@ -21770,7 +21801,7 @@ var require_parse2 = __commonJS({
     var splitKeyIntoSegments = function splitKeyIntoSegments2(originalKey, options) {
       var key = options.allowDots ? topLevelDotsToBrackets(originalKey) : originalKey;
       if (options.depth <= 0) {
-        if (!options.plainObjects && has.call(Object.prototype, key)) {
+        if (!options.plainObjects && has.call(Object.prototype, stripWrappingBrackets(key))) {
           if (!options.allowPrototypes) {
             return;
           }
@@ -21910,16 +21941,16 @@ var require_parse2 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/qs@6.16.1/node_modules/qs/lib/index.js
+// node_modules/.pnpm/qs@6.17.1/node_modules/qs/lib/index.js
 var require_lib = __commonJS({
-  "node_modules/.pnpm/qs@6.16.1/node_modules/qs/lib/index.js"(exports2, module2) {
+  "node_modules/.pnpm/qs@6.17.1/node_modules/qs/lib/index.js"(exports2, module2) {
     "use strict";
     var stringify = require_stringify();
-    var parse = require_parse2();
+    var parse2 = require_parse2();
     var formats = require_formats();
     module2.exports = {
       formats,
-      parse,
+      parse: parse2,
       stringify
     };
   }
@@ -22767,15 +22798,16 @@ var require_RestClient = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/errors.js
+// node_modules/.pnpm/deepl-node@1.29.0_debug@4.4.3/node_modules/deepl-node/dist/errors.js
 var require_errors2 = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/errors.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.29.0_debug@4.4.3/node_modules/deepl-node/dist/errors.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.ArgumentError = exports2.DocumentDeminificationError = exports2.DocumentMinificationError = exports2.DocumentNotReadyError = exports2.GlossaryNotFoundError = exports2.DocumentTranslationError = exports2.ConnectionError = exports2.TooManyRequestsError = exports2.QuotaExceededError = exports2.AuthorizationError = exports2.DeepLError = void 0;
+    exports2.ArgumentError = exports2.DocumentDeminificationError = exports2.DocumentMinificationError = exports2.DocumentNotReadyError = exports2.GlossaryNotFoundError = exports2.NotFoundError = exports2.DocumentTranslationError = exports2.ConnectionError = exports2.TooManyRequestsError = exports2.QuotaExceededError = exports2.AuthorizationError = exports2.DeepLError = void 0;
     var DeepLError = class extends Error {
       constructor(message, error3) {
         super(message);
+        this.shouldRetry = false;
         this.message = message;
         this.error = error3;
       }
@@ -22801,10 +22833,17 @@ var require_errors2 = __commonJS({
       constructor(message, handle, error3) {
         super(message, error3);
         this.documentHandle = handle;
+        if (error3 instanceof DeepLError) {
+          this.httpStatusCode = error3.httpStatusCode;
+          this.shouldRetry = error3.shouldRetry;
+        }
       }
     };
     exports2.DocumentTranslationError = DocumentTranslationError;
-    var GlossaryNotFoundError = class extends DeepLError {
+    var NotFoundError = class extends DeepLError {
+    };
+    exports2.NotFoundError = NotFoundError;
+    var GlossaryNotFoundError = class extends NotFoundError {
     };
     exports2.GlossaryNotFoundError = GlossaryNotFoundError;
     var DocumentNotReadyError = class extends DeepLError {
@@ -23075,15 +23114,15 @@ var require_loglevel = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/utils.js
+// node_modules/.pnpm/deepl-node@1.29.0_debug@4.4.3/node_modules/deepl-node/dist/utils.js
 var require_utils3 = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/utils.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.29.0_debug@4.4.3/node_modules/deepl-node/dist/utils.js"(exports2) {
     "use strict";
     var __importDefault = exports2 && exports2.__importDefault || function(mod) {
       return mod && mod.__esModule ? mod : { "default": mod };
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.extractTranslationMemoryId = exports2.extractGlossaryId = exports2.appendCsvDictionaryEntries = exports2.appendDictionaryEntries = exports2.validateAndAppendTextOptions = exports2.appendStyleAndTranslationMemoryOptions = exports2.appendTextsAndReturnIsSingular = exports2.buildURLSearchParams = exports2.nonRegionalLanguageCode = exports2.standardizeLanguageCode = exports2.isFreeAccountAuthKey = exports2.toBoolString = exports2.isString = exports2.timeout = exports2.streamToString = exports2.streamToBuffer = exports2.logInfo = exports2.logDebug = void 0;
+    exports2.extractTranslationMemoryId = exports2.extractStyleProfileId = exports2.extractSpokenTermsId = exports2.extractGlossaryId = exports2.appendCsvDictionaryEntries = exports2.appendDictionaryEntries = exports2.validateAndAppendTextOptions = exports2.appendStyleAndTranslationMemoryOptions = exports2.appendTextsAndReturnIsSingular = exports2.setExtraBodyParameters = exports2.buildURLSearchParams = exports2.resolveExtraBodyParameters = exports2.nonRegionalLanguageCode = exports2.standardizeLanguageCode = exports2.isFreeAccountAuthKey = exports2.toBoolString = exports2.isString = exports2.pipeToStream = exports2.buildQueryString = exports2.timeout = exports2.streamToString = exports2.streamToBuffer = exports2.logInfo = exports2.logDebug = void 0;
     var loglevel_1 = __importDefault(require_loglevel());
     var errors_1 = require_errors2();
     var logger2 = loglevel_1.default.getLogger("deepl");
@@ -23131,6 +23170,24 @@ var require_utils3 = __commonJS({
     exports2.streamToString = streamToString;
     var timeout = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
     exports2.timeout = timeout;
+    function buildQueryString2(params) {
+      return Object.entries(params).map(([name, value]) => `${encodeURIComponent(name)}=${encodeURIComponent(value)}`).join("&");
+    }
+    exports2.buildQueryString = buildQueryString2;
+    function pipeToStream(content, outputStream) {
+      return new Promise((resolve, reject) => {
+        const fail = (error3) => {
+          content.destroy();
+          outputStream.destroy();
+          reject(error3);
+        };
+        content.on("error", (error3) => fail(new errors_1.ConnectionError(`Connection failure: ${error3.message}`, true, error3)));
+        outputStream.on("error", fail);
+        outputStream.on("finish", resolve);
+        content.pipe(outputStream);
+      });
+    }
+    exports2.pipeToStream = pipeToStream;
     function isString(arg) {
       return typeof arg === "string";
     }
@@ -23165,7 +23222,17 @@ var require_utils3 = __commonJS({
         return tagList.join(",");
       }
     }
-    function buildURLSearchParams(sourceLang, targetLang, formality, glossary, extraRequestParameters, glossaryIds) {
+    function resolveExtraBodyParameters(options) {
+      if ((options === null || options === void 0 ? void 0 : options.extraBodyParameters) !== void 0) {
+        if (options.extraRequestParameters !== void 0) {
+          throw new errors_1.ArgumentError("pass only one of extraBodyParameters and extraRequestParameters");
+        }
+        return options.extraBodyParameters;
+      }
+      return options === null || options === void 0 ? void 0 : options.extraRequestParameters;
+    }
+    exports2.resolveExtraBodyParameters = resolveExtraBodyParameters;
+    function buildURLSearchParams(sourceLang, targetLang, formality, glossary, glossaryIds) {
       targetLang = standardizeLanguageCode(targetLang);
       if (sourceLang !== null) {
         sourceLang = standardizeLanguageCode(sourceLang);
@@ -23174,16 +23241,8 @@ var require_utils3 = __commonJS({
       if (glossary !== void 0 && hasGlossaryIds) {
         throw new errors_1.DeepLError("glossary and glossaryIds options cannot be used together, please use only one.");
       }
-      if ((glossary !== void 0 || hasGlossaryIds) && sourceLang === null) {
-        throw new errors_1.DeepLError("sourceLang is required if using a glossary");
-      }
       if (glossaryIds !== void 0 && glossaryIds.length > 5) {
         throw new errors_1.DeepLError("glossaryIds option supports at most 5 glossaries.");
-      }
-      if (targetLang === "en") {
-        throw new errors_1.DeepLError("targetLang='en' is deprecated, please use 'en-GB' or 'en-US' instead.");
-      } else if (targetLang === "pt") {
-        throw new errors_1.DeepLError("targetLang='pt' is deprecated, please use 'pt-PT' or 'pt-BR' instead.");
       }
       const searchParams = new URLSearchParams({
         target_lang: targetLang
@@ -23216,14 +23275,17 @@ var require_utils3 = __commonJS({
         });
         searchParams.append("glossary_ids", ids.join(","));
       }
-      if (extraRequestParameters !== void 0) {
-        for (const paramName in extraRequestParameters) {
-          searchParams.set(paramName, extraRequestParameters[paramName]);
-        }
-      }
       return searchParams;
     }
     exports2.buildURLSearchParams = buildURLSearchParams;
+    function setExtraBodyParameters(data, extraBodyParameters) {
+      if (extraBodyParameters !== void 0) {
+        for (const paramName in extraBodyParameters) {
+          data.set(paramName, extraBodyParameters[paramName]);
+        }
+      }
+    }
+    exports2.setExtraBodyParameters = setExtraBodyParameters;
     function appendTextsAndReturnIsSingular(data, texts) {
       const singular = !Array.isArray(texts);
       if (singular) {
@@ -23253,6 +23315,16 @@ var require_utils3 = __commonJS({
           data.append("style_id", options.styleRule);
         }
       }
+      if (options.styleProfile !== void 0) {
+        if (!isString(options.styleProfile)) {
+          if (options.styleProfile.styleProfileId === void 0) {
+            throw new errors_1.DeepLError("styleProfile option should be a string containing the style profile ID or a StyleProfile object.");
+          }
+          data.append("style_profile_id", options.styleProfile.styleProfileId);
+        } else {
+          data.append("style_profile_id", options.styleProfile);
+        }
+      }
       if (options.translationMemory !== void 0) {
         if (!isString(options.translationMemory)) {
           if (options.translationMemory.translationMemoryId === void 0) {
@@ -23279,13 +23351,13 @@ var require_utils3 = __commonJS({
         return;
       }
       if (options.splitSentences !== void 0) {
-        options.splitSentences = options.splitSentences.toLowerCase();
-        if (options.splitSentences === "on" || options.splitSentences === "default") {
+        const splitSentences = options.splitSentences.toLowerCase();
+        if (splitSentences === "on" || splitSentences === "default") {
           data.append("split_sentences", "1");
-        } else if (options.splitSentences === "off") {
+        } else if (splitSentences === "off") {
           data.append("split_sentences", "0");
         } else {
-          data.append("split_sentences", options.splitSentences);
+          data.append("split_sentences", splitSentences);
         }
       }
       if (options.preserveFormatting !== void 0) {
@@ -23343,6 +23415,22 @@ var require_utils3 = __commonJS({
       return typeof glossary === "string" ? glossary : glossary.glossaryId;
     }
     exports2.extractGlossaryId = extractGlossaryId;
+    function extractSpokenTermsId(spokenTerms) {
+      const spokenTermsId = isString(spokenTerms) ? spokenTerms : spokenTerms === null || spokenTerms === void 0 ? void 0 : spokenTerms.spokenTermsId;
+      if (!spokenTermsId) {
+        throw new errors_1.ArgumentError('Parameter "spokenTerms" must not be empty');
+      }
+      return spokenTermsId;
+    }
+    exports2.extractSpokenTermsId = extractSpokenTermsId;
+    function extractStyleProfileId(styleProfile) {
+      const styleProfileId = isString(styleProfile) ? styleProfile : styleProfile === null || styleProfile === void 0 ? void 0 : styleProfile.styleProfileId;
+      if (!styleProfileId) {
+        throw new errors_1.ArgumentError('Parameter "styleProfile" must not be empty');
+      }
+      return styleProfileId;
+    }
+    exports2.extractStyleProfileId = extractStyleProfileId;
     function extractTranslationMemoryId(translationMemory) {
       const translationMemoryId = isString(translationMemory) ? translationMemory : translationMemory.translationMemoryId;
       if (!translationMemoryId) {
@@ -23354,9 +23442,9 @@ var require_utils3 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/glossaryEntries.js
+// node_modules/.pnpm/deepl-node@1.29.0_debug@4.4.3/node_modules/deepl-node/dist/glossaryEntries.js
 var require_glossaryEntries = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/glossaryEntries.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.29.0_debug@4.4.3/node_modules/deepl-node/dist/glossaryEntries.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
     exports2.GlossaryEntries = void 0;
@@ -23417,15 +23505,18 @@ var require_glossaryEntries = __commonJS({
         return this.implEntries;
       }
       /**
-       * Converts glossary entries to a tab-separated values (TSV) string.
+       * Converts glossary entries to a tab-separated values (TSV) string. Each term is trimmed of
+       * leading and trailing whitespace, then validated; the trimmed term is what is written.
        * @return string containing entries in TSV format.
-       * @throws {Error} If any glossary entries are invalid.
+       * @throws {Error} If any glossary entries are invalid, for example empty after trimming.
        */
       toTsv() {
         return Object.entries(this.implEntries).map(([source, target]) => {
-          _GlossaryEntries.validateGlossaryTerm(source);
-          _GlossaryEntries.validateGlossaryTerm(target);
-          return `${source}	${target}`;
+          const trimmedSource = source.trim();
+          const trimmedTarget = target.trim();
+          _GlossaryEntries.validateGlossaryTerm(trimmedSource);
+          _GlossaryEntries.validateGlossaryTerm(trimmedTarget);
+          return `${trimmedSource}	${trimmedTarget}`;
         }).join("\n");
       }
       /**
@@ -23451,9 +23542,9 @@ var require_glossaryEntries = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/types.js
+// node_modules/.pnpm/deepl-node@1.29.0_debug@4.4.3/node_modules/deepl-node/dist/types.js
 var require_types = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/types.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.29.0_debug@4.4.3/node_modules/deepl-node/dist/types.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
   }
@@ -32941,7 +33032,7 @@ var require_ms = __commonJS({
       options = options || {};
       var type = typeof val;
       if (type === "string" && val.length > 0) {
-        return parse(val);
+        return parse2(val);
       } else if (type === "number" && isFinite(val)) {
         return options.long ? fmtLong(val) : fmtShort(val);
       }
@@ -32949,7 +33040,7 @@ var require_ms = __commonJS({
         "val is not a non-empty string or a valid number. val=" + JSON.stringify(val)
       );
     };
-    function parse(str) {
+    function parse2(str) {
       str = String(str);
       if (str.length > 100) {
         return;
@@ -34026,9 +34117,9 @@ var require_dist = __commonJS({
   }
 });
 
-// node_modules/.pnpm/follow-redirects@1.16.1_debug@4.4.3/node_modules/follow-redirects/debug.js
+// node_modules/.pnpm/follow-redirects@1.16.2_debug@4.4.3/node_modules/follow-redirects/debug.js
 var require_debug = __commonJS({
-  "node_modules/.pnpm/follow-redirects@1.16.1_debug@4.4.3/node_modules/follow-redirects/debug.js"(exports2, module2) {
+  "node_modules/.pnpm/follow-redirects@1.16.2_debug@4.4.3/node_modules/follow-redirects/debug.js"(exports2, module2) {
     var debug2;
     module2.exports = function() {
       if (!debug2) {
@@ -34046,9 +34137,9 @@ var require_debug = __commonJS({
   }
 });
 
-// node_modules/.pnpm/follow-redirects@1.16.1_debug@4.4.3/node_modules/follow-redirects/index.js
+// node_modules/.pnpm/follow-redirects@1.16.2_debug@4.4.3/node_modules/follow-redirects/index.js
 var require_follow_redirects = __commonJS({
-  "node_modules/.pnpm/follow-redirects@1.16.1_debug@4.4.3/node_modules/follow-redirects/index.js"(exports2, module2) {
+  "node_modules/.pnpm/follow-redirects@1.16.2_debug@4.4.3/node_modules/follow-redirects/index.js"(exports2, module2) {
     var url = require("url");
     var URL2 = url.URL;
     var http = require("http");
@@ -34283,7 +34374,7 @@ var require_follow_redirects = __commonJS({
           options.headers[headerList[i5]] = headerList[i5 + 1];
         }
       }
-      if (!isArray(options.sensitiveHeaders)) {
+      if (!Array.isArray(options.sensitiveHeaders)) {
         options.sensitiveHeaders = [];
       }
       if (options.host) {
@@ -34540,9 +34631,6 @@ var require_follow_redirects = __commonJS({
       var dot = subdomain.length - domain.length - 1;
       return dot > 0 && subdomain[dot] === "." && subdomain.endsWith(domain);
     }
-    function isArray(value) {
-      return value instanceof Array;
-    }
     function isString(value) {
       return typeof value === "string" || value instanceof String;
     }
@@ -34563,9 +34651,9 @@ var require_follow_redirects = __commonJS({
   }
 });
 
-// node_modules/.pnpm/axios@1.20.0_debug@4.4.3/node_modules/axios/dist/node/axios.cjs
+// node_modules/.pnpm/axios@1.21.0_debug@4.4.3/node_modules/axios/dist/node/axios.cjs
 var require_axios = __commonJS({
-  "node_modules/.pnpm/axios@1.20.0_debug@4.4.3/node_modules/axios/dist/node/axios.cjs"(exports2, module2) {
+  "node_modules/.pnpm/axios@1.21.0_debug@4.4.3/node_modules/axios/dist/node/axios.cjs"(exports2, module2) {
     "use strict";
     var FormData$1 = require_form_data();
     var crypto3 = require("crypto");
@@ -34710,10 +34798,16 @@ var require_axios = __commonJS({
         return false;
       }
       const prototype2 = getPrototypeOf(val);
-      return (prototype2 === null || prototype2 === Object.prototype || getPrototypeOf(prototype2) === null) && // Treat safe own/inherited Symbol.toStringTag or Symbol.iterator members as
-      // evidence the value is tagged/iterable, while ignoring members reachable
-      // only through shared or terminal prototype boundaries.
-      !hasOwnInPrototypeChain(val, toStringTag) && !hasOwnInPrototypeChain(val, iterator);
+      return (prototype2 === null || prototype2 === Object.prototype || getPrototypeOf(prototype2) === null) && // Treat own Symbol.toStringTag or Symbol.iterator members as evidence the
+      // value is tagged/iterable, ignoring members reachable only through shared
+      // or terminal prototype boundaries. This is exactly what
+      // hasOwnInPrototypeChain(val, prop) computes here: every prototype admitted
+      // above (null, Object.prototype, or a terminal null-prototype template) is
+      // a boundary, so the walk never inspects anything but `val`'s own members,
+      // and stops before even those when `val` is itself the boundary
+      // Object.prototype. Checking that inline avoids allocating the walker's
+      // `seen` list twice per call on the mergeConfig / merge hot path.
+      (isPrototypeBoundary(val, prototype2, true) || !hasOwnProperty(val, toStringTag) && !hasOwnProperty(val, iterator));
     };
     var isEmptyObject = (val) => {
       if (!isObject(val) || isBuffer2(val)) {
@@ -34814,11 +34908,21 @@ var require_axios = __commonJS({
         skipUndefined
       } = isContextDefined(this) && this || {};
       const result = {};
+      const lowerCaseKeys = caseless ? /* @__PURE__ */ Object.create(null) : null;
       const assignValue = (val, key) => {
         if (key === "__proto__" || key === "constructor" || key === "prototype") {
           return;
         }
-        const targetKey = caseless && typeof key === "string" && findKey2(result, key) || key;
+        let targetKey = key;
+        if (lowerCaseKeys && typeof key === "string") {
+          const lowerKey = key.toLowerCase();
+          const knownKey = lowerCaseKeys[lowerKey];
+          if (knownKey !== void 0 && hasOwnProperty(result, knownKey)) {
+            targetKey = knownKey;
+          } else {
+            lowerCaseKeys[lowerKey] = key;
+          }
+        }
         const existing = hasOwnProperty(result, targetKey) ? result[targetKey] : void 0;
         if (isPlainObject(existing) && isPlainObject(val)) {
           result[targetKey] = merge2(existing, val);
@@ -34836,7 +34940,7 @@ var require_axios = __commonJS({
           continue;
         }
         forEach(source, assignValue);
-        if (typeof source !== "object" || isArray(source)) {
+        if (typeof source !== "object" || isArray(source) || !Object.getOwnPropertySymbols) {
           continue;
         }
         const symbols = Object.getOwnPropertySymbols(source);
@@ -34932,7 +35036,24 @@ var require_axios = __commonJS({
       if (!thing) return null;
       if (isArray(thing)) return thing;
       let i5 = thing.length;
-      if (!isNumber(i5)) return null;
+      if (!Number.isSafeInteger(i5) || i5 < 0 || i5 > 4294967295) return null;
+      const indexes = /* @__PURE__ */ new Set();
+      const seen = /* @__PURE__ */ new Set();
+      let source = thing;
+      while (source != null && indexes.size < i5) {
+        if (seen.has(source)) return null;
+        seen.add(source);
+        const prototype2 = getPrototypeOf(source);
+        if (isPrototypeBoundary(source, prototype2, source === thing)) break;
+        Object.getOwnPropertyNames(source).forEach((key) => {
+          const index = +key;
+          if (Number.isInteger(index) && index >= 0 && index < i5 && String(index) === key && hasOwnProperty(source, key)) {
+            indexes.add(index);
+          }
+        });
+        source = prototype2;
+      }
+      if (indexes.size !== i5) return null;
       const arr = new Array(i5);
       while (i5-- > 0) {
         arr[i5] = thing[i5];
@@ -35145,7 +35266,7 @@ var require_axios = __commonJS({
     };
     var ignoreDuplicateOf = utils$1.toObjectSet(["age", "authorization", "content-length", "content-type", "etag", "expires", "from", "host", "if-modified-since", "if-unmodified-since", "last-modified", "location", "max-forwards", "proxy-authorization", "referer", "retry-after", "user-agent"]);
     var parseHeaders = (rawHeaders) => {
-      const parsed = {};
+      const parsed = /* @__PURE__ */ Object.create(null);
       let key;
       let val;
       let i5;
@@ -35309,9 +35430,11 @@ var require_axios = __commonJS({
       return parameters;
     }
     var isValidHeaderName = (str) => /^[-_a-zA-Z0-9^`|~,!#$%&'*+.]+$/.test(str.trim());
+    var PROTO_HEADER_SLOT = "__Proto__";
+    var headerSlot = (name) => name === "__proto__" ? PROTO_HEADER_SLOT : name;
     function matchHeaderValue(context, value, header, filter, isHeaderNameFilter) {
       if (utils$1.isFunction(filter)) {
-        return filter.call(this, value, header);
+        return filter.call(context, value, header);
       }
       if (isHeaderNameFilter) {
         value = header;
@@ -35356,7 +35479,7 @@ var require_axios = __commonJS({
           }
           const key = utils$1.findKey(self2, lHeader);
           if (!key || self2[key] === void 0 || _rewrite === true || _rewrite === void 0 && self2[key] !== false) {
-            self2[key || _header] = normalizeValue(_value);
+            self2[headerSlot(key || _header)] = normalizeValue(_value);
           }
         }
         const setHeaders = (headers, _rewrite) => utils$1.forEach(headers, (_value, _header) => setHeader(_value, _header, _rewrite));
@@ -35449,7 +35572,7 @@ var require_axios = __commonJS({
       }
       normalize(format2) {
         const self2 = this;
-        const headers = {};
+        const headers = /* @__PURE__ */ Object.create(null);
         utils$1.forEach(this, (value, header) => {
           const key = utils$1.findKey(headers, header);
           if (key) {
@@ -35457,7 +35580,7 @@ var require_axios = __commonJS({
             delete self2[header];
             return;
           }
-          const normalized = format2 ? formatHeader(header) : String(header).trim();
+          const normalized = headerSlot(format2 ? formatHeader(header) : String(header).trim());
           if (normalized !== header) {
             delete self2[header];
           }
@@ -35599,6 +35722,31 @@ var require_axios = __commonJS({
       }).filter(Boolean).join("; ");
       return message || error3.name || "AggregateError";
     }
+    var CAUSED_BY_SEPARATOR = "\nCaused by: ";
+    var $causeStack = /* @__PURE__ */ Symbol("causeStack");
+    function getCauseStackIndex(error3, stack) {
+      const causeStack = utils$1.hasOwnProp(error3, $causeStack) && error3[$causeStack];
+      return causeStack && stack.endsWith(causeStack) ? stack.length - causeStack.length : -1;
+    }
+    function appendCauseStack(target, source) {
+      try {
+        const sourceStack = source && source.stack;
+        if (typeof sourceStack !== "string" || !sourceStack) {
+          return;
+        }
+        const targetStack = target.stack;
+        if (typeof targetStack !== "string" || !targetStack) {
+          return;
+        }
+        const causeStack = CAUSED_BY_SEPARATOR + sourceStack;
+        target.stack = targetStack + causeStack;
+        Object.defineProperty(target, $causeStack, {
+          __proto__: null,
+          value: causeStack
+        });
+      } catch (e5) {
+      }
+    }
     var AxiosError = class _AxiosError extends Error {
       static from(error3, code, config, request, response, customProps) {
         let message = error3.message;
@@ -35614,6 +35762,7 @@ var require_axios = __commonJS({
           configurable: true
         });
         axiosError.name = error3.name;
+        appendCauseStack(axiosError, error3);
         if (error3.status != null && axiosError.status == null) {
           axiosError.status = error3.status;
         }
@@ -35902,6 +36051,12 @@ var require_axios = __commonJS({
         handlers.pop();
       }
     }
+    function normalizeHandlerId(id) {
+      if (typeof id === "string" && id !== "" && String(Number(id)) === id) {
+        return Number(id);
+      }
+      return id;
+    }
     function syncHandlerEntries(manager, internals) {
       const handlers = manager.handlers;
       const length = countHandlers(handlers);
@@ -35972,9 +36127,10 @@ var require_axios = __commonJS({
       eject(id) {
         const internals = this[$internals];
         syncHandlerEntries(this, internals);
-        const entry = internals.handlerEntries.get(id);
+        const handlerId = normalizeHandlerId(id);
+        const entry = internals.handlerEntries.get(handlerId);
         if (entry) {
-          internals.handlerEntries.delete(id);
+          internals.handlerEntries.delete(handlerId);
           if (this.handlers[entry.index] !== entry.handler) {
             return;
           }
@@ -36031,7 +36187,8 @@ var require_axios = __commonJS({
       clarifyTimeoutError: false,
       legacyInterceptorReqResOrdering: true,
       advertiseZstdAcceptEncoding: false,
-      validateStatusUndefinedResolves: true
+      validateStatusUndefinedResolves: true,
+      encodeBasicAuthUsername: false
     };
     var URLSearchParams2 = url.URLSearchParams;
     var ALPHA = "abcdefghijklmnopqrstuvwxyz";
@@ -36124,6 +36281,24 @@ var require_axios = __commonJS({
       }
       return obj;
     }
+    function normalizeArray(value) {
+      if (!utils$1.isArray(value)) return value;
+      const keys = Object.keys(value);
+      return keys.length !== value.length || keys.some((key, index) => key !== String(index)) ? arrayToObject(value) : value;
+    }
+    function normalizeArrays(obj) {
+      const pending = [obj];
+      while (pending.length) {
+        const target = pending.pop();
+        Object.keys(target).forEach((key) => {
+          const value = target[key] = normalizeArray(target[key]);
+          if (utils$1.isArray(value) || utils$1.isPlainObject(value)) {
+            pending.push(value);
+          }
+        });
+      }
+      return obj;
+    }
     function formDataToJSON(formData) {
       function buildPath(path2, value, target, index) {
         throwIfDepthExceeded(index);
@@ -36134,6 +36309,7 @@ var require_axios = __commonJS({
         name = !name && utils$1.isArray(target) ? target.length : name;
         if (isLast) {
           if (utils$1.hasOwnProp(target, name)) {
+            target[name] = normalizeArray(target[name]);
             target[name] = utils$1.isArray(target[name]) ? target[name].concat(value) : [target[name], value];
           } else {
             target[name] = value;
@@ -36154,7 +36330,7 @@ var require_axios = __commonJS({
         utils$1.forEachEntry(formData, (name, value) => {
           buildPath(parsePropPath(name), value, obj, 0);
         });
-        return obj;
+        return normalizeArrays(obj);
       }
       return null;
     }
@@ -36433,12 +36609,12 @@ var require_axios = __commonJS({
     function getEnv(key) {
       return process.env[key.toLowerCase()] || process.env[key.toUpperCase()] || "";
     }
-    var VERSION = "1.20.0";
+    var VERSION = "1.21.0";
     function parseProtocol(url2) {
       const match = /^([-+\w]{1,25}):(?:\/\/)?/.exec(url2);
-      return match && match[1] || "";
+      return match && match[1].toLowerCase() || "";
     }
-    var DATA_URL_PATTERN = /^([^,;/]+\/[^,;/]+)?((?:;[^,;=]+=[^,;]+)*)(;base64)?,([\s\S]*)$/;
+    var DATA_URL_PATTERN = /^([^,;/]+\/[^,;/]+)?((?:;[^,;=]+=[^,;]+)*)(;base64)?,([\s\S]*)$/i;
     function fromDataURI(uri, asBlob, options) {
       const _Blob = options && options.Blob || platform3.classes.Blob;
       const protocol = parseProtocol(uri);
@@ -36461,7 +36637,7 @@ var require_axios = __commonJS({
         } else if (params) {
           mime = "text/plain" + params;
         }
-        const buffer = encoding === "base64" ? Buffer.from(body, "base64") : Buffer.from(decodeURIComponent(body), encoding);
+        const buffer = encoding === "base64" ? Buffer.from(body.replace(/%([\da-f]{2})/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16))), "base64") : Buffer.from(decodeURIComponent(body), encoding);
         if (asBlob) {
           if (!_Blob) {
             throw new AxiosError("Blob is not supported", AxiosError.ERR_NOT_SUPPORT);
@@ -36536,7 +36712,10 @@ var require_axios = __commonJS({
         const timeWindow = internals.timeWindow;
         const divider = 1e3 / timeWindow;
         const bytesThreshold = maxRate / divider;
-        const minChunkSize = internals.minChunkSize !== false ? Math.max(internals.minChunkSize, bytesThreshold * 0.01) : 0;
+        let minChunkSize = internals.minChunkSize !== false ? Math.max(internals.minChunkSize, bytesThreshold * 0.01) : 0;
+        if (maxRate) {
+          minChunkSize = Math.min(bytesThreshold, minChunkSize);
+        }
         const pushChunk = (_chunk, _callback) => {
           const bytes = Buffer.byteLength(_chunk);
           internals.bytesSeen += bytes;
@@ -36552,6 +36731,9 @@ var require_axios = __commonJS({
           }
         };
         const transformChunk = (_chunk, _callback) => {
+          if (this.destroyed) {
+            return _callback();
+          }
           const chunkSize = Buffer.byteLength(_chunk);
           let chunkRemainder = null;
           let maxChunkSize = readableHighWaterMark;
@@ -36574,7 +36756,7 @@ var require_axios = __commonJS({
               }, timeWindow - passed);
             }
             if (bytesLeft < maxChunkSize) {
-              maxChunkSize = bytesLeft;
+              maxChunkSize = Math.max(1, Math.floor(bytesLeft));
             }
           }
           if (maxChunkSize && chunkSize > maxChunkSize && chunkSize - maxChunkSize > minChunkSize) {
@@ -36613,23 +36795,23 @@ var require_axios = __commonJS({
     };
     var BOUNDARY_ALPHABET = platform3.ALPHABET.ALPHA_DIGIT + "-_";
     var textEncoder2 = typeof TextEncoder === "function" ? new TextEncoder() : new util.TextEncoder();
-    var CRLF = "\r\n";
-    var CRLF_BYTES = textEncoder2.encode(CRLF);
+    var CRLF$1 = "\r\n";
+    var CRLF_BYTES = textEncoder2.encode(CRLF$1);
     var CRLF_BYTES_COUNT = 2;
     var FormDataPart = class {
       constructor(name, value) {
         const {
-          escapeName
+          escapeName: escapeName2
         } = this.constructor;
         const isStringValue = utils$1.isString(value);
-        let headers = `Content-Disposition: form-data; name="${escapeName(name)}"${!isStringValue && value.name ? `; filename="${escapeName(value.name)}"` : ""}${CRLF}`;
+        let headers = `Content-Disposition: form-data; name="${escapeName2(name)}"${!isStringValue && value.name ? `; filename="${escapeName2(value.name)}"` : ""}${CRLF$1}`;
         if (isStringValue) {
-          value = textEncoder2.encode(String(value).replace(/\r?\n|\r\n?/g, CRLF));
+          value = textEncoder2.encode(String(value).replace(/\r?\n|\r\n?/g, CRLF$1));
         } else {
           const safeType = String(value.type || "application/octet-stream").replace(/[\r\n]/g, "");
-          headers += `Content-Type: ${safeType}${CRLF}`;
+          headers += `Content-Type: ${safeType}${CRLF$1}`;
         }
-        this.headers = textEncoder2.encode(headers + CRLF);
+        this.headers = textEncoder2.encode(headers + CRLF$1);
         this.contentLength = isStringValue ? value.byteLength : value.size;
         this.size = this.headers.byteLength + this.contentLength + CRLF_BYTES_COUNT;
         this.name = name;
@@ -36667,8 +36849,8 @@ var require_axios = __commonJS({
       if (boundary.length < 1 || boundary.length > 70) {
         throw new Error("boundary must be 1-70 characters long");
       }
-      const boundaryBytes = textEncoder2.encode("--" + boundary + CRLF);
-      const footerBytes = textEncoder2.encode("--" + boundary + "--" + CRLF);
+      const boundaryBytes = textEncoder2.encode("--" + boundary + CRLF$1);
+      const footerBytes = textEncoder2.encode("--" + boundary + "--" + CRLF$1);
       let contentLength = footerBytes.byteLength;
       const parts = Array.from(form.entries()).map(([name, value]) => {
         const part = new FormDataPart(name, value);
@@ -36769,7 +36951,7 @@ var require_axios = __commonJS({
               timer = null;
             }
             stream2.once("close", () => {
-              if (!--streamsCount) {
+              if (!--streamsCount && !removed) {
                 timer = setTimeout(() => {
                   timer = null;
                   removeSession();
@@ -36781,6 +36963,7 @@ var require_axios = __commonJS({
         }
         session.once("close", removeSession);
         session.once("error", removeSession);
+        session.once("goaway", removeSession);
         let entry = [session, options];
         authoritySessions ? authoritySessions.push(entry) : authoritySessions = this.sessions[authority] = [entry];
         return session;
@@ -36991,7 +37174,20 @@ var require_axios = __commonJS({
       if (hostname.charAt(0) === "[" && hostname.charAt(hostname.length - 1) === "]") {
         hostname = hostname.slice(1, -1);
       }
-      const trimmed = trimTrailingDots(hostname);
+      let trimmed = trimTrailingDots(hostname);
+      if (trimmed.indexOf(":") !== -1) {
+        try {
+          trimmed = new URL("http://[" + trimmed + "]/").hostname.slice(1, -1);
+        } catch (_err) {
+          return trimmed;
+        }
+      } else if (/[\u0080-\uffff]/.test(trimmed)) {
+        const prefix = /^[*.]+/.exec(trimmed);
+        const start = prefix ? prefix[0] : "";
+        const ascii = url.domainToASCII(trimmed.slice(start.length));
+        if (!ascii) return "";
+        trimmed = start + trimTrailingDots(ascii);
+      }
       const ipv4 = normalizeIPAddress(trimmed);
       if (ipv4 !== trimmed) {
         return ipv4;
@@ -37258,6 +37454,26 @@ var require_axios = __commonJS({
       }
       return Math.floor((len - padding) * 3 / 4);
     };
+    var estimatePercentDecodedBase64BufferAllocation = (body) => {
+      if (body.indexOf("%") === -1) {
+        return estimateBase64BufferAllocation(body);
+      }
+      let length = 0;
+      let previous = 0;
+      let last = 0;
+      for (let i5 = 0, len = body.length; i5 < len; i5++) {
+        let code = body.charCodeAt(i5);
+        if (code === 37 && isPercentEncodedByte(body, i5, len)) {
+          code = hexValue(body.charCodeAt(i5 + 1)) * 16 + hexValue(body.charCodeAt(i5 + 2));
+          i5 += 2;
+        }
+        length++;
+        previous = last;
+        last = code;
+      }
+      const padding = last === 61 ? previous === 61 ? 2 : 1 : 0;
+      return Math.floor((length - padding) * 3 / 4);
+    };
     var estimatePercentDecodedBase64Bytes = (body) => {
       const len = body.length;
       let significant = 0;
@@ -37287,14 +37503,14 @@ var require_axios = __commonJS({
       }
       return base64Bytes(significant);
     };
-    var estimateDataURLBytes = (url2, estimateBase64) => {
+    var estimateDataURLBytes = (url2, estimateBase64, base64Pattern) => {
       if (!url2 || typeof url2 !== "string") return 0;
-      if (!url2.startsWith("data:")) return 0;
+      if (!/^data:/i.test(url2)) return 0;
       const comma = url2.indexOf(",");
       if (comma < 0) return 0;
       const meta = url2.slice(5, comma);
       const body = url2.slice(comma + 1);
-      const isBase64 = /;base64/i.test(meta);
+      const isBase64 = base64Pattern.test(meta);
       if (isBase64) {
         return estimateBase64(body);
       }
@@ -37324,10 +37540,10 @@ var require_axios = __commonJS({
     };
     function estimateDataURLDecodedBytes(url2) {
       const fragmentIndex = typeof url2 === "string" ? url2.indexOf("#") : -1;
-      return estimateDataURLBytes(fragmentIndex === -1 ? url2 : url2.slice(0, fragmentIndex), estimatePercentDecodedBase64Bytes);
+      return estimateDataURLBytes(fragmentIndex === -1 ? url2 : url2.slice(0, fragmentIndex), estimatePercentDecodedBase64Bytes, /; *base64[\t\n\f\r ]*$/i);
     }
     function estimateDataURLBufferAllocation(url2) {
-      return estimateDataURLBytes(url2, estimateBase64BufferAllocation);
+      return estimateDataURLBytes(url2, estimatePercentDecodedBase64BufferAllocation, /;base64$/i);
     }
     var zlibOptions = {
       flush: zlib2.constants.Z_SYNC_FLUSH,
@@ -37362,6 +37578,9 @@ var require_axios = __commonJS({
     var kAxiosInstalledTunnel = /* @__PURE__ */ Symbol("axios.http.installedTunnel");
     var tunnelingAgentCache = /* @__PURE__ */ new Map();
     var tunnelingAgentCacheUser = /* @__PURE__ */ new WeakMap();
+    var directAgents = /* @__PURE__ */ new WeakMap();
+    var directAgentHooks = ["createConnection", "getName"];
+    var nativeAgentPoolHooks = ["addRequest", "createSocket", "removeSocket", "keepSocketAlive", "reuseSocket", "_getSession", "_cacheSession", "_evictSession"];
     var NODE_NATIVE_ENV_PROXY_SUPPORT = {
       22: 21,
       24: 5
@@ -37389,6 +37608,49 @@ var require_axios = __commonJS({
     function getProxyEnvAgent(options, configHttpAgent, configHttpsAgent) {
       return isHttps.test(options.protocol) ? configHttpsAgent || https.globalAgent : configHttpAgent || http.globalAgent;
     }
+    function getDirectAgent(configuredAgent, transport) {
+      if (!process.allowedNodeEnvironmentFlags || !process.allowedNodeEnvironmentFlags.has("--use-env-proxy")) {
+        return configuredAgent;
+      }
+      const agent = configuredAgent || transport.globalAgent;
+      const options = agent && agent.options;
+      if (!(agent instanceof transport.Agent) || agent.protocol !== transport.globalAgent.protocol || !options || !utils$1.hasOwnProp(options, "proxyEnv") || typeof options.proxyEnv !== "object" || options.proxyEnv === null) {
+        return configuredAgent;
+      }
+      for (const hook of nativeAgentPoolHooks) {
+        if (utils$1.isFunction(transport.Agent.prototype[hook]) && agent[hook] !== transport.Agent.prototype[hook]) {
+          throw new AxiosError("proxy: false cannot adapt an agent overriding " + hook + "; use an agent constructed without proxyEnv", AxiosError.ERR_BAD_OPTION_VALUE);
+        }
+      }
+      let direct = directAgents.get(agent);
+      if (!direct) {
+        direct = new transport.Agent({
+          ...options,
+          proxyEnv: void 0
+        });
+        const destroy = agent.destroy;
+        agent.destroy = function destroyWithDirectAgent() {
+          try {
+            return destroy.apply(this, arguments);
+          } finally {
+            direct.destroy();
+          }
+        };
+        directAgents.set(agent, direct);
+      }
+      for (const hook of directAgentHooks) {
+        direct[hook] = agent[hook] === transport.Agent.prototype[hook] ? transport.Agent.prototype[hook] : bind(agent[hook], agent);
+      }
+      return direct;
+    }
+    function setDirectAgent(options, configHttpAgent, configHttpsAgent) {
+      const secure = isHttps.test(options.protocol);
+      const agent = getDirectAgent(secure ? configHttpsAgent : configHttpAgent, secure ? https : http);
+      options.agent = agent;
+      if (options.agents) {
+        options.agents[secure ? "https" : "http"] = agent;
+      }
+    }
     function getTunnelingAgent(agentOptions, userHttpsAgent) {
       const key = agentOptions.protocol + "//" + agentOptions.hostname + ":" + (agentOptions.port || "") + "#" + (agentOptions.auth || "");
       const cache5 = userHttpsAgent ? tunnelingAgentCacheUser.get(userHttpsAgent) || tunnelingAgentCacheUser.set(userHttpsAgent, /* @__PURE__ */ new Map()).get(userHttpsAgent) : tunnelingAgentCache;
@@ -37399,18 +37661,15 @@ var require_axios = __commonJS({
         ...agentOptions
       } : agentOptions;
       agent = new HttpsProxyAgent(merged);
-      if (userHttpsAgent && userHttpsAgent.options) {
-        const originTLSOptions = {
-          ...userHttpsAgent.options
-        };
-        const callback = agent.callback;
-        agent.callback = function axiosTunnelingAgentCallback(req, opts) {
-          return callback.call(this, req, {
-            ...originTLSOptions,
-            ...opts
-          });
-        };
-      }
+      const callback = agent.callback;
+      agent.callback = function axiosTunnelingAgentCallback(req, opts) {
+        const originTLSAgent = userHttpsAgent || https.globalAgent;
+        const originTLSOptions = originTLSAgent && originTLSAgent.options;
+        return callback.call(this, req, {
+          ...originTLSOptions,
+          ...opts
+        });
+      };
       agent[kAxiosInstalledTunnel] = true;
       cache5.set(key, agent);
       return agent;
@@ -37434,6 +37693,10 @@ var require_axios = __commonJS({
     };
     var http2Sessions = new Http2Sessions();
     function dispatchBeforeRedirect(options, responseDetails, requestDetails) {
+      if (!isSameOriginRedirect(options, requestDetails)) {
+        stripMatchingHeaders(options.headers, /* @__PURE__ */ new Set(["authorization", "cookie"]));
+        delete options.auth;
+      }
       if (options.beforeRedirects.proxy) {
         options.beforeRedirects.proxy(options);
       }
@@ -37442,6 +37705,9 @@ var require_axios = __commonJS({
       }
       if (options.beforeRedirects.sensitiveHeaders) {
         options.beforeRedirects.sensitiveHeaders(options, requestDetails);
+      }
+      if (options.beforeRedirects.direct) {
+        options.beforeRedirects.direct(options);
       }
       if (options.beforeRedirects.config) {
         options.beforeRedirects.config(options, responseDetails, requestDetails);
@@ -37487,6 +37753,9 @@ var require_axios = __commonJS({
       }
       if (isRedirect && options.agent && options.agent[kAxiosInstalledTunnel]) {
         options.agent = void 0;
+      }
+      if (isRedirect && options.agents && options.agents.https && options.agents.https[kAxiosInstalledTunnel]) {
+        options.agents.https = configHttpsAgent;
       }
       if (proxy) {
         const isProxyURL = proxy instanceof URL;
@@ -37672,9 +37941,9 @@ var require_axios = __commonJS({
         if (httpVersion === void 0) httpVersion = 1;
         const rawHttpVersion = httpVersion;
         let http2Options = own2("http2Options");
+        const configProxy = own2("proxy");
         const httpAgent = own2("httpAgent");
         const httpsAgent = own2("httpsAgent");
-        const configProxy = own2("proxy");
         const responseType = own2("responseType");
         const responseEncoding = own2("responseEncoding");
         const socketPath = own2("socketPath");
@@ -37788,6 +38057,9 @@ var require_axios = __commonJS({
             });
           } catch (err) {
             throw AxiosError.from(err, AxiosError.ERR_BAD_REQUEST, config);
+          }
+          if (maxContentLength > -1 && (responseType === "blob" ? convertedData.size : convertedData.length) > maxContentLength) {
+            return reject(new AxiosError("maxContentLength size of " + maxContentLength + " exceeded", AxiosError.ERR_BAD_RESPONSE, config));
           }
           if (responseType === "text") {
             convertedData = convertedData.toString(responseEncoding);
@@ -37948,9 +38220,13 @@ var require_axios = __commonJS({
         }
         let transport;
         let isNativeTransport = false;
-        let transportEnforcesMaxBodyLength = false;
         const isHttpsRequest = isHttps.test(options.protocol);
-        if (options.agent == null) {
+        if (!isHttp2 && configProxy === false) {
+          setDirectAgent(options, httpAgent, httpsAgent);
+          options.beforeRedirects.direct = (redirectOptions) => {
+            setDirectAgent(redirectOptions, httpAgent, httpsAgent);
+          };
+        } else if (options.agent == null) {
           options.agent = isHttpsRequest ? httpsAgent : httpAgent;
         }
         if (isHttp2) {
@@ -37966,7 +38242,6 @@ var require_axios = __commonJS({
             transport = isHttpsRequest ? https : http;
             isNativeTransport = true;
           } else {
-            transportEnforcesMaxBodyLength = true;
             options.sensitiveHeaders = [];
             if (maxRedirects) {
               options.maxRedirects = maxRedirects;
@@ -38202,7 +38477,7 @@ var require_axios = __commonJS({
             }
           });
           let uploadStream = data;
-          if (maxBodyLength > -1 && !transportEnforcesMaxBodyLength) {
+          if (maxBodyLength > -1) {
             const limit = maxBodyLength;
             let bytesSent = 0;
             uploadStream = stream.pipeline([data, new stream.Transform({
@@ -38225,10 +38500,13 @@ var require_axios = __commonJS({
         }
       });
     };
-    var isURLSameOrigin = platform3.hasStandardBrowserEnv ? /* @__PURE__ */ ((origin2, isMSIE) => (url2) => {
-      url2 = new URL(url2, platform3.origin);
-      return origin2.protocol === url2.protocol && origin2.host === url2.host && (isMSIE || origin2.port === url2.port);
-    })(new URL(platform3.origin), platform3.navigator && /(msie|trident)/i.test(platform3.navigator.userAgent)) : () => true;
+    var decodeCookieValue = (value) => {
+      try {
+        return decodeURIComponent(value);
+      } catch (e5) {
+        return value;
+      }
+    };
     var cookies = platform3.hasStandardBrowserEnv ? (
       // Standard browser envs support document.cookie
       {
@@ -38254,19 +38532,28 @@ var require_axios = __commonJS({
         },
         read(name) {
           if (typeof document === "undefined") return null;
-          const cookies2 = document.cookie.split(";");
+          const cookieString = document.cookie;
+          if (!cookieString) return null;
+          const cookies2 = cookieString.split(";");
           for (let i5 = 0; i5 < cookies2.length; i5++) {
             const cookie = cookies2[i5].replace(/^\s+/, "");
             const eq = cookie.indexOf("=");
             if (eq !== -1 && cookie.slice(0, eq) === name) {
-              try {
-                return decodeURIComponent(cookie.slice(eq + 1));
-              } catch (e5) {
-                return cookie.slice(eq + 1);
-              }
+              return decodeCookieValue(cookie.slice(eq + 1));
             }
           }
           return null;
+        },
+        async readAsync(name) {
+          try {
+            const store = typeof window !== "undefined" && window.cookieStore;
+            if (store && utils$1.isFunction(store.get)) {
+              const cookie = await store.get(name);
+              return cookie ? decodeCookieValue(cookie.value) : null;
+            }
+          } catch (e5) {
+          }
+          return this.read(name);
         },
         remove(name) {
           this.write(name, "", Date.now() - 864e5, "/");
@@ -38280,131 +38567,240 @@ var require_axios = __commonJS({
         read() {
           return null;
         },
+        async readAsync() {
+          return null;
+        },
         remove() {
         }
       }
     );
+    var isURLSameOrigin = platform3.hasStandardBrowserEnv ? /* @__PURE__ */ ((origin2) => (url2) => {
+      url2 = new URL(url2, document.baseURI || platform3.origin);
+      return origin2.protocol === url2.protocol && origin2.host === url2.host && origin2.port === url2.port;
+    })(new URL(platform3.origin)) : () => true;
+    function assertParamsAcyclic(params) {
+      const pending = [{
+        value: params
+      }];
+      const active = /* @__PURE__ */ new WeakSet();
+      const visited = /* @__PURE__ */ new WeakSet();
+      while (pending.length) {
+        const {
+          value,
+          done
+        } = pending.pop();
+        if (!utils$1.isPlainObject(value) && !utils$1.isArray(value)) continue;
+        if (done) {
+          active.delete(value);
+          continue;
+        }
+        if (active.has(value)) {
+          throw new AxiosError("Circular reference detected in params", AxiosError.ERR_BAD_OPTION_VALUE);
+        }
+        if (visited.has(value)) continue;
+        visited.add(value);
+        active.add(value);
+        pending.push({
+          value,
+          done: true
+        });
+        const keys = Object.keys(value);
+        if (Object.getOwnPropertySymbols && Object.getOwnPropertyDescriptor) {
+          Object.getOwnPropertySymbols(value).forEach((key) => {
+            const descriptor = Object.getOwnPropertyDescriptor(value, key);
+            if (descriptor && descriptor.enumerable) keys.push(key);
+          });
+        }
+        keys.forEach((key) => {
+          if (key === "__proto__" || key === "constructor" || key === "prototype") {
+            const descriptor = Object.getOwnPropertyDescriptor(value, key);
+            if (descriptor && utils$1.hasOwnProp(descriptor, "value")) {
+              pending.push({
+                value: descriptor.value
+              });
+            }
+          } else {
+            pending.push({
+              value: value[key]
+            });
+          }
+        });
+      }
+    }
     var headersToObject = (thing) => thing instanceof AxiosHeaders ? {
       ...thing
     } : thing;
     var ownEnumerableKeys = (thing) => {
       if (Object.getOwnPropertySymbols && Object.getOwnPropertyDescriptor) {
-        return Object.keys(thing).concat(Object.getOwnPropertySymbols(thing).filter((symbol) => Object.getOwnPropertyDescriptor(thing, symbol).enumerable));
+        return Object.keys(thing).concat(Object.getOwnPropertySymbols(thing).filter((symbol) => {
+          const descriptor = Object.getOwnPropertyDescriptor(thing, symbol);
+          return descriptor && descriptor.enumerable;
+        }));
       }
       return Object.keys(thing);
+    };
+    function mergeParams(a5, b5) {
+      const pending = [];
+      const copies = /* @__PURE__ */ new WeakMap();
+      const empty = {};
+      function copy(target, source) {
+        if (!utils$1.isPlainObject(source)) {
+          return utils$1.isArray(source) ? source.slice() : source;
+        }
+        const base = utils$1.isPlainObject(target) ? target : empty;
+        let bases = copies.get(source);
+        if (!bases) {
+          bases = /* @__PURE__ */ new WeakMap();
+          copies.set(source, bases);
+        }
+        if (bases.has(base)) return bases.get(base);
+        const result2 = {};
+        bases.set(base, result2);
+        pending.push({
+          base,
+          source,
+          result: result2
+        });
+        return result2;
+      }
+      const result = utils$1.isUndefined(b5) ? copy(void 0, a5) : copy(a5, b5);
+      while (pending.length) {
+        const {
+          base,
+          source,
+          result: target
+        } = pending.pop();
+        const baseKeys = new Set(ownEnumerableKeys(base));
+        const sourceKeys = new Set(ownEnumerableKeys(source));
+        const keys = /* @__PURE__ */ new Set([...baseKeys, ...sourceKeys]);
+        keys.forEach((key) => {
+          if (key === "__proto__" || key === "constructor" || key === "prototype") return;
+          const hasSource = sourceKeys.has(key);
+          const value = hasSource ? source[key] : void 0;
+          const previous = (!hasSource || utils$1.isPlainObject(value)) && baseKeys.has(key) ? base[key] : void 0;
+          target[key] = hasSource ? copy(previous, value) : copy(void 0, previous);
+        });
+      }
+      assertParamsAcyclic(result);
+      return result;
+    }
+    function getMergedValue(target, source, prop, caseless) {
+      if (utils$1.isPlainObject(target) && utils$1.isPlainObject(source)) {
+        return utils$1.merge.call({
+          caseless
+        }, target, source);
+      } else if (utils$1.isPlainObject(source)) {
+        return utils$1.merge({}, source);
+      } else if (utils$1.isArray(source)) {
+        return source.slice();
+      }
+      return source;
+    }
+    function mergeDeepProperties(a5, b5, prop, caseless) {
+      if (!utils$1.isUndefined(b5)) {
+        return getMergedValue(a5, b5, prop, caseless);
+      } else if (!utils$1.isUndefined(a5)) {
+        return getMergedValue(void 0, a5, prop, caseless);
+      }
+    }
+    function valueFromConfig2(a5, b5) {
+      if (!utils$1.isUndefined(b5)) {
+        return getMergedValue(void 0, b5);
+      }
+    }
+    function defaultToConfig2(a5, b5) {
+      if (!utils$1.isUndefined(b5)) {
+        return getMergedValue(void 0, b5);
+      } else if (!utils$1.isUndefined(a5)) {
+        return getMergedValue(void 0, a5);
+      }
+    }
+    function getMergedTransitionalOption(config1, config2, prop) {
+      const transitional2 = utils$1.hasOwnProp(config2, "transitional") ? config2.transitional : void 0;
+      if (!utils$1.isUndefined(transitional2)) {
+        if (utils$1.isPlainObject(transitional2)) {
+          if (utils$1.hasOwnProp(transitional2, prop)) {
+            return transitional2[prop];
+          }
+        } else {
+          return void 0;
+        }
+      }
+      const transitional1 = utils$1.hasOwnProp(config1, "transitional") ? config1.transitional : void 0;
+      if (utils$1.isPlainObject(transitional1) && utils$1.hasOwnProp(transitional1, prop)) {
+        return transitional1[prop];
+      }
+      return void 0;
+    }
+    function mergeDirectKeys(a5, b5, prop, config1, config2) {
+      if (utils$1.hasOwnProp(config2, prop)) {
+        return getMergedValue(a5, b5);
+      } else if (utils$1.hasOwnProp(config1, prop)) {
+        return getMergedValue(void 0, a5);
+      }
+    }
+    function mergeHeaders(a5, b5, prop) {
+      return mergeDeepProperties(headersToObject(a5), headersToObject(b5), prop, true);
+    }
+    var hasOwnPropertyDescriptor = Object.freeze({
+      __proto__: null,
+      value: Object.prototype.hasOwnProperty,
+      enumerable: false,
+      writable: true,
+      configurable: true
+    });
+    var mergeMap = {
+      url: valueFromConfig2,
+      method: valueFromConfig2,
+      data: valueFromConfig2,
+      baseURL: defaultToConfig2,
+      transformRequest: defaultToConfig2,
+      transformResponse: defaultToConfig2,
+      params: mergeParams,
+      paramsSerializer: defaultToConfig2,
+      timeout: defaultToConfig2,
+      timeoutErrorMessage: defaultToConfig2,
+      withCredentials: defaultToConfig2,
+      withXSRFToken: defaultToConfig2,
+      adapter: defaultToConfig2,
+      responseType: defaultToConfig2,
+      xsrfCookieName: defaultToConfig2,
+      xsrfHeaderName: defaultToConfig2,
+      onUploadProgress: defaultToConfig2,
+      onDownloadProgress: defaultToConfig2,
+      decompress: defaultToConfig2,
+      maxContentLength: defaultToConfig2,
+      maxBodyLength: defaultToConfig2,
+      beforeRedirect: defaultToConfig2,
+      transport: defaultToConfig2,
+      httpAgent: defaultToConfig2,
+      httpsAgent: defaultToConfig2,
+      cancelToken: defaultToConfig2,
+      socketPath: defaultToConfig2,
+      allowedSocketPaths: defaultToConfig2,
+      responseEncoding: defaultToConfig2,
+      validateStatus: mergeDirectKeys,
+      headers: mergeHeaders
     };
     function mergeConfig(config1, config2) {
       config1 = config1 || {};
       config2 = config2 || {};
       const config = /* @__PURE__ */ Object.create(null);
-      Object.defineProperty(config, "hasOwnProperty", {
-        // Null-proto descriptor so a polluted Object.prototype.get cannot turn
-        // this data descriptor into an accessor descriptor on the way in.
-        __proto__: null,
-        value: Object.prototype.hasOwnProperty,
-        enumerable: false,
-        writable: true,
-        configurable: true
-      });
-      function getMergedValue(target, source, prop, caseless) {
-        if (utils$1.isPlainObject(target) && utils$1.isPlainObject(source)) {
-          return utils$1.merge.call({
-            caseless
-          }, target, source);
-        } else if (utils$1.isPlainObject(source)) {
-          return utils$1.merge({}, source);
-        } else if (utils$1.isArray(source)) {
-          return source.slice();
-        }
-        return source;
-      }
-      function mergeDeepProperties(a5, b5, prop, caseless) {
-        if (!utils$1.isUndefined(b5)) {
-          return getMergedValue(a5, b5, prop, caseless);
-        } else if (!utils$1.isUndefined(a5)) {
-          return getMergedValue(void 0, a5, prop, caseless);
-        }
-      }
-      function valueFromConfig2(a5, b5) {
-        if (!utils$1.isUndefined(b5)) {
-          return getMergedValue(void 0, b5);
-        }
-      }
-      function defaultToConfig2(a5, b5) {
-        if (!utils$1.isUndefined(b5)) {
-          return getMergedValue(void 0, b5);
-        } else if (!utils$1.isUndefined(a5)) {
-          return getMergedValue(void 0, a5);
-        }
-      }
-      function getMergedTransitionalOption(prop) {
-        const transitional2 = utils$1.hasOwnProp(config2, "transitional") ? config2.transitional : void 0;
-        if (!utils$1.isUndefined(transitional2)) {
-          if (utils$1.isPlainObject(transitional2)) {
-            if (utils$1.hasOwnProp(transitional2, prop)) {
-              return transitional2[prop];
-            }
-          } else {
-            return void 0;
-          }
-        }
-        const transitional1 = utils$1.hasOwnProp(config1, "transitional") ? config1.transitional : void 0;
-        if (utils$1.isPlainObject(transitional1) && utils$1.hasOwnProp(transitional1, prop)) {
-          return transitional1[prop];
-        }
-        return void 0;
-      }
-      function mergeDirectKeys(a5, b5, prop) {
-        if (utils$1.hasOwnProp(config2, prop)) {
-          return getMergedValue(a5, b5);
-        } else if (utils$1.hasOwnProp(config1, prop)) {
-          return getMergedValue(void 0, a5);
-        }
-      }
-      const mergeMap = {
-        url: valueFromConfig2,
-        method: valueFromConfig2,
-        data: valueFromConfig2,
-        baseURL: defaultToConfig2,
-        transformRequest: defaultToConfig2,
-        transformResponse: defaultToConfig2,
-        paramsSerializer: defaultToConfig2,
-        timeout: defaultToConfig2,
-        timeoutErrorMessage: defaultToConfig2,
-        withCredentials: defaultToConfig2,
-        withXSRFToken: defaultToConfig2,
-        adapter: defaultToConfig2,
-        responseType: defaultToConfig2,
-        xsrfCookieName: defaultToConfig2,
-        xsrfHeaderName: defaultToConfig2,
-        onUploadProgress: defaultToConfig2,
-        onDownloadProgress: defaultToConfig2,
-        decompress: defaultToConfig2,
-        maxContentLength: defaultToConfig2,
-        maxBodyLength: defaultToConfig2,
-        beforeRedirect: defaultToConfig2,
-        transport: defaultToConfig2,
-        httpAgent: defaultToConfig2,
-        httpsAgent: defaultToConfig2,
-        cancelToken: defaultToConfig2,
-        socketPath: defaultToConfig2,
-        allowedSocketPaths: defaultToConfig2,
-        responseEncoding: defaultToConfig2,
-        validateStatus: mergeDirectKeys,
-        headers: (a5, b5, prop) => mergeDeepProperties(headersToObject(a5), headersToObject(b5), prop, true)
-      };
-      utils$1.forEach(ownEnumerableKeys({
+      Object.defineProperty(config, "hasOwnProperty", hasOwnPropertyDescriptor);
+      const keys = ownEnumerableKeys({
         ...config1,
         ...config2
-      }), function computeConfigValue(prop) {
-        if (prop === "__proto__" || prop === "constructor" || prop === "prototype") return;
+      });
+      for (let i5 = 0, len = keys.length; i5 < len; i5++) {
+        const prop = keys[i5];
+        if (prop === "__proto__" || prop === "constructor" || prop === "prototype") continue;
         const merge3 = utils$1.hasOwnProp(mergeMap, prop) ? mergeMap[prop] : mergeDeepProperties;
         const a5 = utils$1.hasOwnProp(config1, prop) ? config1[prop] : void 0;
         const b5 = utils$1.hasOwnProp(config2, prop) ? config2[prop] : void 0;
-        const configValue = merge3(a5, b5, prop);
+        const configValue = merge3 === mergeDirectKeys ? merge3(a5, b5, prop, config1, config2) : merge3(a5, b5, prop);
         utils$1.isUndefined(configValue) && merge3 !== mergeDirectKeys || (config[prop] = configValue);
-      });
-      if (utils$1.hasOwnProp(config2, "validateStatus") && utils$1.isUndefined(config2.validateStatus) && getMergedTransitionalOption("validateStatusUndefinedResolves") === false) {
+      }
+      if (utils$1.hasOwnProp(config2, "validateStatus") && utils$1.isUndefined(config2.validateStatus) && getMergedTransitionalOption(config1, config2, "validateStatusUndefinedResolves") === false) {
         if (utils$1.hasOwnProp(config1, "validateStatus")) {
           config.validateStatus = getMergedValue(void 0, config1.validateStatus);
         } else {
@@ -38414,7 +38810,8 @@ var require_axios = __commonJS({
       return config;
     }
     var encodeUTF8$1 = (str) => encodeURIComponent(str).replace(/%([0-9A-F]{2})/gi, (_, hex) => String.fromCharCode(parseInt(hex, 16)));
-    function resolveConfig(config) {
+    var readCookie = (name) => cookies.read(name);
+    function resolveConfig(config, readXsrfCookie = readCookie) {
       const newConfig = mergeConfig({}, config);
       const own2 = (key) => utils$1.hasOwnProp(newConfig, key) ? newConfig[key] : void 0;
       const data = own2("data");
@@ -38431,8 +38828,14 @@ var require_axios = __commonJS({
       if (auth) {
         const username = utils$1.getSafeProp(auth, "username") || "";
         const password = utils$1.getSafeProp(auth, "password") || "";
+        const transitional = own2("transitional");
+        const encodeUsername = transitional && utils$1.hasOwnProp(transitional, "encodeBasicAuthUsername") && transitional.encodeBasicAuthUsername === true;
         try {
-          headers.set("Authorization", "Basic " + btoa(username + ":" + (password ? encodeUTF8$1(password) : "")));
+          headers.set(
+            "Authorization",
+            // Preserve legacy username bytes unless the caller opts in to UTF-8.
+            "Basic " + btoa((encodeUsername ? encodeUTF8$1(username) : username) + ":" + (password ? encodeUTF8$1(password) : ""))
+          );
         } catch (e5) {
           throw AxiosError.from(e5, AxiosError.ERR_BAD_OPTION_VALUE, config);
         }
@@ -38451,7 +38854,7 @@ var require_axios = __commonJS({
         }
         const shouldSendXSRF = withXSRFToken === true || withXSRFToken == null && isURLSameOrigin(newConfig.url);
         if (shouldSendXSRF) {
-          const xsrfValue = xsrfHeaderName && xsrfCookieName && cookies.read(xsrfCookieName);
+          const xsrfValue = xsrfHeaderName && xsrfCookieName && readXsrfCookie(xsrfCookieName);
           if (xsrfValue) {
             headers.set(xsrfHeaderName, xsrfValue);
           }
@@ -38462,7 +38865,17 @@ var require_axios = __commonJS({
     var isXHRAdapterSupported = typeof XMLHttpRequest !== "undefined";
     var xhrAdapter = isXHRAdapterSupported && function(config) {
       return new Promise(function dispatchXhrRequest(resolve, reject) {
-        const _config = resolveConfig(config);
+        let useAsyncXsrf;
+        try {
+          const store = platform3.hasStandardBrowserEnv && typeof window !== "undefined" && window.cookieStore;
+          useAsyncXsrf = store && utils$1.isFunction(store.get);
+        } catch (e5) {
+        }
+        let xsrfCookieName;
+        const _config = resolveConfig(config, useAsyncXsrf ? (name) => {
+          xsrfCookieName = name;
+          return null;
+        } : void 0);
         let requestData = _config.data;
         const requestHeaders = AxiosHeaders.from(_config.headers).normalize();
         let {
@@ -38471,11 +38884,32 @@ var require_axios = __commonJS({
           onDownloadProgress
         } = _config;
         let onCanceled;
+        let timeoutId;
         let uploadThrottled, downloadThrottled;
         let flushUpload, flushDownload, flushDownloadWithEvent;
         function done() {
-          flushUpload && flushUpload();
-          flushDownload && flushDownload();
+          clearTimeout(timeoutId);
+          try {
+            flushUpload && flushUpload();
+          } catch (err) {
+            setTimeout(() => {
+              throw err;
+            });
+          }
+          try {
+            flushDownload && flushDownload();
+          } catch (err) {
+            setTimeout(() => {
+              throw err;
+            });
+          }
+          if (request) {
+            downloadThrottled && request.removeEventListener("progress", downloadThrottled);
+            if (request.upload) {
+              uploadThrottled && request.upload.removeEventListener("progress", uploadThrottled);
+              flushUpload && request.upload.removeEventListener("loadend", flushUpload);
+            }
+          }
           _config.cancelToken && _config.cancelToken.unsubscribe(onCanceled);
           _config.signal && _config.signal.removeEventListener("abort", onCanceled);
         }
@@ -38555,6 +38989,7 @@ var require_axios = __commonJS({
           request = null;
         };
         request.ontimeout = function handleTimeout() {
+          if (!request) return;
           let timeoutErrorMessage = _config.timeout ? "timeout of " + _config.timeout + "ms exceeded" : "timeout exceeded";
           const transitional = _config.transitional || transitionalDefaults;
           if (_config.timeoutErrorMessage) {
@@ -38565,11 +39000,6 @@ var require_axios = __commonJS({
           request = null;
         };
         requestData === void 0 && requestHeaders.setContentType(null);
-        if ("setRequestHeader" in request) {
-          utils$1.forEach(toByteStringHeaderObject(requestHeaders), function setRequestHeader(val, key) {
-            request.setRequestHeader(key, val);
-          });
-        }
         if (!utils$1.isUndefined(_config.withCredentials)) {
           request.withCredentials = !!_config.withCredentials;
         }
@@ -38591,22 +39021,73 @@ var require_axios = __commonJS({
               return;
             }
             reject(!cancel || cancel.type ? new CanceledError(null, config, request) : cancel);
-            request.abort();
+            const xhr = request;
             done();
             request = null;
+            xhr.abort();
           };
           _config.cancelToken && _config.cancelToken.subscribe(onCanceled);
+          if (!request) return;
           if (_config.signal) {
             _config.signal.aborted ? onCanceled() : _config.signal.addEventListener("abort", onCanceled);
           }
         }
+        if (!request) return;
         const protocol = parseProtocol(_config.url);
         if (protocol && !platform3.protocols.includes(protocol)) {
           reject(new AxiosError("Unsupported protocol " + protocol + ":", AxiosError.ERR_BAD_REQUEST, config));
           done();
           return;
         }
-        request.send(requestData || null);
+        const sendRequest = () => {
+          if (!request) return;
+          if ("setRequestHeader" in request) {
+            utils$1.forEach(toByteStringHeaderObject(requestHeaders), function setRequestHeader(val, key) {
+              request.setRequestHeader(key, val);
+            });
+          }
+          request.send(requestData || null);
+        };
+        if (xsrfCookieName) {
+          const now = typeof performance !== "undefined" && utils$1.isFunction(performance.now) ? () => performance.now() : Date.now;
+          const deadline = request.timeout > 0 ? now() + Number(request.timeout) : void 0;
+          const abortOnTimeout = () => {
+            if (!request) return;
+            const xhr = request;
+            xhr.ontimeout();
+            xhr.abort();
+          };
+          if (deadline !== void 0) {
+            const scheduleTimeout = () => {
+              const remaining = deadline - now();
+              if (remaining > 0) {
+                timeoutId = setTimeout(scheduleTimeout, Math.min(remaining, 2147483647));
+              } else {
+                abortOnTimeout();
+              }
+            };
+            scheduleTimeout();
+          }
+          cookies.readAsync(xsrfCookieName).then((value) => {
+            if (!request) return;
+            if (deadline !== void 0 && now() >= deadline) {
+              abortOnTimeout();
+              return;
+            }
+            if (value) {
+              const headerName = utils$1.hasOwnProp(_config, "xsrfHeaderName") && _config.xsrfHeaderName;
+              requestHeaders.set(headerName, value);
+            }
+            sendRequest();
+          }).catch((error3) => {
+            if (!request) return;
+            reject(AxiosError.from(error3, null, config, request));
+            done();
+            request = null;
+          });
+        } else {
+          sendRequest();
+        }
       });
     };
     var composeSignals = (signals, timeout) => {
@@ -38635,7 +39116,8 @@ var require_axios = __commonJS({
         timer && clearTimeout(timer);
         timer = null;
         signals.forEach((signal2) => {
-          signal2.unsubscribe ? signal2.unsubscribe(onabort) : signal2.removeEventListener("abort", onabort);
+          const unsubscribeSignal = utils$1.getSafeProp(signal2, "unsubscribe");
+          utils$1.isFunction(unsubscribeSignal) ? unsubscribeSignal.call(signal2, onabort) : signal2.removeEventListener("abort", onabort);
         });
         signals = null;
       };
@@ -38738,6 +39220,107 @@ var require_axios = __commonJS({
         highWaterMark: 2
       });
     };
+    var CRLF = "\r\n";
+    var normalizeLines = (value) => String(value).replace(/\r\n|\r|\n/g, CRLF);
+    var escapeName = (value) => String(value).replace(/[\r\n"]/g, (char) => char === "\r" ? "%0D" : char === "\n" ? "%0A" : "%22");
+    var stringBytes = (value, normalize) => {
+      let length = 0;
+      for (let i5 = 0; i5 < value.length; i5++) {
+        const code = value.charCodeAt(i5);
+        if (normalize && (code === 13 || code === 10)) {
+          if (code === 13 && value.charCodeAt(i5 + 1) === 10) i5++;
+          length += 2;
+        } else if (code < 128) {
+          length++;
+        } else if (code < 2048) {
+          length += 2;
+        } else if (code >= 55296 && code <= 56319 && value.charCodeAt(i5 + 1) >= 56320 && value.charCodeAt(i5 + 1) <= 57343) {
+          length += 4;
+          i5++;
+        } else {
+          length += 3;
+        }
+      }
+      return length;
+    };
+    var FormDataError = class extends TypeError {
+      constructor(message, reason) {
+        super(message);
+        this.name = "FormDataError";
+        this.reason = reason;
+      }
+    };
+    function formDataToBlob(form, Blob2, limit, limitError, boundary) {
+      if (!utils$1.isFunction(Blob2)) {
+        throw new FormDataError("Blob is not supported", "blob");
+      }
+      if (!utils$1.isString(boundary) || !/^[A-Za-z0-9'()+_,./:=? -]{1,70}$/.test(boundary) || / $/.test(boundary)) {
+        throw new FormDataError("Invalid multipart boundary", "boundary");
+      }
+      const footer = "--" + boundary + "--" + CRLF;
+      let length = footer.length;
+      const parts = [];
+      const checkLength = (extra) => {
+        if (length + extra > limit) throw limitError();
+      };
+      checkLength(0);
+      for (const [name, value] of form) {
+        const isString2 = utils$1.isString(value);
+        const valueLength = isString2 ? stringBytes(value, true) : value.size;
+        if (!Number.isFinite(valueLength) || valueLength < 0) {
+          throw new FormDataError("Unsupported FormData part size", "part");
+        }
+        checkLength(valueLength + stringBytes(name, true) + (!isString2 && value.name ? stringBytes(value.name, false) : 0) + (!isString2 && value.type ? stringBytes(value.type, false) : 0));
+        let header = "--" + boundary + CRLF + 'Content-Disposition: form-data; name="' + escapeName(normalizeLines(name)) + '"';
+        if (!isString2) {
+          header += '; filename="' + escapeName(utils$1.isString(value.name) ? value.name : "blob") + '"' + CRLF + "Content-Type: " + String(value.type || "application/octet-stream").replace(/[\r\n]/g, "");
+        }
+        header += CRLF + CRLF;
+        const partLength = stringBytes(header, false) + valueLength + CRLF.length;
+        checkLength(partLength);
+        length += partLength;
+        parts.push({
+          header,
+          value,
+          isString: isString2
+        });
+      }
+      const blobParts = [];
+      for (const part of parts) {
+        blobParts.push(part.header, part.isString ? normalizeLines(part.value) : part.value, CRLF);
+      }
+      blobParts.push(footer);
+      return new Blob2(blobParts, {
+        type: "multipart/form-data; boundary=" + boundary
+      });
+    }
+    function createMultipartBody(form, Blob2, limit, limitError, boundary) {
+      if (!utils$1.isFunction(Blob2)) {
+        throw new AxiosError("Blob is not supported", AxiosError.ERR_NOT_SUPPORT);
+      }
+      if (boundary === void 0) {
+        if (utils$1.isFunction(platform3.generateString)) {
+          boundary = "axios-" + platform3.generateString(36, "0123456789abcdef");
+        } else {
+          const crypto4 = utils$1.global.crypto;
+          if (!crypto4 || !utils$1.isFunction(crypto4.getRandomValues)) {
+            throw new AxiosError("Random byte generation is not supported", AxiosError.ERR_NOT_SUPPORT);
+          }
+          const random = new Uint8Array(18);
+          crypto4.getRandomValues(random);
+          boundary = "axios-" + Array.from(random, (value) => ("0" + value.toString(16)).slice(-2)).join("");
+        }
+      }
+      try {
+        return formDataToBlob(form, Blob2, limit, limitError, boundary);
+      } catch (error3) {
+        if (error3 instanceof FormDataError) {
+          const code = error3.reason === "boundary" ? AxiosError.ERR_BAD_OPTION_VALUE : AxiosError.ERR_BAD_REQUEST;
+          throw new AxiosError(error3.message, code);
+        }
+        throw error3;
+      }
+    }
     var DEFAULT_CHUNK_SIZE = 64 * 1024;
     var DEFAULT_REQUEST_OPTIONS = {
       cache: "default",
@@ -38764,7 +39347,7 @@ var require_axios = __commonJS({
         return value;
       }
     };
-    var test = (fn, ...args) => {
+    var test23 = (fn, ...args) => {
       try {
         return !!fn(...args);
       } catch (e5) {
@@ -38789,12 +39372,14 @@ var require_axios = __commonJS({
         skipUndefined: true
       }, {
         Request: globalObject.Request,
-        Response: globalObject.Response
+        Response: globalObject.Response,
+        Blob: globalObject.Blob
       }, env2);
+      const envFetch = utils$1.hasOwnProp(env2, "fetch") ? env2.fetch : void 0;
       const {
-        fetch: envFetch,
         Request,
-        Response
+        Response,
+        Blob: Blob2
       } = env2;
       const isFetchSupported = envFetch ? isFunction2(envFetch) : typeof fetch === "function";
       const isRequestSupported = isFunction2(Request);
@@ -38804,7 +39389,7 @@ var require_axios = __commonJS({
       }
       const isReadableStreamSupported = isFetchSupported && isFunction2(ReadableStream2);
       const encodeText = isFetchSupported && (typeof TextEncoder2 === "function" ? /* @__PURE__ */ ((encoder2) => (str) => encoder2.encode(str))(new TextEncoder2()) : async (str) => new Uint8Array(await new Request(str).arrayBuffer()));
-      const supportsRequestStream = isRequestSupported && isReadableStreamSupported && test(() => {
+      const supportsRequestStream = isRequestSupported && isReadableStreamSupported && test23(() => {
         let duplexAccessed = false;
         const request = new Request(platform3.origin, {
           body: new ReadableStream2(),
@@ -38820,7 +39405,14 @@ var require_axios = __commonJS({
         }
         return duplexAccessed && !hasContentType;
       });
-      const supportsResponseStream = isResponseSupported && isReadableStreamSupported && test(() => utils$1.isReadableStream(new Response("").body));
+      const supportsResponseStream = isResponseSupported && isReadableStreamSupported && test23(() => utils$1.isReadableStream(new Response("").body));
+      const requestDefaults = Object.assign(/* @__PURE__ */ Object.create(null), DEFAULT_REQUEST_OPTIONS);
+      if (isRequestSupported && !test23(() => new Request(platform3.origin, requestDefaults))) {
+        delete requestDefaults.cache;
+        if (!test23(() => new Request(platform3.origin, requestDefaults))) {
+          requestDefaults.cache = DEFAULT_REQUEST_OPTIONS.cache;
+        }
+      }
       const resolvers = {
         stream: supportsResponseStream && ((res) => res.body)
       };
@@ -38841,13 +39433,6 @@ var require_axios = __commonJS({
         }
         if (utils$1.isBlob(body)) {
           return body.size;
-        }
-        if (utils$1.isSpecCompliantForm(body)) {
-          const _request = new Request(platform3.origin, {
-            method: "POST",
-            body
-          });
-          return (await _request.arrayBuffer()).byteLength;
         }
         if (utils$1.isArrayBufferView(body) || utils$1.isArrayBuffer(body)) {
           return body.byteLength;
@@ -38893,6 +39478,7 @@ var require_axios = __commonJS({
         });
         let requestContentLength;
         let pendingBodyError = null;
+        let pendingResponseError = null;
         const maxBodyLengthError = () => new AxiosError("Request body larger than maxBodyLength limit", AxiosError.ERR_BAD_REQUEST, config, request);
         try {
           let auth = void 0;
@@ -38905,8 +39491,9 @@ var require_axios = __commonJS({
               password
             };
           }
+          let parsedURL;
           if (maybeWithAuthCredentials(url2)) {
-            const parsedURL = new URL(url2, platform3.origin);
+            parsedURL = new URL(url2, platform3.origin);
             if (!auth && (parsedURL.username || parsedURL.password)) {
               const urlUsername = decodeURIComponentSafe(parsedURL.username);
               const urlPassword = decodeURIComponentSafe(parsedURL.password);
@@ -38925,11 +39512,22 @@ var require_axios = __commonJS({
             headers.delete("authorization");
             headers.set("Authorization", "Basic " + btoa(encodeUTF8((auth.username || "") + ":" + (auth.password || ""))));
           }
-          if (hasMaxContentLength && typeof url2 === "string" && url2.startsWith("data:")) {
-            const estimated = estimateDataURLDecodedBytes(url2);
+          if (hasMaxContentLength && parsedURL && parsedURL.protocol === "data:") {
+            const estimated = estimateDataURLDecodedBytes(parsedURL.href);
             if (estimated > maxContentLength) {
               throw new AxiosError("maxContentLength size of " + maxContentLength + " exceeded", AxiosError.ERR_BAD_RESPONSE, config, request);
             }
+          }
+          const formContentType = utils$1.isSpecCompliantForm(data) && AxiosHeaders.from(own2("headers")).getContentType();
+          let formBoundary;
+          if (utils$1.isString(formContentType) && /^multipart\/form-data(?:\s*;|$)/i.test(formContentType.trim())) {
+            const parameters = AxiosHeaders.parseParameters(formContentType);
+            if (utils$1.hasOwnProp(parameters, "boundary")) formBoundary = parameters.boundary;
+          }
+          if (utils$1.isSpecCompliantForm(data) && method !== "get" && method !== "head" && (hasMaxBodyLength || onUploadProgress && supportsRequestStream || formBoundary !== void 0)) {
+            data = createMultipartBody(data, Blob2, hasMaxBodyLength ? maxBodyLength : Infinity, maxBodyLengthError, formBoundary);
+            headers.setContentType(formBoundary === void 0 ? data.type : formContentType);
+            requestContentLength = data.size;
           }
           if (hasMaxBodyLength && method !== "get" && method !== "head") {
             const outboundLength = await getBodyLength(data);
@@ -38998,7 +39596,7 @@ var require_axios = __commonJS({
             credentials: isCredentialsSupported ? withCredentials : void 0
           });
           if (isRequestSupported) {
-            utils$1.forEach(DEFAULT_REQUEST_OPTIONS, (value, key) => {
+            utils$1.forEach(requestDefaults, (value, key) => {
               if (resolvedOptions[key] === void 0) {
                 resolvedOptions[key] = value;
               }
@@ -39038,7 +39636,7 @@ var require_axios = __commonJS({
               if (hasMaxContentLength) {
                 bytesRead = loadedBytes;
                 if (bytesRead > maxContentLength) {
-                  throw new AxiosError("maxContentLength size of " + maxContentLength + " exceeded", AxiosError.ERR_BAD_RESPONSE, config, request);
+                  throw pendingResponseError = new AxiosError("maxContentLength size of " + maxContentLength + " exceeded", AxiosError.ERR_BAD_RESPONSE, config, request);
                 }
               }
               onProgress && onProgress(loadedBytes);
@@ -39097,6 +39695,9 @@ var require_axios = __commonJS({
             request && !pendingBodyError.request && (pendingBodyError.request = request);
             throw pendingBodyError;
           }
+          if (pendingResponseError) {
+            throw pendingResponseError;
+          }
           if (err instanceof AxiosError) {
             request && !err.request && (err.request = request);
             throw err;
@@ -39118,13 +39719,20 @@ var require_axios = __commonJS({
     };
     var seedCache = /* @__PURE__ */ new Map();
     var getFetch = (config) => {
-      let env2 = config && config.env || {};
+      const env2 = /* @__PURE__ */ Object.create(null);
+      const configuredEnv = config && utils$1.hasOwnProp(config, "env") && config.env;
+      ["fetch", "Request", "Response", "Blob"].forEach((key) => {
+        if (configuredEnv && utils$1.hasOwnProp(configuredEnv, key)) {
+          env2[key] = configuredEnv[key];
+        }
+      });
       const {
         fetch: fetch3,
         Request,
-        Response
+        Response,
+        Blob: Blob2
       } = env2;
-      const seeds = [Request, Response, fetch3];
+      const seeds = [Request, Response, fetch3, Blob2];
       let len = seeds.length, i5 = len, seed, target, map3 = seedCache;
       while (i5--) {
         seed = seeds[i5];
@@ -39209,6 +39817,9 @@ var require_axios = __commonJS({
         throw new CanceledError(null, config);
       }
     }
+    function elapsedSince(start) {
+      return Math.max(0, Date.now() - start);
+    }
     function dispatchRequest(_config) {
       const config = utils$1.toSafeFlatObject(_config);
       throwIfCancellationRequested(config);
@@ -39218,8 +39829,10 @@ var require_axios = __commonJS({
         config.headers.setContentType("application/x-www-form-urlencoded", false);
       }
       const adapter = adapters.getAdapter(config.adapter || defaults.adapter, config);
+      const start = Date.now();
       return adapter(config).then(function onAdapterResolution(response) {
         throwIfCancellationRequested(config);
+        response.duration = elapsedSince(start);
         config.response = response;
         try {
           response.data = transformData.call(config, config.transformResponse, response);
@@ -39232,6 +39845,7 @@ var require_axios = __commonJS({
         if (!isCancel(reason)) {
           throwIfCancellationRequested(config);
           if (reason && reason.response) {
+            reason.response.duration = elapsedSince(start);
             config.response = reason.response;
             try {
               reason.response.data = transformData.call(config, config.transformResponse, reason.response);
@@ -39299,6 +39913,16 @@ var require_axios = __commonJS({
       validators: validators$1
     };
     var validators = validator.validators;
+    var isHeadersBucket = (value) => {
+      if (value == null || utils$1.isPlainObject(value) || value instanceof AxiosHeaders) {
+        return true;
+      }
+      try {
+        return utils$1.isObject(value) && utils$1.getSafeProp(value, Symbol.toStringTag) === "AxiosHeaders" && ["toJSON", "set", "get", "has", "delete", "clear", "normalize", "concat", "toString", Symbol.iterator].every((method) => utils$1.isFunction(utils$1.getSafeProp(value, method)));
+      } catch (e5) {
+        return false;
+      }
+    };
     var Axios = class {
       constructor(instanceConfig) {
         this.defaults = instanceConfig || {};
@@ -39334,9 +39958,13 @@ var require_axios = __commonJS({
               } else if (stack) {
                 const firstNewlineIndex = stack.indexOf("\n");
                 const secondNewlineIndex = firstNewlineIndex === -1 ? -1 : stack.indexOf("\n", firstNewlineIndex + 1);
-                const stackWithoutTwoTopLines = secondNewlineIndex === -1 ? "" : stack.slice(secondNewlineIndex + 1);
-                if (!String(err.stack).endsWith(stackWithoutTwoTopLines)) {
-                  err.stack += "\n" + stack;
+                const duplicateCheckSuffix = secondNewlineIndex === -1 ? stack : stack.slice(secondNewlineIndex + 1);
+                const currentStack = String(err.stack);
+                const causeIndex = getCauseStackIndex(err, currentStack);
+                const stackHead = causeIndex === -1 ? currentStack : currentStack.slice(0, causeIndex);
+                const causeSection = causeIndex === -1 ? "" : currentStack.slice(causeIndex);
+                if (!stackHead.endsWith(duplicateCheckSuffix)) {
+                  err.stack = stackHead + "\n" + stack + causeSection;
                 }
               }
             } catch (e5) {
@@ -39365,7 +39993,8 @@ var require_axios = __commonJS({
             clarifyTimeoutError: validators.transitional(validators.boolean),
             legacyInterceptorReqResOrdering: validators.transitional(validators.boolean),
             advertiseZstdAcceptEncoding: validators.transitional(validators.boolean),
-            validateStatusUndefinedResolves: validators.transitional(validators.boolean)
+            validateStatusUndefinedResolves: validators.transitional(validators.boolean),
+            encodeBasicAuthUsername: validators.transitional(validators.boolean)
           }, false);
         }
         if (paramsSerializer != null) {
@@ -39381,7 +40010,7 @@ var require_axios = __commonJS({
           }
         }
         if (config.allowAbsoluteUrls !== void 0) ;
-        else if (this.defaults.allowAbsoluteUrls !== void 0) {
+        else if (utils$1.hasOwnProp(this.defaults, "allowAbsoluteUrls") && this.defaults.allowAbsoluteUrls !== void 0) {
           config.allowAbsoluteUrls = this.defaults.allowAbsoluteUrls;
         } else {
           config.allowAbsoluteUrls = true;
@@ -39391,9 +40020,13 @@ var require_axios = __commonJS({
           withXsrfToken: validators.spelling("withXSRFToken")
         }, true);
         config.method = (utils$1.getSafeProp(config, "method") || utils$1.getSafeProp(this.defaults, "method") || "get").toLowerCase();
-        let contextHeaders = headers && utils$1.merge(headers.common, headers[config.method]);
+        const commonHeaders = utils$1.getSafeProp(headers, "common");
+        const methodHeaders = utils$1.getSafeProp(headers, config.method);
+        const contextHeaders = headers && utils$1.merge(isHeadersBucket(commonHeaders) ? commonHeaders : void 0, isHeadersBucket(methodHeaders) ? methodHeaders : void 0);
         headers && utils$1.forEach(methodList.concat("common"), (method) => {
-          delete headers[method];
+          if (isHeadersBucket(utils$1.getSafeProp(headers, method))) {
+            delete headers[method];
+          }
         });
         config.headers = AxiosHeaders.concat(contextHeaders, headers);
         const requestInterceptorChain = [];
@@ -39473,7 +40106,7 @@ var require_axios = __commonJS({
       }
     };
     utils$1.forEach(["delete", "get", "head", "options"], function forEachMethodNoData(method) {
-      Axios.prototype[method] = function(url2, config) {
+      Axios.prototype[method] = async function(url2, config) {
         return this.request(mergeConfig(config || {}, {
           method,
           url: url2,
@@ -39483,7 +40116,7 @@ var require_axios = __commonJS({
     });
     utils$1.forEach(["post", "put", "patch", "query"], function forEachMethodWithData(method) {
       function generateHTTPMethod(isForm) {
-        return function httpMethod(url2, data, config) {
+        return async function httpMethod(url2, data, config) {
           return this.request(mergeConfig(config || {}, {
             method,
             headers: isForm ? {
@@ -40059,9 +40692,9 @@ var require_form_data2 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/client.js
+// node_modules/.pnpm/deepl-node@1.29.0_debug@4.4.3/node_modules/deepl-node/dist/client.js
 var require_client2 = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/client.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.29.0_debug@4.4.3/node_modules/deepl-node/dist/client.js"(exports2) {
     "use strict";
     var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m3, k5, k22) {
       if (k22 === void 0) k22 = k5;
@@ -40094,7 +40727,7 @@ var require_client2 = __commonJS({
       return mod && mod.__esModule ? mod : { "default": mod };
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.HttpClient = exports2.RETRYABLE_AXIOS_ERROR_CODES = void 0;
+    exports2.createHttpClient = exports2.parseProxy = exports2.buildRequestHeaders = exports2.HttpClient = exports2.RETRYABLE_AXIOS_ERROR_CODES = void 0;
     var errors_1 = require_errors2();
     var utils_1 = require_utils3();
     var axios_1 = __importDefault(require_axios());
@@ -40102,16 +40735,56 @@ var require_client2 = __commonJS({
     var form_data_1 = __importDefault(require_form_data2());
     var https = __importStar(require("https"));
     var http = __importStar(require("http"));
+    var os5 = __importStar(require("os"));
     exports2.RETRYABLE_AXIOS_ERROR_CODES = /* @__PURE__ */ new Set([
       "ETIMEDOUT",
       "ECONNABORTED",
       "ECONNRESET",
       "EPIPE",
-      "EAI_AGAIN"
+      "EAI_AGAIN",
+      "ENOTFOUND",
+      "ECONNREFUSED",
+      "EHOSTUNREACH",
+      "ENETUNREACH",
+      "ENETDOWN"
     ]);
+    var UNSENT_AXIOS_ERROR_CODES = /* @__PURE__ */ new Set([
+      "EAI_AGAIN",
+      "ENOTFOUND",
+      "ECONNREFUSED",
+      "EHOSTUNREACH",
+      "ENETUNREACH",
+      "ENETDOWN"
+    ]);
+    var TIMEOUT_AXIOS_ERROR_CODES = /* @__PURE__ */ new Set(["ETIMEDOUT", "ECONNABORTED"]);
+    var unsentRequestErrors = /* @__PURE__ */ new WeakSet();
+    var trackedSockets = /* @__PURE__ */ new WeakSet();
+    var connectedSockets = /* @__PURE__ */ new WeakSet();
+    function trackConnects(agent) {
+      const base = Object.getPrototypeOf(agent);
+      Object.assign(agent, {
+        createConnection(...args) {
+          const socket = base.createConnection.apply(this, args);
+          if (socket) {
+            trackedSockets.add(socket);
+            socket.once("connect", () => connectedSockets.add(socket));
+          }
+          return socket;
+        }
+      });
+      return agent;
+    }
+    function timedOutBeforeConnect(request) {
+      if (request === void 0 || request === null)
+        return false;
+      const socket = request.socket;
+      if (!socket)
+        return true;
+      return trackedSockets.has(socket) && !connectedSockets.has(socket);
+    }
     var axiosInstance = axios_1.default.create({
-      httpAgent: new http.Agent({ keepAlive: true }),
-      httpsAgent: new https.Agent({ keepAlive: true })
+      httpAgent: trackConnects(new http.Agent({ keepAlive: true })),
+      httpsAgent: trackConnects(new https.Agent({ keepAlive: true }))
     });
     var BackoffTimer = class {
       constructor() {
@@ -40217,7 +40890,7 @@ var require_client2 = __commonJS({
             response = void 0;
             error3 = e5;
           }
-          if (!_HttpClient.shouldRetry(response === null || response === void 0 ? void 0 : response.statusCode, error3) || backoff.getNumRetries() + 1 >= this.maxRetries) {
+          if (!_HttpClient.shouldRetry(response === null || response === void 0 ? void 0 : response.statusCode, error3, options.retryOnlyUnprocessed) || backoff.getNumRetries() >= this.maxRetries) {
             break;
           }
           if (error3 !== void 0) {
@@ -40234,6 +40907,9 @@ var require_client2 = __commonJS({
           }
           return response;
         } else {
+          if (options.retryOnlyUnprocessed && error3 !== void 0) {
+            error3.shouldRetry = unsentRequestErrors.has(error3);
+          }
           throw error3;
         }
       }
@@ -40270,26 +40946,103 @@ var require_client2 = __commonJS({
             (0, utils_1.logDebug)("Unrecognized axios error", axiosError);
             error3.shouldRetry = false;
           }
+          const code = axiosError.code;
+          if (code !== void 0 && (UNSENT_AXIOS_ERROR_CODES.has(code) || TIMEOUT_AXIOS_ERROR_CODES.has(code) && timedOutBeforeConnect(axiosError.request))) {
+            unsentRequestErrors.add(error3);
+          }
           throw error3;
         }
       }
-      static shouldRetry(statusCode, error3) {
+      static shouldRetry(statusCode, error3, onlyUnprocessed) {
         if (statusCode === void 0) {
-          return error3.shouldRetry;
+          const connectionError = error3;
+          return onlyUnprocessed ? unsentRequestErrors.has(connectionError) : connectionError.shouldRetry;
         }
-        return statusCode === 429 || statusCode >= 500;
+        return statusCode === 429 || !onlyUnprocessed && statusCode >= 500;
       }
     };
     exports2.HttpClient = HttpClient2;
+    function constructUserAgentString(sendPlatformInfo, appInfo) {
+      let libraryInfoString = "deepl-node/1.29.0";
+      if (sendPlatformInfo) {
+        const systemType = os5.type();
+        const systemVersion = os5.version();
+        const nodeVersion = process.version.substring(1);
+        libraryInfoString += ` (${systemType} ${systemVersion}) node/${nodeVersion}`;
+      }
+      if (appInfo) {
+        libraryInfoString += ` ${appInfo.appName}/${appInfo.appVersion}`;
+      }
+      return libraryInfoString;
+    }
+    var IGNORED_CUSTOM_HEADERS = /* @__PURE__ */ new Set([
+      "content-type",
+      "content-length",
+      "transfer-encoding",
+      "host"
+    ]);
+    var LIBRARY_HEADER_NAMES = {
+      authorization: "Authorization",
+      "user-agent": "User-Agent"
+    };
+    function buildRequestHeaders(authKey, options) {
+      var _a2, _b;
+      const headers = {
+        Authorization: `DeepL-Auth-Key ${authKey}`,
+        "User-Agent": constructUserAgentString((options === null || options === void 0 ? void 0 : options.sendPlatformInfo) !== false, options === null || options === void 0 ? void 0 : options.appInfo)
+      };
+      for (const [name, value] of Object.entries((_a2 = options === null || options === void 0 ? void 0 : options.headers) !== null && _a2 !== void 0 ? _a2 : {})) {
+        const lowerName = name.toLowerCase();
+        if (IGNORED_CUSTOM_HEADERS.has(lowerName))
+          continue;
+        headers[(_b = LIBRARY_HEADER_NAMES[lowerName]) !== null && _b !== void 0 ? _b : name] = value;
+      }
+      return headers;
+    }
+    exports2.buildRequestHeaders = buildRequestHeaders;
+    function parseProxy(proxy) {
+      if (typeof proxy !== "string") {
+        return proxy;
+      }
+      let url;
+      try {
+        url = new URL(proxy);
+      } catch (error3) {
+        throw new errors_1.ArgumentError(`Invalid proxy URL: ${proxy}`, error3);
+      }
+      const protocol = url.protocol.replace(/:$/, "");
+      const config = {
+        protocol,
+        host: url.hostname,
+        port: url.port ? Number(url.port) : protocol === "https" ? 443 : 80
+      };
+      if (url.username || url.password) {
+        config.auth = {
+          username: decodeURIComponent(url.username),
+          password: decodeURIComponent(url.password)
+        };
+      }
+      return config;
+    }
+    exports2.parseProxy = parseProxy;
+    function createHttpClient(serverUrl, headers, options) {
+      var _a2, _b;
+      const maxRetries = (_a2 = options === null || options === void 0 ? void 0 : options.maxRetries) !== null && _a2 !== void 0 ? _a2 : 5;
+      if (!Number.isInteger(maxRetries) || maxRetries < 0) {
+        throw new errors_1.ArgumentError(`maxRetries must be a non-negative integer, got: ${maxRetries}`);
+      }
+      return new HttpClient2(serverUrl, headers, maxRetries, (_b = options === null || options === void 0 ? void 0 : options.minTimeout) !== null && _b !== void 0 ? _b : 1e4, parseProxy(options === null || options === void 0 ? void 0 : options.proxy));
+    }
+    exports2.createHttpClient = createHttpClient;
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/parsing.js
+// node_modules/.pnpm/deepl-node@1.29.0_debug@4.4.3/node_modules/deepl-node/dist/parsing.js
 var require_parsing = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/parsing.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.29.0_debug@4.4.3/node_modules/deepl-node/dist/parsing.js"(exports2) {
     "use strict";
     Object.defineProperty(exports2, "__esModule", { value: true });
-    exports2.parseTranslationMemoryJob = exports2.parseTranslationMemoryExport = exports2.parseTranslationMemoryImport = exports2.parseTranslationMemorySegments = exports2.parseTranslationMemoryInfoList = exports2.parseTranslationMemoryInfoJson = exports2.parseTranslationMemoryInfo = exports2.parseStyleRuleInfoList = exports2.parseStyleRuleInfo = exports2.parseCustomInstruction = exports2.parseDocumentHandle = exports2.parseGlossaryLanguagePairArray = exports2.parseLanguageArray = exports2.parseWriteResultArray = exports2.parseTextResultArray = exports2.parseUsage = exports2.parseDocumentStatus = exports2.parseGlossaryInfoList = exports2.parseMultilingualGlossaryInfo = exports2.parseGlossaryInfo = exports2.parseListMultilingualGlossaries = exports2.parseMultilingualGlossaryDictionaryEntries = exports2.parseMultilingualGlossaryDictionaryInfo = void 0;
+    exports2.parseCustomTagUsageReport = exports2.parseAdminUsageReport = exports2.parseDeveloperKeyList = exports2.parseDeveloperKey = exports2.parseLanguageSupportList = exports2.parseLanguageResourceList = exports2.parseTranslationMemoryJob = exports2.isTranslationMemoryJobStatusOk = exports2.isTranslationMemoryJobStatusDone = exports2.parseTranslationMemoryExport = exports2.parseTranslationMemoryImport = exports2.parseTranslationMemorySegments = exports2.parseTranslationMemoryInfoList = exports2.parseTranslationMemoryInfoJson = exports2.parseTranslationMemoryInfo = exports2.parseStyleProfileList = exports2.parseStyleProfile = exports2.parseStyleRuleInfoList = exports2.parseStyleRuleInfo = exports2.parseCustomInstruction = exports2.parseDocumentHandle = exports2.parseGlossaryLanguagePairArrayV3 = exports2.parseTargetLanguageArrayV3 = exports2.parseSourceLanguageArrayV3 = exports2.parseWriteResultArray = exports2.parseTextResultArray = exports2.parseUsage = exports2.parseDocumentStatus = exports2.parseGlossaryInfoList = exports2.parseMultilingualGlossaryInfo = exports2.parseGlossaryInfo = exports2.parseSpokenTermsEntries = exports2.parseSpokenTermsList = exports2.parseSpokenTermsArray = exports2.parseSpokenTerms = exports2.parseResponse = exports2.parseListMultilingualGlossaries = exports2.parseMultilingualGlossaryDictionaryEntries = exports2.parseMultilingualGlossaryDictionaryInfo = void 0;
     var glossaryEntries_1 = require_glossaryEntries();
     var errors_1 = require_errors2();
     var utils_1 = require_utils3();
@@ -40309,12 +41062,21 @@ var require_parsing = __commonJS({
       /**
        * @private Package users should not need to construct this class.
        */
-      constructor(character, document2, teamDocument) {
+      constructor(character, document2, teamDocument, proUsage) {
         this.character = character;
         this.document = document2;
         this.teamDocument = teamDocument;
+        this.apiKeyCharacter = proUsage === null || proUsage === void 0 ? void 0 : proUsage.apiKeyCharacter;
+        this.speechToTextMinutes = proUsage === null || proUsage === void 0 ? void 0 : proUsage.speechToTextMinutes;
+        this.speechToSpeechMinutes = proUsage === null || proUsage === void 0 ? void 0 : proUsage.speechToSpeechMinutes;
+        this.products = proUsage === null || proUsage === void 0 ? void 0 : proUsage.products;
+        this.startTime = proUsage === null || proUsage === void 0 ? void 0 : proUsage.startTime;
+        this.endTime = proUsage === null || proUsage === void 0 ? void 0 : proUsage.endTime;
       }
-      /** Returns true if any usage type limit has been reached or passed, otherwise false. */
+      /**
+       * Returns true if the character, document or team document usage has reached or passed its
+       * limit, otherwise false. Does not check apiKeyCharacter or the speech usage.
+       */
       anyLimitReached() {
         var _a2, _b, _c5;
         return ((_a2 = this.character) === null || _a2 === void 0 ? void 0 : _a2.limitReached()) || ((_b = this.document) === null || _b === void 0 ? void 0 : _b.limitReached()) || ((_c5 = this.teamDocument) === null || _c5 === void 0 ? void 0 : _c5.limitReached()) || false;
@@ -40331,14 +41093,15 @@ var require_parsing = __commonJS({
       }
     };
     var DocumentStatusImpl = class {
-      constructor(status, secondsRemaining, billedCharacters, errorMessage) {
+      constructor(status, documentId, secondsRemaining, billedCharacters, errorMessage) {
         this.status = status;
         this.secondsRemaining = secondsRemaining;
         this.billedCharacters = billedCharacters;
         this.errorMessage = errorMessage;
+        this.documentId = documentId;
       }
       ok() {
-        return this.status === "queued" || this.status === "translating" || this.status === "done";
+        return this.status !== "error";
       }
       done() {
         return this.status === "done";
@@ -40388,6 +41151,59 @@ var require_parsing = __commonJS({
       }));
     }
     exports2.parseListMultilingualGlossaries = parseListMultilingualGlossaries;
+    function parseRawSpokenTermsList(obj) {
+      return { lang: obj.lang, entryCount: obj.entry_count };
+    }
+    function parseRawSpokenTerms(obj) {
+      var _a2;
+      return {
+        spokenTermsId: obj.spoken_terms_id,
+        name: obj.name,
+        creationTime: new Date(obj.creation_time),
+        termLists: ((_a2 = obj.term_lists) !== null && _a2 !== void 0 ? _a2 : []).map(parseRawSpokenTermsList)
+      };
+    }
+    function parseResponse(json, convert) {
+      let obj;
+      try {
+        obj = JSON.parse(json);
+      } catch (error3) {
+        throw new errors_1.DeepLError(`Error parsing response JSON: ${error3}`, error3);
+      }
+      try {
+        return convert(obj);
+      } catch (error3) {
+        if (error3 instanceof errors_1.DeepLError)
+          throw error3;
+        throw new errors_1.DeepLError(`Error parsing response JSON: ${error3}`, error3);
+      }
+    }
+    exports2.parseResponse = parseResponse;
+    function parseSpokenTerms(json) {
+      return parseResponse(json, parseRawSpokenTerms);
+    }
+    exports2.parseSpokenTerms = parseSpokenTerms;
+    function parseSpokenTermsArray(json) {
+      return parseResponse(json, (obj) => {
+        var _a2;
+        return ((_a2 = obj.spoken_terms) !== null && _a2 !== void 0 ? _a2 : []).map(parseRawSpokenTerms);
+      });
+    }
+    exports2.parseSpokenTermsArray = parseSpokenTermsArray;
+    function parseSpokenTermsList(json) {
+      return parseResponse(json, parseRawSpokenTermsList);
+    }
+    exports2.parseSpokenTermsList = parseSpokenTermsList;
+    function parseSpokenTermsEntries(json) {
+      return parseResponse(json, (obj) => {
+        var _a2;
+        return {
+          lang: obj.lang,
+          entries: ((_a2 = obj.entries) !== null && _a2 !== void 0 ? _a2 : "").split("\n").filter((term) => term.length > 0)
+        };
+      });
+    }
+    exports2.parseSpokenTermsEntries = parseSpokenTermsEntries;
     function parseGlossaryInfo(json) {
       try {
         const obj = JSON.parse(json);
@@ -40415,10 +41231,13 @@ var require_parsing = __commonJS({
       }
     }
     exports2.parseGlossaryInfoList = parseGlossaryInfoList;
+    function parseOptionalString(value) {
+      return typeof value === "string" ? value : void 0;
+    }
     function parseDocumentStatus(json) {
       try {
         const obj = JSON.parse(json);
-        return new DocumentStatusImpl(obj.status, obj.seconds_remaining, obj.billed_characters, obj.error_message);
+        return new DocumentStatusImpl(obj.status, parseOptionalString(obj.document_id), obj.seconds_remaining, obj.billed_characters, obj.error_message);
       } catch (error3) {
         throw new errors_1.DeepLError(`Error parsing response JSON: ${error3}`);
       }
@@ -40427,14 +41246,42 @@ var require_parsing = __commonJS({
     function parseUsageDetail(obj, prefix) {
       const count = obj[`${prefix}_count`];
       const limit = obj[`${prefix}_limit`];
-      if (count === void 0 || limit === void 0)
+      if (typeof count !== "number" || typeof limit !== "number")
         return void 0;
       return new UsageDetailImpl(count, limit);
+    }
+    function parseOptionalDate(value) {
+      if (typeof value !== "string")
+        return void 0;
+      const date2 = new Date(value);
+      return isNaN(date2.getTime()) ? void 0 : date2;
+    }
+    function parseUsageProducts(products) {
+      if (!Array.isArray(products))
+        return void 0;
+      const str = (value) => typeof value === "string" ? value : void 0;
+      const num = (value) => typeof value === "number" ? value : void 0;
+      return products.map((product) => {
+        const p3 = typeof product === "object" && product !== null ? product : {};
+        return {
+          productType: str(p3.product_type),
+          billingUnit: str(p3.billing_unit),
+          apiKeyUnitCount: num(p3.api_key_unit_count),
+          accountUnitCount: num(p3.account_unit_count)
+        };
+      });
     }
     function parseUsage(json) {
       try {
         const obj = JSON.parse(json);
-        return new UsageImpl(parseUsageDetail(obj, "character"), parseUsageDetail(obj, "document"), parseUsageDetail(obj, "team_document"));
+        return new UsageImpl(parseUsageDetail(obj, "character"), parseUsageDetail(obj, "document"), parseUsageDetail(obj, "team_document"), {
+          apiKeyCharacter: parseUsageDetail(obj, "api_key_character"),
+          speechToTextMinutes: parseUsageDetail(obj, "speech_to_text_minutes"),
+          speechToSpeechMinutes: parseUsageDetail(obj, "speech_to_speech_minutes"),
+          products: parseUsageProducts(obj.products),
+          startTime: parseOptionalDate(obj.start_time),
+          endTime: parseOptionalDate(obj.end_time)
+        });
       } catch (error3) {
         throw new errors_1.DeepLError(`Error parsing response JSON: ${error3}`);
       }
@@ -40448,7 +41295,8 @@ var require_parsing = __commonJS({
             text: translation.text,
             detectedSourceLang: (0, utils_1.standardizeLanguageCode)(translation.detected_source_language),
             billedCharacters: translation.billed_characters,
-            modelTypeUsed: translation.model_type_used
+            modelTypeUsed: translation.model_type_used,
+            tagHandlingVersion: parseOptionalString(translation.tag_handling_version)
           };
         });
       } catch (error3) {
@@ -40456,10 +41304,11 @@ var require_parsing = __commonJS({
       }
     }
     exports2.parseTextResultArray = parseTextResultArray;
-    function parseWriteResultArray(json) {
+    function parseWriteResultArray(json, expectedCount) {
+      let results;
       try {
         const obj = JSON.parse(json);
-        return obj.improvements.map((improvement) => {
+        results = obj.improvements.map((improvement) => {
           return {
             text: improvement.text,
             detectedSourceLang: (0, utils_1.standardizeLanguageCode)(improvement.detected_source_language),
@@ -40469,43 +41318,64 @@ var require_parsing = __commonJS({
       } catch (error3) {
         throw new errors_1.DeepLError(`Error parsing response JSON: ${error3}`);
       }
+      if (expectedCount !== void 0 && results.length !== expectedCount) {
+        throw new errors_1.DeepLError(`Expected ${expectedCount} improvements in the response, received ${results.length}`);
+      }
+      return results;
     }
     exports2.parseWriteResultArray = parseWriteResultArray;
-    function parseLanguage(lang) {
-      try {
-        const result = {
-          name: lang.name,
-          code: (0, utils_1.standardizeLanguageCode)(lang.language),
-          supportsFormality: lang.supports_formality
-        };
-        if (result.supportsFormality === void 0) {
-          delete result.supportsFormality;
-        }
-        return result;
-      } catch (error3) {
-        throw new errors_1.DeepLError(`Error parsing response JSON: ${error3}`);
-      }
-    }
-    function parseLanguageArray(json) {
-      const obj = JSON.parse(json);
-      return obj.map((lang) => parseLanguage(lang));
-    }
-    exports2.parseLanguageArray = parseLanguageArray;
-    function parseGlossaryLanguagePair(obj) {
+    function parseSourceLanguageV3(lang) {
       try {
         return {
-          sourceLang: obj.source_lang,
-          targetLang: obj.target_lang
+          name: lang.name,
+          code: (0, utils_1.standardizeLanguageCode)(lang.lang)
         };
       } catch (error3) {
         throw new errors_1.DeepLError(`Error parsing response JSON: ${error3}`);
       }
     }
-    function parseGlossaryLanguagePairArray(json) {
-      const obj = JSON.parse(json);
-      return obj.supported_languages.map((langPair) => parseGlossaryLanguagePair(langPair));
+    function parseTargetLanguageV3(lang) {
+      var _a2;
+      try {
+        return {
+          name: lang.name,
+          code: (0, utils_1.standardizeLanguageCode)(lang.lang),
+          supportsFormality: "formality" in ((_a2 = lang.features) !== null && _a2 !== void 0 ? _a2 : {})
+        };
+      } catch (error3) {
+        throw new errors_1.DeepLError(`Error parsing response JSON: ${error3}`);
+      }
     }
-    exports2.parseGlossaryLanguagePairArray = parseGlossaryLanguagePairArray;
+    function parseSourceLanguageArrayV3(json) {
+      return parseResponse(json, (obj) => obj.filter((lang) => lang.usable_as_source).map((lang) => parseSourceLanguageV3(lang)));
+    }
+    exports2.parseSourceLanguageArrayV3 = parseSourceLanguageArrayV3;
+    function parseTargetLanguageArrayV3(json) {
+      return parseResponse(json, (obj) => obj.filter((lang) => lang.usable_as_target).map((lang) => parseTargetLanguageV3(lang)));
+    }
+    exports2.parseTargetLanguageArrayV3 = parseTargetLanguageArrayV3;
+    function parseGlossaryLanguagePairArrayV3(json) {
+      try {
+        const obj = JSON.parse(json);
+        const sourceLangs = obj.filter((lang) => lang.usable_as_source).map((lang) => lang.lang);
+        const targetLangs = obj.filter((lang) => lang.usable_as_target).map((lang) => lang.lang);
+        const pairs = [];
+        for (const sourceLang of sourceLangs) {
+          for (const targetLang of targetLangs) {
+            if (sourceLang === targetLang)
+              continue;
+            pairs.push({
+              sourceLang,
+              targetLang
+            });
+          }
+        }
+        return pairs;
+      } catch (error3) {
+        throw new errors_1.DeepLError(`Error parsing response JSON: ${error3}`);
+      }
+    }
+    exports2.parseGlossaryLanguagePairArrayV3 = parseGlossaryLanguagePairArrayV3;
     function parseDocumentHandle(json) {
       try {
         const obj = JSON.parse(json);
@@ -40572,6 +41442,39 @@ var require_parsing = __commonJS({
       const date2 = new Date(value);
       return isNaN(date2.getTime()) ? void 0 : date2;
     }
+    function parseIdList(value) {
+      return Array.isArray(value) ? value.filter((id) => typeof id === "string") : [];
+    }
+    function parseRawStyleProfile(obj) {
+      var _a2, _b, _c5, _d;
+      return {
+        styleProfileId: (_a2 = obj.style_profile_id) !== null && _a2 !== void 0 ? _a2 : "",
+        name: (_b = obj.name) !== null && _b !== void 0 ? _b : "",
+        description: parseOptionalString(obj.description),
+        industry: parseOptionalString(obj.industry),
+        glossaryIds: parseIdList(obj.glossary_ids),
+        styleRuleIds: parseIdList(obj.style_rule_ids),
+        translationMemoryIds: parseIdList(obj.translation_memory_ids),
+        glossaryPriorityOrderEnabled: obj.glossary_priority_order_enabled === true,
+        // Required on the wire; a missing or malformed value gives an invalid Date, never a throw
+        creationTime: new Date((_c5 = parseOptionalString(obj.creation_time)) !== null && _c5 !== void 0 ? _c5 : NaN),
+        updatedTime: new Date((_d = parseOptionalString(obj.updated_time)) !== null && _d !== void 0 ? _d : NaN)
+      };
+    }
+    function parseStyleProfile(json) {
+      return parseResponse(json, parseRawStyleProfile);
+    }
+    exports2.parseStyleProfile = parseStyleProfile;
+    function parseStyleProfileList(json) {
+      return parseResponse(json, (obj) => {
+        const list2 = obj === null || obj === void 0 ? void 0 : obj.style_profiles;
+        if (!Array.isArray(list2)) {
+          return [];
+        }
+        return list2.filter((item) => typeof item === "object" && item !== null && !Array.isArray(item)).map((item) => parseRawStyleProfile(item));
+      });
+    }
+    exports2.parseStyleProfileList = parseStyleProfileList;
     function parseTranslationMemoryInfo(tm) {
       return {
         translationMemoryId: tm.translation_memory_id,
@@ -40659,22 +41562,32 @@ var require_parsing = __commonJS({
       }
     }
     exports2.parseTranslationMemoryExport = parseTranslationMemoryExport;
+    function isTranslationMemoryJobStatusDone(status) {
+      return status === "completed" || status === "downloaded";
+    }
+    exports2.isTranslationMemoryJobStatusDone = isTranslationMemoryJobStatusDone;
+    function isTranslationMemoryJobStatusOk(status) {
+      return status !== "failed" && status !== "expired";
+    }
+    exports2.isTranslationMemoryJobStatusOk = isTranslationMemoryJobStatusOk;
     function parseTranslationMemoryJob(json) {
       var _a2, _b, _c5, _d, _e5, _f, _g;
       try {
         const obj = JSON.parse(json);
-        const results = ((_a2 = obj.results) !== null && _a2 !== void 0 ? _a2 : []).map((result) => {
+        const results = ((_a2 = obj.results) !== null && _a2 !== void 0 ? _a2 : []).map((result2) => {
           var _a3, _b2, _c6;
           return {
-            status: (_a3 = result.status) !== null && _a3 !== void 0 ? _a3 : "",
-            requiredAction: (_b2 = result.status_metadata) === null || _b2 === void 0 ? void 0 : _b2.required_action,
-            downloadUrl: result.download_url,
-            expiresAt: parseOptionalTimestamp(result.expires_at),
-            errorMessage: (_c6 = result.error) === null || _c6 === void 0 ? void 0 : _c6.message,
-            translationMemoryId: result.translation_memory_id,
-            skippedSegmentCount: result.skipped_segment_count
+            status: (_a3 = result2.status) !== null && _a3 !== void 0 ? _a3 : "",
+            requiredAction: (_b2 = result2.status_metadata) === null || _b2 === void 0 ? void 0 : _b2.required_action,
+            downloadUrl: result2.download_url,
+            expiresAt: parseOptionalTimestamp(result2.expires_at),
+            errorMessage: (_c6 = result2.error) === null || _c6 === void 0 ? void 0 : _c6.message,
+            translationMemoryId: result2.translation_memory_id,
+            skippedSegmentCount: result2.skipped_segment_count
           };
         });
+        const result = results[0];
+        const status = result === null || result === void 0 ? void 0 : result.status;
         return {
           jobId: obj.job_id,
           operation: (_b = obj.operation) !== null && _b !== void 0 ? _b : "",
@@ -40685,13 +41598,213 @@ var require_parsing = __commonJS({
           translationMemoryId: (_d = obj.parameters) === null || _d === void 0 ? void 0 : _d.translation_memory_id,
           displayName: (_e5 = obj.parameters) === null || _e5 === void 0 ? void 0 : _e5.display_name,
           sourceContentType: (_f = obj.source_file) === null || _f === void 0 ? void 0 : _f.content_type,
-          sourceContentLength: (_g = obj.source_file) === null || _g === void 0 ? void 0 : _g.content_length
+          sourceContentLength: (_g = obj.source_file) === null || _g === void 0 ? void 0 : _g.content_length,
+          result,
+          status,
+          done: () => isTranslationMemoryJobStatusDone(status),
+          ok: () => isTranslationMemoryJobStatusOk(status)
         };
       } catch (error3) {
         throw new errors_1.DeepLError(`Error parsing response JSON: ${error3}`);
       }
     }
     exports2.parseTranslationMemoryJob = parseTranslationMemoryJob;
+    function parseLanguageResourceList(json) {
+      try {
+        const obj = JSON.parse(json);
+        return obj.map((resource) => {
+          var _a2;
+          const features = {};
+          for (const feature of (_a2 = resource.features) !== null && _a2 !== void 0 ? _a2 : []) {
+            features[feature.name] = {
+              name: feature.name,
+              needsSourceSupport: feature.needs_source_support === true,
+              needsTargetSupport: feature.needs_target_support === true
+            };
+          }
+          return { name: resource.name, features };
+        });
+      } catch (error3) {
+        throw new errors_1.DeepLError(`Error parsing response JSON: ${error3}`);
+      }
+    }
+    exports2.parseLanguageResourceList = parseLanguageResourceList;
+    function parseLanguageSupportList(json) {
+      try {
+        const obj = JSON.parse(json);
+        return obj.map((lang) => {
+          var _a2;
+          const features = {};
+          for (const [name, feature] of Object.entries((_a2 = lang.features) !== null && _a2 !== void 0 ? _a2 : {})) {
+            features[name] = { status: feature.status };
+          }
+          return {
+            code: lang.lang,
+            name: lang.name,
+            status: lang.status,
+            usableAsSource: lang.usable_as_source,
+            usableAsTarget: lang.usable_as_target,
+            features
+          };
+        });
+      } catch (error3) {
+        throw new errors_1.DeepLError(`Error parsing response JSON: ${error3}`);
+      }
+    }
+    exports2.parseLanguageSupportList = parseLanguageSupportList;
+    function isRecord(value) {
+      return typeof value === "object" && value !== null && !Array.isArray(value);
+    }
+    function recordList(value) {
+      return Array.isArray(value) ? value.filter(isRecord) : [];
+    }
+    function numberOr(value, fallback2) {
+      return typeof value === "number" && isFinite(value) ? value : fallback2;
+    }
+    function stringOr(value, fallback2) {
+      return (0, utils_1.isString)(value) ? value : fallback2;
+    }
+    function parseOptionalUtcTimestamp(value) {
+      if (!(0, utils_1.isString)(value)) {
+        return void 0;
+      }
+      if (/T\d{2}:\d{2}(:\d{2}(\.\d+)?)?$/.test(value)) {
+        return parseOptionalTimestamp(`${value}Z`);
+      }
+      return parseOptionalTimestamp(value);
+    }
+    function parseRawDeveloperKey(value) {
+      if (!isRecord(value)) {
+        return void 0;
+      }
+      const obj = value;
+      if (!(0, utils_1.isString)(obj.key_id) || obj.key_id.length === 0) {
+        return void 0;
+      }
+      const limits = isRecord(obj.usage_limits) ? obj.usage_limits : void 0;
+      return {
+        keyId: obj.key_id,
+        label: (0, utils_1.isString)(obj.label) ? obj.label : void 0,
+        creationTime: parseOptionalUtcTimestamp(obj.creation_time),
+        deactivatedTime: parseOptionalUtcTimestamp(obj.deactivated_time),
+        isDeactivated: obj.is_deactivated === true,
+        usageLimits: limits === void 0 ? void 0 : {
+          characters: numberOr(limits.characters, null),
+          speechToTextMilliseconds: numberOr(limits.speech_to_text_milliseconds, null),
+          speechToSpeechMilliseconds: numberOr(limits.speech_to_speech_milliseconds, null)
+        }
+      };
+    }
+    function parseDeveloperKey(json) {
+      let parsed;
+      try {
+        parsed = JSON.parse(json);
+      } catch (error3) {
+        throw new errors_1.DeepLError(`Error parsing response JSON: ${error3}`);
+      }
+      const key = parseRawDeveloperKey(parsed);
+      if (key === void 0) {
+        throw new errors_1.DeepLError("Developer key response is missing key_id");
+      }
+      return key;
+    }
+    exports2.parseDeveloperKey = parseDeveloperKey;
+    function parseDeveloperKeyList(json) {
+      let parsed;
+      try {
+        parsed = JSON.parse(json);
+      } catch (error3) {
+        throw new errors_1.DeepLError(`Error parsing response JSON: ${error3}`);
+      }
+      if (!Array.isArray(parsed)) {
+        throw new errors_1.DeepLError("Developer keys response is not a list");
+      }
+      return parsed.map(parseRawDeveloperKey).filter((key) => key !== void 0);
+    }
+    exports2.parseDeveloperKeyList = parseDeveloperKeyList;
+    function parseAdminUsageBreakdown(obj) {
+      const b5 = isRecord(obj) ? obj : void 0;
+      return {
+        totalCharacters: numberOr(b5 === null || b5 === void 0 ? void 0 : b5.total_characters, 0),
+        textTranslationCharacters: numberOr(b5 === null || b5 === void 0 ? void 0 : b5.text_translation_characters, 0),
+        documentTranslationCharacters: numberOr(b5 === null || b5 === void 0 ? void 0 : b5.document_translation_characters, 0),
+        textImprovementCharacters: numberOr(b5 === null || b5 === void 0 ? void 0 : b5.text_improvement_characters, 0),
+        speechToTextMinutes: numberOr(b5 === null || b5 === void 0 ? void 0 : b5.speech_to_text_minutes, 0),
+        speechToSpeechMinutes: numberOr(b5 === null || b5 === void 0 ? void 0 : b5.speech_to_speech_minutes, void 0)
+      };
+    }
+    function parseKeyUsage(obj) {
+      return {
+        apiKey: stringOr(obj.api_key, ""),
+        apiKeyLabel: (0, utils_1.isString)(obj.api_key_label) ? obj.api_key_label : void 0,
+        usage: parseAdminUsageBreakdown(obj.usage),
+        usageDate: parseOptionalUtcTimestamp(obj.usage_date)
+      };
+    }
+    function parseAdminUsageReport(json) {
+      try {
+        const top = JSON.parse(json);
+        if (!isRecord(top)) {
+          throw new errors_1.DeepLError("Usage analytics response is not a JSON object");
+        }
+        const parsed = top.usage_report;
+        const report = isRecord(parsed) ? parsed : {};
+        return {
+          totalUsage: isRecord(report.total_usage) ? parseAdminUsageBreakdown(report.total_usage) : void 0,
+          startDate: parseOptionalUtcTimestamp(report.start_date),
+          endDate: parseOptionalUtcTimestamp(report.end_date),
+          groupBy: (0, utils_1.isString)(report.group_by) ? report.group_by : void 0,
+          keyUsages: recordList(report.key_usages).map(parseKeyUsage),
+          keyAndDayUsages: recordList(report.key_and_day_usages).map(parseKeyUsage)
+        };
+      } catch (error3) {
+        if (error3 instanceof errors_1.DeepLError) {
+          throw error3;
+        }
+        throw new errors_1.DeepLError(`Error parsing response JSON: ${error3}`);
+      }
+    }
+    exports2.parseAdminUsageReport = parseAdminUsageReport;
+    function parseCustomTagUsageBreakdown(obj) {
+      const b5 = isRecord(obj) ? obj : void 0;
+      return {
+        totalCharacters: numberOr(b5 === null || b5 === void 0 ? void 0 : b5.total_characters, 0),
+        textTranslationCharacters: numberOr(b5 === null || b5 === void 0 ? void 0 : b5.text_translation_characters, 0),
+        textImprovementCharacters: numberOr(b5 === null || b5 === void 0 ? void 0 : b5.text_improvement_characters, 0),
+        speechToTextMinutes: numberOr(b5 === null || b5 === void 0 ? void 0 : b5.speech_to_text_minutes, 0),
+        speechToSpeechMinutes: numberOr(b5 === null || b5 === void 0 ? void 0 : b5.speech_to_speech_minutes, void 0)
+      };
+    }
+    function parseCustomTagUsage(obj) {
+      return {
+        customTag: stringOr(obj.custom_tag, ""),
+        breakdown: parseCustomTagUsageBreakdown(obj.breakdown),
+        usageDate: parseOptionalUtcTimestamp(obj.usage_date)
+      };
+    }
+    function parseCustomTagUsageReport(json) {
+      try {
+        const top = JSON.parse(json);
+        if (!isRecord(top)) {
+          throw new errors_1.DeepLError("Usage analytics response is not a JSON object");
+        }
+        const parsed = top.custom_tag_usage_report;
+        const report = isRecord(parsed) ? parsed : {};
+        return {
+          aggregateBy: (0, utils_1.isString)(report.aggregate_by) ? report.aggregate_by : void 0,
+          startDate: parseOptionalUtcTimestamp(report.start_date),
+          endDate: parseOptionalUtcTimestamp(report.end_date),
+          nextPage: typeof report.next_page === "number" ? report.next_page : void 0,
+          usage: recordList(report.usage).map(parseCustomTagUsage)
+        };
+      } catch (error3) {
+        if (error3 instanceof errors_1.DeepLError) {
+          throw error3;
+        }
+        throw new errors_1.DeepLError(`Error parsing response JSON: ${error3}`);
+      }
+    }
+    exports2.parseCustomTagUsageReport = parseCustomTagUsageReport;
   }
 });
 
@@ -40996,7 +42109,7 @@ var require_utils4 = __commonJS({
       }
       return c5 >>> 0;
     });
-    function Utils(opts) {
+    function Utils2(opts) {
       this.sep = pth.sep;
       this.fs = fsystem;
       if (is_Obj(opts)) {
@@ -41005,8 +42118,8 @@ var require_utils4 = __commonJS({
         }
       }
     }
-    module2.exports = Utils;
-    Utils.prototype.makeDir = function(folder) {
+    module2.exports = Utils2;
+    Utils2.prototype.makeDir = function(folder) {
       const self2 = this;
       function mkdirSync(fpath) {
         let resolvedPath2 = fpath.split(self2.sep)[0];
@@ -41028,7 +42141,7 @@ var require_utils4 = __commonJS({
       }
       mkdirSync(folder);
     };
-    Utils.prototype.writeFileTo = function(path, content, overwrite, attr) {
+    Utils2.prototype.writeFileTo = function(path, content, overwrite, attr) {
       const self2 = this;
       if (self2.fs.existsSync(path)) {
         if (!overwrite) return false;
@@ -41058,7 +42171,7 @@ var require_utils4 = __commonJS({
       self2.fs.chmodSync(path, attr || 438);
       return true;
     };
-    Utils.prototype.writeFileToAsync = function(path, content, overwrite, attr, callback) {
+    Utils2.prototype.writeFileToAsync = function(path, content, overwrite, attr, callback) {
       if (typeof attr === "function") {
         callback = attr;
         attr = void 0;
@@ -41107,7 +42220,7 @@ var require_utils4 = __commonJS({
         });
       });
     };
-    Utils.prototype.assertPathSafe = function(root5, target) {
+    Utils2.prototype.assertPathSafe = function(root5, target) {
       const self2 = this;
       if (typeof self2.fs.lstatSync !== "function") return;
       const resolvedRoot = pth.resolve(root5);
@@ -41128,7 +42241,7 @@ var require_utils4 = __commonJS({
         if (stat2.isSymbolicLink()) throw Errors.FILE_IN_THE_WAY(`"${cur}"`);
       }
     };
-    Utils.prototype.findFiles = function(path) {
+    Utils2.prototype.findFiles = function(path) {
       const self2 = this;
       const canLstat = typeof self2.fs.lstatSync === "function";
       const rootReal = self2.fs.realpathSync(path);
@@ -41168,7 +42281,7 @@ var require_utils4 = __commonJS({
       }
       return findSync(path, void 0, true, /* @__PURE__ */ new Set([rootReal]));
     };
-    Utils.prototype.findFilesAsync = function(dir, cb) {
+    Utils2.prototype.findFilesAsync = function(dir, cb) {
       const self2 = this;
       const results = [];
       let finished = false;
@@ -41237,23 +42350,23 @@ var require_utils4 = __commonJS({
         walk(dir, /* @__PURE__ */ new Set([realDir]), finish);
       });
     };
-    Utils.prototype.getAttributes = function() {
+    Utils2.prototype.getAttributes = function() {
     };
-    Utils.prototype.setAttributes = function() {
+    Utils2.prototype.setAttributes = function() {
     };
-    Utils.crc32update = function(crc, byte) {
+    Utils2.crc32update = function(crc, byte) {
       return crcTable[(crc ^ byte) & 255] ^ crc >>> 8;
     };
-    Utils.crc32 = function(buf2) {
+    Utils2.crc32 = function(buf2) {
       if (typeof buf2 === "string") {
         buf2 = Buffer.from(buf2, "utf8");
       }
       let len = buf2.length;
       let crc = ~0;
-      for (let off = 0; off < len; ) crc = Utils.crc32update(crc, buf2[off++]);
+      for (let off = 0; off < len; ) crc = Utils2.crc32update(crc, buf2[off++]);
       return ~crc >>> 0;
     };
-    Utils.methodToString = function(method) {
+    Utils2.methodToString = function(method) {
       switch (method) {
         case Constants.STORED:
           return "STORED (" + method + ")";
@@ -41263,17 +42376,17 @@ var require_utils4 = __commonJS({
           return "UNSUPPORTED (" + method + ")";
       }
     };
-    Utils.canonical = function(path) {
+    Utils2.canonical = function(path) {
       if (!path) return "";
       const safeSuffix = pth.posix.normalize("/" + path.split("\\").join("/"));
       return pth.join(".", safeSuffix);
     };
-    Utils.zipnamefix = function(path) {
+    Utils2.zipnamefix = function(path) {
       if (!path) return "";
       const safeSuffix = pth.posix.normalize("/" + path.split("\\").join("/"));
       return pth.posix.join(".", safeSuffix);
     };
-    Utils.findLast = function(arr, callback) {
+    Utils2.findLast = function(arr, callback) {
       if (!Array.isArray(arr)) throw new TypeError("arr is not array");
       const len = arr.length >>> 0;
       for (let i5 = len - 1; i5 >= 0; i5--) {
@@ -41283,7 +42396,7 @@ var require_utils4 = __commonJS({
       }
       return void 0;
     };
-    Utils.sanitize = function(prefix, name) {
+    Utils2.sanitize = function(prefix, name) {
       prefix = pth.resolve(pth.normalize(prefix));
       var parts = name.split("/");
       for (var i5 = 0, l3 = parts.length; i5 < l3; i5++) {
@@ -41294,7 +42407,7 @@ var require_utils4 = __commonJS({
       }
       return pth.normalize(pth.join(prefix, pth.basename(name)));
     };
-    Utils.toBuffer = function toBuffer2(input, encoder2) {
+    Utils2.toBuffer = function toBuffer2(input, encoder2) {
       if (Buffer.isBuffer(input)) {
         return input;
       } else if (input instanceof Uint8Array) {
@@ -41303,7 +42416,7 @@ var require_utils4 = __commonJS({
         return typeof input === "string" ? encoder2(input) : Buffer.alloc(0);
       }
     };
-    Utils.readBigUInt64LE = function(buffer, index) {
+    Utils2.readBigUInt64LE = function(buffer, index) {
       const lo = buffer.readUInt32LE(index);
       const hi = buffer.readUInt32LE(index + 4);
       const value = hi * 4294967296 + lo;
@@ -41312,16 +42425,16 @@ var require_utils4 = __commonJS({
       }
       return value;
     };
-    Utils.writeBigUInt64LE = function(buffer, value, index) {
+    Utils2.writeBigUInt64LE = function(buffer, value, index) {
       const lo = value >>> 0;
       const hi = Math.floor(value / 4294967296) >>> 0;
       buffer.writeUInt32LE(lo, index);
       buffer.writeUInt32LE(hi, index + 4);
     };
-    Utils.fromDOS2Date = function(val) {
+    Utils2.fromDOS2Date = function(val) {
       return new Date((val >> 25 & 127) + 1980, Math.max((val >> 21 & 15) - 1, 0), Math.max(val >> 16 & 31, 1), val >> 11 & 31, val >> 5 & 63, (val & 31) << 1);
     };
-    Utils.fromDate2DOS = function(val) {
+    Utils2.fromDate2DOS = function(val) {
       let date2 = 0;
       let time2 = 0;
       if (val.getFullYear() > 1979) {
@@ -41330,8 +42443,8 @@ var require_utils4 = __commonJS({
       }
       return date2 << 16 | time2;
     };
-    Utils.isWin = isWin;
-    Utils.crcTable = crcTable;
+    Utils2.isWin = isWin;
+    Utils2.crcTable = crcTable;
   }
 });
 
@@ -41429,11 +42542,11 @@ var require_util9 = __commonJS({
 // node_modules/.pnpm/adm-zip@0.6.1/node_modules/adm-zip/headers/entryHeader.js
 var require_entryHeader = __commonJS({
   "node_modules/.pnpm/adm-zip@0.6.1/node_modules/adm-zip/headers/entryHeader.js"(exports2, module2) {
-    var Utils = require_util9();
-    var Constants = Utils.Constants;
+    var Utils2 = require_util9();
+    var Constants = Utils2.Constants;
     module2.exports = function() {
       var _verMade = 20, _version = 10, _flags = 0, _method = 0, _time = 0, _crc = 0, _compressedSize = 0, _size = 0, _fnameLen = 0, _extraLen = 0, _comLen = 0, _diskStart = 0, _inattr = 0, _attr = 0, _offset = 0;
-      _verMade |= Utils.isWin ? 2560 : 768;
+      _verMade |= Utils2.isWin ? 2560 : 768;
       _flags |= Constants.FLG_EFS;
       const _localHeader = {
         extraLen: 0
@@ -41441,7 +42554,7 @@ var require_entryHeader = __commonJS({
       const uint32 = (val) => Math.max(0, val) >>> 0;
       const uint16 = (val) => Math.max(0, val) & 65535;
       const uint8 = (val) => Math.max(0, val) & 255;
-      _time = Utils.fromDate2DOS(/* @__PURE__ */ new Date());
+      _time = Utils2.fromDate2DOS(/* @__PURE__ */ new Date());
       return {
         get made() {
           return _verMade;
@@ -41496,11 +42609,11 @@ var require_entryHeader = __commonJS({
           _method = val;
         },
         get time() {
-          return Utils.fromDOS2Date(this.timeval);
+          return Utils2.fromDOS2Date(this.timeval);
         },
         set time(val) {
           val = new Date(val);
-          this.timeval = Utils.fromDate2DOS(val);
+          this.timeval = Utils2.fromDate2DOS(val);
         },
         get timeval() {
           return _time;
@@ -41595,11 +42708,11 @@ var require_entryHeader = __commonJS({
         },
         loadLocalHeaderFromBinary: function(input) {
           if (_offset < 0 || _offset + Constants.LOCHDR > input.length) {
-            throw Utils.Errors.INVALID_LOC();
+            throw Utils2.Errors.INVALID_LOC();
           }
           var data = input.slice(_offset, _offset + Constants.LOCHDR);
           if (data.readUInt32LE(0) !== Constants.LOCSIG) {
-            throw Utils.Errors.INVALID_LOC();
+            throw Utils2.Errors.INVALID_LOC();
           }
           _localHeader.version = data.readUInt16LE(Constants.LOCVER);
           _localHeader.flags = data.readUInt16LE(Constants.LOCFLG);
@@ -41617,7 +42730,7 @@ var require_entryHeader = __commonJS({
         },
         loadFromBinary: function(data) {
           if (data.length !== Constants.CENHDR || data.readUInt32LE(0) !== Constants.CENSIG) {
-            throw Utils.Errors.INVALID_CEN();
+            throw Utils2.Errors.INVALID_CEN();
           }
           _verMade = data.readUInt16LE(Constants.CENVEM);
           _version = data.readUInt16LE(Constants.CENVER);
@@ -41677,7 +42790,7 @@ var require_entryHeader = __commonJS({
             made: _verMade,
             version: _version,
             flags: _flags,
-            method: Utils.methodToString(_method),
+            method: Utils2.methodToString(_method),
             time: this.time,
             crc: "0x" + _crc.toString(16).toUpperCase(),
             compressedSize: bytes(_compressedSize),
@@ -41703,8 +42816,8 @@ var require_entryHeader = __commonJS({
 // node_modules/.pnpm/adm-zip@0.6.1/node_modules/adm-zip/headers/mainHeader.js
 var require_mainHeader = __commonJS({
   "node_modules/.pnpm/adm-zip@0.6.1/node_modules/adm-zip/headers/mainHeader.js"(exports2, module2) {
-    var Utils = require_util9();
-    var Constants = Utils.Constants;
+    var Utils2 = require_util9();
+    var Constants = Utils2.Constants;
     module2.exports = function() {
       var _volumeEntries = 0, _totalEntries = 0, _size = 0, _offset = 0, _commentLength = 0;
       const needsZip64 = () => _volumeEntries > Constants.EF_ZIP64_OR_16 || _totalEntries > Constants.EF_ZIP64_OR_16 || _size > Constants.EF_ZIP64_OR_32 || _offset > Constants.EF_ZIP64_OR_32;
@@ -41744,7 +42857,7 @@ var require_mainHeader = __commonJS({
         },
         loadFromBinary: function(data) {
           if ((data.length !== Constants.ENDHDR || data.readUInt32LE(0) !== Constants.ENDSIG) && (data.length < Constants.ZIP64HDR || data.readUInt32LE(0) !== Constants.ZIP64SIG)) {
-            throw Utils.Errors.INVALID_END();
+            throw Utils2.Errors.INVALID_END();
           }
           if (data.readUInt32LE(0) === Constants.ENDSIG) {
             _volumeEntries = data.readUInt16LE(Constants.ENDSUB);
@@ -41753,10 +42866,10 @@ var require_mainHeader = __commonJS({
             _offset = data.readUInt32LE(Constants.ENDOFF);
             _commentLength = data.readUInt16LE(Constants.ENDCOM);
           } else {
-            _volumeEntries = Utils.readBigUInt64LE(data, Constants.ZIP64SUB);
-            _totalEntries = Utils.readBigUInt64LE(data, Constants.ZIP64TOT);
-            _size = Utils.readBigUInt64LE(data, Constants.ZIP64SIZB);
-            _offset = Utils.readBigUInt64LE(data, Constants.ZIP64OFF);
+            _volumeEntries = Utils2.readBigUInt64LE(data, Constants.ZIP64SUB);
+            _totalEntries = Utils2.readBigUInt64LE(data, Constants.ZIP64TOT);
+            _size = Utils2.readBigUInt64LE(data, Constants.ZIP64SIZB);
+            _offset = Utils2.readBigUInt64LE(data, Constants.ZIP64OFF);
             _commentLength = 0;
           }
         },
@@ -41776,20 +42889,20 @@ var require_mainHeader = __commonJS({
           var b5 = Buffer.alloc(this.mainHeaderSize);
           let offset = 0;
           b5.writeUInt32LE(Constants.ZIP64SIG, offset);
-          Utils.writeBigUInt64LE(b5, Constants.ZIP64HDR - Constants.ZIP64LEAD, offset + Constants.ZIP64SIZE);
+          Utils2.writeBigUInt64LE(b5, Constants.ZIP64HDR - Constants.ZIP64LEAD, offset + Constants.ZIP64SIZE);
           b5.writeUInt16LE(45, offset + Constants.ZIP64VEM);
           b5.writeUInt16LE(45, offset + Constants.ZIP64VER);
           b5.writeUInt32LE(0, offset + Constants.ZIP64DSK);
           b5.writeUInt32LE(0, offset + Constants.ZIP64DSKDIR);
-          Utils.writeBigUInt64LE(b5, _volumeEntries, offset + Constants.ZIP64SUB);
-          Utils.writeBigUInt64LE(b5, _totalEntries, offset + Constants.ZIP64TOT);
-          Utils.writeBigUInt64LE(b5, _size, offset + Constants.ZIP64SIZB);
-          Utils.writeBigUInt64LE(b5, _offset, offset + Constants.ZIP64OFF);
+          Utils2.writeBigUInt64LE(b5, _volumeEntries, offset + Constants.ZIP64SUB);
+          Utils2.writeBigUInt64LE(b5, _totalEntries, offset + Constants.ZIP64TOT);
+          Utils2.writeBigUInt64LE(b5, _size, offset + Constants.ZIP64SIZB);
+          Utils2.writeBigUInt64LE(b5, _offset, offset + Constants.ZIP64OFF);
           const zip64EndOffset = _offset + _size;
           offset += Constants.ZIP64HDR;
           b5.writeUInt32LE(Constants.END64SIG, offset);
           b5.writeUInt32LE(0, offset + Constants.END64START);
-          Utils.writeBigUInt64LE(b5, zip64EndOffset, offset + Constants.END64OFF);
+          Utils2.writeBigUInt64LE(b5, zip64EndOffset, offset + Constants.END64OFF);
           b5.writeUInt32LE(1, offset + Constants.END64NUMDISKS);
           offset += Constants.END64HDR;
           b5.writeUInt32LE(Constants.ENDSIG, offset);
@@ -42044,14 +43157,14 @@ var require_methods = __commonJS({
 // node_modules/.pnpm/adm-zip@0.6.1/node_modules/adm-zip/zipEntry.js
 var require_zipEntry = __commonJS({
   "node_modules/.pnpm/adm-zip@0.6.1/node_modules/adm-zip/zipEntry.js"(exports2, module2) {
-    var Utils = require_util9();
+    var Utils2 = require_util9();
     var Headers2 = require_headers2();
-    var Constants = Utils.Constants;
+    var Constants = Utils2.Constants;
     var Methods = require_methods();
     module2.exports = function(options, input) {
       var _centralHeader = new Headers2.EntryHeader(), _entryName = Buffer.alloc(0), _comment = Buffer.alloc(0), _isDirectory = false, uncompressedData = null, _extra = Buffer.alloc(0), _extralocal = Buffer.alloc(0), _efs = true;
       const opts = options;
-      const decoder = typeof opts.decoder === "object" ? opts.decoder : Utils.decoder;
+      const decoder = typeof opts.decoder === "object" ? opts.decoder : Utils2.decoder;
       _efs = decoder.hasOwnProperty("efs") ? decoder.efs : false;
       function getCompressedDataFromZip() {
         if (!input || !(input instanceof Uint8Array)) {
@@ -42061,13 +43174,13 @@ var require_zipEntry = __commonJS({
         const dataOffset = _centralHeader.realDataOffset;
         const dataEnd = dataOffset + _centralHeader.compressedSize;
         if (dataOffset < 0 || dataEnd < dataOffset || dataEnd > input.length) {
-          throw Utils.Errors.INVALID_LOC();
+          throw Utils2.Errors.INVALID_LOC();
         }
         return input.slice(dataOffset, dataEnd);
       }
       function crc32OK(data) {
         const expectedCrc = _centralHeader.flags_desc || _centralHeader.localHeader.flags_desc ? _centralHeader.crc : _centralHeader.localHeader.crc;
-        return Utils.crc32(data) === expectedCrc;
+        return Utils2.crc32(data) === expectedCrc;
       }
       function decompress(async, callback, pass2) {
         if (typeof callback === "undefined" && typeof async === "string") {
@@ -42076,7 +43189,7 @@ var require_zipEntry = __commonJS({
         }
         if (_isDirectory) {
           if (async && callback) {
-            callback(Buffer.alloc(0), Utils.Errors.DIRECTORY_CONTENT_ERROR());
+            callback(Buffer.alloc(0), Utils2.Errors.DIRECTORY_CONTENT_ERROR());
           }
           return Buffer.alloc(0);
         }
@@ -42089,7 +43202,7 @@ var require_zipEntry = __commonJS({
           }
           if (_centralHeader.encrypted) {
             if ("string" !== typeof pass2 && !Buffer.isBuffer(pass2)) {
-              throw Utils.Errors.INVALID_PASS_PARAM();
+              throw Utils2.Errors.INVALID_PASS_PARAM();
             }
             compressedData = Methods.ZipCrypto.decrypt(compressedData, _centralHeader, pass2);
           }
@@ -42102,22 +43215,22 @@ var require_zipEntry = __commonJS({
         }
         var data;
         switch (_centralHeader.method) {
-          case Utils.Constants.STORED:
+          case Utils2.Constants.STORED:
             data = Buffer.alloc(compressedData.length);
             compressedData.copy(data);
             if (!crc32OK(data)) {
-              if (async && callback) callback(data, Utils.Errors.BAD_CRC());
-              throw Utils.Errors.BAD_CRC();
+              if (async && callback) callback(data, Utils2.Errors.BAD_CRC());
+              throw Utils2.Errors.BAD_CRC();
             } else {
               if (async && callback) callback(data);
               return data;
             }
-          case Utils.Constants.DEFLATED:
+          case Utils2.Constants.DEFLATED:
             var inflater = new Methods.Inflater(compressedData, _centralHeader.size);
             if (!async) {
               data = inflater.inflate();
               if (!crc32OK(data)) {
-                throw Utils.Errors.BAD_CRC(`"${decoder.decode(_entryName)}"`);
+                throw Utils2.Errors.BAD_CRC(`"${decoder.decode(_entryName)}"`);
               }
               return data;
             } else {
@@ -42126,7 +43239,7 @@ var require_zipEntry = __commonJS({
                 if (err) {
                   callback(Buffer.alloc(0), err);
                 } else if (!crc32OK(result)) {
-                  callback(result, Utils.Errors.BAD_CRC());
+                  callback(result, Utils2.Errors.BAD_CRC());
                 } else {
                   callback(result);
                 }
@@ -42134,8 +43247,8 @@ var require_zipEntry = __commonJS({
             }
             break;
           default:
-            if (async && callback) callback(Buffer.alloc(0), Utils.Errors.UNKNOWN_METHOD());
-            throw Utils.Errors.UNKNOWN_METHOD();
+            if (async && callback) callback(Buffer.alloc(0), Utils2.Errors.UNKNOWN_METHOD());
+            throw Utils2.Errors.UNKNOWN_METHOD();
         }
       }
       function compress2(async, callback) {
@@ -42146,14 +43259,14 @@ var require_zipEntry = __commonJS({
         if (uncompressedData.length && !_isDirectory) {
           var compressedData;
           switch (_centralHeader.method) {
-            case Utils.Constants.STORED:
+            case Utils2.Constants.STORED:
               _centralHeader.compressedSize = _centralHeader.size;
               compressedData = Buffer.alloc(uncompressedData.length);
               uncompressedData.copy(compressedData);
               if (async && callback) callback(compressedData);
               return compressedData;
             default:
-            case Utils.Constants.DEFLATED:
+            case Utils2.Constants.DEFLATED:
               var deflater = new Methods.Deflater(uncompressedData);
               if (!async) {
                 var deflated = deflater.deflate();
@@ -42177,7 +43290,7 @@ var require_zipEntry = __commonJS({
         }
       }
       function readUInt64LE(buffer, offset) {
-        return Utils.readBigUInt64LE(buffer, offset);
+        return Utils2.readBigUInt64LE(buffer, offset);
       }
       function parseExtra(data) {
         try {
@@ -42195,7 +43308,7 @@ var require_zipEntry = __commonJS({
             }
           }
         } catch (error3) {
-          throw Utils.Errors.EXTRA_FIELD_PARSE_ERROR();
+          throw Utils2.Errors.EXTRA_FIELD_PARSE_ERROR();
         }
       }
       function parseZip64ExtendedInformation(data) {
@@ -42233,7 +43346,7 @@ var require_zipEntry = __commonJS({
           return _entryName;
         },
         set entryName(val) {
-          _entryName = Utils.toBuffer(val, decoder.encode);
+          _entryName = Utils2.toBuffer(val, decoder.encode);
           var lastChar = _entryName[_entryName.length - 1];
           _isDirectory = lastChar === 47 || lastChar === 92;
           _centralHeader.fileNameLength = _entryName.length;
@@ -42257,9 +43370,9 @@ var require_zipEntry = __commonJS({
           return decoder.decode(_comment);
         },
         set comment(val) {
-          _comment = Utils.toBuffer(val, decoder.encode);
+          _comment = Utils2.toBuffer(val, decoder.encode);
           _centralHeader.commentLength = _comment.length;
-          if (_comment.length > 65535) throw Utils.Errors.COMMENT_TOO_LONG();
+          if (_comment.length > 65535) throw Utils2.Errors.COMMENT_TOO_LONG();
         },
         get name() {
           const n3 = decoder.decode(_entryName);
@@ -42275,14 +43388,14 @@ var require_zipEntry = __commonJS({
           compress2(true, callback);
         },
         setData: function(value) {
-          uncompressedData = Utils.toBuffer(value, Utils.decoder.encode);
+          uncompressedData = Utils2.toBuffer(value, Utils2.decoder.encode);
           if (!_isDirectory && uncompressedData.length) {
             _centralHeader.size = uncompressedData.length;
-            _centralHeader.method = Utils.Constants.DEFLATED;
-            _centralHeader.crc = Utils.crc32(value);
+            _centralHeader.method = Utils2.Constants.DEFLATED;
+            _centralHeader.crc = Utils2.crc32(value);
             _centralHeader.changed = true;
           } else {
-            _centralHeader.method = Utils.Constants.STORED;
+            _centralHeader.method = Utils2.Constants.STORED;
           }
         },
         getData: function(pass2) {
@@ -42315,7 +43428,7 @@ var require_zipEntry = __commonJS({
           _centralHeader.flags_efs = this.efs;
           _centralHeader.extraLength = _extra.length;
           var header = _centralHeader.centralHeaderToBinary();
-          var addpos = Utils.Constants.CENHDR;
+          var addpos = Utils2.Constants.CENHDR;
           _entryName.copy(header, addpos);
           addpos += _entryName.length;
           _extra.copy(header, addpos);
@@ -42364,7 +43477,7 @@ var require_zipFile = __commonJS({
   "node_modules/.pnpm/adm-zip@0.6.1/node_modules/adm-zip/zipFile.js"(exports2, module2) {
     var ZipEntry = require_zipEntry();
     var Headers2 = require_headers2();
-    var Utils = require_util9();
+    var Utils2 = require_util9();
     module2.exports = function(inBuffer, options) {
       var entryList = [], entryTable = /* @__PURE__ */ Object.create(null), _comment = Buffer.alloc(0), mainHeader = new Headers2.MainHeader(), loadedEntries = false;
       var password = null;
@@ -42402,14 +43515,14 @@ var require_zipFile = __commonJS({
       function readEntries() {
         loadedEntries = true;
         entryTable = /* @__PURE__ */ Object.create(null);
-        if (mainHeader.diskEntries > (inBuffer.length - mainHeader.offset) / Utils.Constants.CENHDR) {
-          throw Utils.Errors.DISK_ENTRY_TOO_LARGE();
+        if (mainHeader.diskEntries > (inBuffer.length - mainHeader.offset) / Utils2.Constants.CENHDR) {
+          throw Utils2.Errors.DISK_ENTRY_TOO_LARGE();
         }
         entryList = new Array(mainHeader.diskEntries);
         var index = mainHeader.offset;
         for (var i5 = 0; i5 < entryList.length; i5++) {
           var tmp = index, entry = new ZipEntry(opts, inBuffer);
-          entry.header = inBuffer.slice(tmp, tmp += Utils.Constants.CENHDR);
+          entry.header = inBuffer.slice(tmp, tmp += Utils2.Constants.CENHDR);
           entry.entryName = inBuffer.slice(tmp, tmp += entry.header.fileNameLength);
           if (entry.header.extraLength) {
             entry.extra = inBuffer.slice(tmp, tmp += entry.header.extraLength);
@@ -42417,7 +43530,7 @@ var require_zipFile = __commonJS({
           if (entry.header.commentLength) entry.comment = inBuffer.slice(tmp, tmp + entry.header.commentLength);
           index += entry.header.centralHeaderSize;
           if (entry.entryName in entryTable) {
-            throw Utils.Errors.DUPLICATE_ENTRY(`"${entry.entryName}"`);
+            throw Utils2.Errors.DUPLICATE_ENTRY(`"${entry.entryName}"`);
           }
           entryList[i5] = entry;
           entryTable[entry.entryName] = entry;
@@ -42426,32 +43539,32 @@ var require_zipFile = __commonJS({
         makeTemporaryFolders();
       }
       function readMainHeader(readNow) {
-        var i5 = inBuffer.length - Utils.Constants.ENDHDR, max = Math.max(0, i5 - 65535), n3 = max, endStart = inBuffer.length, endOffset = -1, commentEnd = 0;
+        var i5 = inBuffer.length - Utils2.Constants.ENDHDR, max = Math.max(0, i5 - 65535), n3 = max, endStart = inBuffer.length, endOffset = -1, commentEnd = 0;
         const trailingSpace = typeof opts.trailingSpace === "boolean" ? opts.trailingSpace : false;
         if (trailingSpace) max = 0;
         for (i5; i5 >= n3; i5--) {
           if (inBuffer[i5] !== 80) continue;
-          if (inBuffer.readUInt32LE(i5) === Utils.Constants.ENDSIG) {
+          if (inBuffer.readUInt32LE(i5) === Utils2.Constants.ENDSIG) {
             endOffset = i5;
             commentEnd = i5;
-            endStart = i5 + Utils.Constants.ENDHDR;
-            n3 = i5 - Utils.Constants.END64HDR;
+            endStart = i5 + Utils2.Constants.ENDHDR;
+            n3 = i5 - Utils2.Constants.END64HDR;
             continue;
           }
-          if (inBuffer.readUInt32LE(i5) === Utils.Constants.END64SIG) {
+          if (inBuffer.readUInt32LE(i5) === Utils2.Constants.END64SIG) {
             n3 = max;
             continue;
           }
-          if (inBuffer.readUInt32LE(i5) === Utils.Constants.ZIP64SIG) {
+          if (inBuffer.readUInt32LE(i5) === Utils2.Constants.ZIP64SIG) {
             endOffset = i5;
-            endStart = i5 + Utils.readBigUInt64LE(inBuffer, i5 + Utils.Constants.ZIP64SIZE) + Utils.Constants.ZIP64LEAD;
+            endStart = i5 + Utils2.readBigUInt64LE(inBuffer, i5 + Utils2.Constants.ZIP64SIZE) + Utils2.Constants.ZIP64LEAD;
             break;
           }
         }
-        if (endOffset == -1) throw Utils.Errors.INVALID_FORMAT();
+        if (endOffset == -1) throw Utils2.Errors.INVALID_FORMAT();
         mainHeader.loadFromBinary(inBuffer.slice(endOffset, endStart));
         if (mainHeader.commentLength) {
-          _comment = inBuffer.slice(commentEnd + Utils.Constants.ENDHDR);
+          _comment = inBuffer.slice(commentEnd + Utils2.Constants.ENDHDR);
         }
         if (readNow) readEntries();
       }
@@ -42479,7 +43592,7 @@ var require_zipFile = __commonJS({
           return decoder.decode(_comment);
         },
         set comment(val) {
-          _comment = Utils.toBuffer(val, decoder.encode);
+          _comment = Utils2.toBuffer(val, decoder.encode);
           mainHeader.commentLength = _comment.length;
         },
         getEntryCount: function() {
@@ -42711,20 +43824,20 @@ var require_zipFile = __commonJS({
 // node_modules/.pnpm/adm-zip@0.6.1/node_modules/adm-zip/adm-zip.js
 var require_adm_zip = __commonJS({
   "node_modules/.pnpm/adm-zip@0.6.1/node_modules/adm-zip/adm-zip.js"(exports2, module2) {
-    var Utils = require_util9();
+    var Utils2 = require_util9();
     var pth = require("path");
     var ZipEntry = require_zipEntry();
     var ZipFile = require_zipFile();
-    var get_Bool = (...val) => Utils.findLast(val, (c5) => typeof c5 === "boolean");
-    var get_Str = (...val) => Utils.findLast(val, (c5) => typeof c5 === "string");
-    var get_Fun = (...val) => Utils.findLast(val, (c5) => typeof c5 === "function");
+    var get_Bool = (...val) => Utils2.findLast(val, (c5) => typeof c5 === "boolean");
+    var get_Str = (...val) => Utils2.findLast(val, (c5) => typeof c5 === "string");
+    var get_Fun = (...val) => Utils2.findLast(val, (c5) => typeof c5 === "function");
     var defaultOptions = {
       // option "noSort" : if true it disables files sorting
       noSort: false,
       // read entries during load (initial loading may be slower)
       readEntries: false,
       // default method is none
-      method: Utils.Constants.NONE,
+      method: Utils2.Constants.NONE,
       // file system
       fs: null
     };
@@ -42739,29 +43852,29 @@ var require_adm_zip = __commonJS({
         }
         if (Buffer.isBuffer(input)) {
           inBuffer = input;
-          opts.method = Utils.Constants.BUFFER;
+          opts.method = Utils2.Constants.BUFFER;
           input = void 0;
         }
       }
       Object.assign(opts, options);
-      const filetools = new Utils(opts);
+      const filetools = new Utils2(opts);
       const applyDirAttributes = (dirEntries) => {
         dirEntries.filter((d5) => d5.attr).sort((a5, b5) => b5.path.length - a5.path.length).forEach((d5) => filetools.fs.chmodSync(d5.path, d5.attr));
       };
       if (typeof opts.decoder !== "object" || typeof opts.decoder.encode !== "function" || typeof opts.decoder.decode !== "function") {
-        opts.decoder = Utils.decoder;
+        opts.decoder = Utils2.decoder;
       }
       if (input && "string" === typeof input) {
         if (filetools.fs.existsSync(input)) {
-          opts.method = Utils.Constants.FILE;
+          opts.method = Utils2.Constants.FILE;
           opts.filename = input;
           inBuffer = filetools.fs.readFileSync(input);
         } else {
-          throw Utils.Errors.INVALID_FILENAME();
+          throw Utils2.Errors.INVALID_FILENAME();
         }
       }
       const _zip = new ZipFile(inBuffer, opts);
-      const { canonical, sanitize, zipnamefix } = Utils;
+      const { canonical, sanitize, zipnamefix } = Utils2;
       function getEntry(entry) {
         if (entry && _zip) {
           var item;
@@ -42971,7 +44084,7 @@ var require_adm_zip = __commonJS({
             if (_attr.isDirectory()) zipPath += filetools.sep;
             this.addFile(zipPath, data, comment, _attr);
           } else {
-            throw Utils.Errors.FILE_NOT_FOUND(localPath);
+            throw Utils2.Errors.FILE_NOT_FOUND(localPath);
           }
         },
         /**
@@ -43038,7 +44151,7 @@ var require_adm_zip = __commonJS({
               }
             }
           } else {
-            throw Utils.Errors.FILE_NOT_FOUND(localPath);
+            throw Utils2.Errors.FILE_NOT_FOUND(localPath);
           }
         },
         /**
@@ -43056,7 +44169,7 @@ var require_adm_zip = __commonJS({
           var self2 = this;
           filetools.fs.open(localPath, "r", function(err) {
             if (err && err.code === "ENOENT") {
-              callback(void 0, Utils.Errors.FILE_NOT_FOUND(localPath));
+              callback(void 0, Utils2.Errors.FILE_NOT_FOUND(localPath));
             } else if (err) {
               callback(void 0, err);
             } else {
@@ -43134,7 +44247,7 @@ var require_adm_zip = __commonJS({
           const fileNameFix = (entry) => pth.win32.basename(pth.win32.normalize(namefix(entry)));
           filetools.fs.open(localPath, "r", function(err) {
             if (err && err.code === "ENOENT") {
-              callback(Utils.Errors.FILE_NOT_FOUND(localPath), false);
+              callback(Utils2.Errors.FILE_NOT_FOUND(localPath), false);
             } else if (err) {
               callback(err, false);
             } else {
@@ -43261,7 +44374,7 @@ var require_adm_zip = __commonJS({
           outFileName = get_Str(keepOriginalPermission, outFileName);
           var item = getEntry(entry);
           if (!item) {
-            throw Utils.Errors.NO_ENTRY();
+            throw Utils2.Errors.NO_ENTRY();
           }
           var entryName = canonical(item.entryName);
           var target = sanitize(targetPath, outFileName && !item.isDirectory ? canonical(outFileName) : maintainEntryPath ? entryName : pth.basename(entryName));
@@ -43271,7 +44384,7 @@ var require_adm_zip = __commonJS({
               if (child.isDirectory) return;
               var content2 = child.getData();
               if (!content2) {
-                throw Utils.Errors.CANT_EXTRACT_FILE();
+                throw Utils2.Errors.CANT_EXTRACT_FILE();
               }
               var name = canonical(maintainEntryPath ? child.entryName : child.entryName.substring(item.entryName.length));
               var childName = sanitize(targetPath, name);
@@ -43282,10 +44395,10 @@ var require_adm_zip = __commonJS({
             return true;
           }
           var content = item.getData(_zip.password);
-          if (!content) throw Utils.Errors.CANT_EXTRACT_FILE();
+          if (!content) throw Utils2.Errors.CANT_EXTRACT_FILE();
           filetools.assertPathSafe(targetPath, target);
           if (filetools.fs.existsSync(target) && !overwrite) {
-            throw Utils.Errors.CANT_OVERRIDE();
+            throw Utils2.Errors.CANT_OVERRIDE();
           }
           const fileAttr = keepOriginalPermission ? entry.header.fileAttr : void 0;
           filetools.writeFileTo(target, content, overwrite, fileAttr);
@@ -43328,7 +44441,7 @@ var require_adm_zip = __commonJS({
           keepOriginalPermission = get_Bool(false, keepOriginalPermission);
           pass2 = get_Str(keepOriginalPermission, pass2);
           overwrite = get_Bool(false, overwrite);
-          if (!_zip) throw Utils.Errors.NO_ZIP();
+          if (!_zip) throw Utils2.Errors.NO_ZIP();
           const dirEntries = [];
           _zip.entries.forEach(function(entry) {
             var entryName = sanitize(targetPath, canonical(entry.entryName));
@@ -43340,7 +44453,7 @@ var require_adm_zip = __commonJS({
             }
             var content = entry.getData(pass2);
             if (!content) {
-              throw Utils.Errors.CANT_EXTRACT_FILE();
+              throw Utils2.Errors.CANT_EXTRACT_FILE();
             }
             const fileAttr = keepOriginalPermission ? entry.header.fileAttr : void 0;
             filetools.writeFileTo(entryName, content, overwrite, fileAttr);
@@ -43377,7 +44490,7 @@ var require_adm_zip = __commonJS({
             });
           }
           if (!_zip) {
-            callback(Utils.Errors.NO_ZIP());
+            callback(Utils2.Errors.NO_ZIP());
             return;
           }
           targetPath = pth.resolve(targetPath);
@@ -43435,7 +44548,7 @@ var require_adm_zip = __commonJS({
                   if (err_1) {
                     next(err_1);
                   } else if (!content) {
-                    next(Utils.Errors.CANT_EXTRACT_FILE());
+                    next(Utils2.Errors.CANT_EXTRACT_FILE());
                   } else {
                     const fileAttr = keepOriginalPermission ? entry.header.fileAttr : void 0;
                     filetools.writeFileToAsync(filePath, content, overwrite, fileAttr, function(succ) {
@@ -43524,9 +44637,9 @@ var require_adm_zip = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/fsHelper.js
+// node_modules/.pnpm/deepl-node@1.29.0_debug@4.4.3/node_modules/deepl-node/dist/fsHelper.js
 var require_fsHelper = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/fsHelper.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.29.0_debug@4.4.3/node_modules/deepl-node/dist/fsHelper.js"(exports2) {
     "use strict";
     var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m3, k5, k22) {
       if (k22 === void 0) k22 = k5;
@@ -43603,9 +44716,9 @@ var require_fsHelper = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/documentMinifier.js
+// node_modules/.pnpm/deepl-node@1.29.0_debug@4.4.3/node_modules/deepl-node/dist/documentMinifier.js
 var require_documentMinifier = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/documentMinifier.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.29.0_debug@4.4.3/node_modules/deepl-node/dist/documentMinifier.js"(exports2) {
     "use strict";
     var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m3, k5, k22) {
       if (k22 === void 0) k22 = k5;
@@ -43901,9 +45014,9 @@ var require_documentMinifier = __commonJS({
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/translator.js
+// node_modules/.pnpm/deepl-node@1.29.0_debug@4.4.3/node_modules/deepl-node/dist/translator.js
 var require_translator = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/translator.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.29.0_debug@4.4.3/node_modules/deepl-node/dist/translator.js"(exports2) {
     "use strict";
     var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m3, k5, k22) {
       if (k22 === void 0) k22 = k5;
@@ -43945,12 +45058,38 @@ var require_translator = __commonJS({
     var fs4 = __importStar(require("fs"));
     var http_1 = require("http");
     var path_1 = __importDefault(require("path"));
-    var os5 = __importStar(require("os"));
     var url_1 = require("url");
     var util = __importStar(require("util"));
     var documentMinifier_1 = require_documentMinifier();
+    function createStatusCodeError(statusCode, message, content, usingGlossary, inDocumentDownload) {
+      switch (statusCode) {
+        case 401:
+        case 403:
+          return new errors_1.AuthorizationError(`Authorization failure, check auth_key${message}`);
+        case 456:
+          return new errors_1.QuotaExceededError(`Quota for this billing period has been exceeded${message}`);
+        case 404:
+          if (usingGlossary)
+            return new errors_1.GlossaryNotFoundError(`Glossary not found${message}`);
+          return new errors_1.NotFoundError(`Not found${message}`);
+        case 400:
+          return new errors_1.DeepLError(`Bad request${message}`);
+        case 429:
+          return new errors_1.TooManyRequestsError(`Too many requests, DeepL servers are currently experiencing high load${message}`);
+        case 503:
+          if (inDocumentDownload) {
+            return new errors_1.DocumentNotReadyError(`Document not ready${message}`);
+          } else {
+            return new errors_1.DeepLError(`Service unavailable${message}`);
+          }
+        default: {
+          const statusName = http_1.STATUS_CODES[statusCode] || "Unknown";
+          return new errors_1.DeepLError(`Unexpected status code: ${statusCode} ${statusName}${message}, content: ${content}`);
+        }
+      }
+    }
     async function checkStatusCode(statusCode, content, usingGlossary = false, inDocumentDownload = false) {
-      if (200 <= statusCode && statusCode < 400)
+      if (200 <= statusCode && statusCode < 300)
         return;
       if (content instanceof http_1.IncomingMessage) {
         try {
@@ -43968,33 +45107,13 @@ var require_translator = __commonJS({
         if (jsonObj.detail !== void 0) {
           message += `, detail: ${jsonObj.detail}`;
         }
-      } catch (error3) {
+      } catch (error4) {
         message = ", " + content;
       }
-      switch (statusCode) {
-        case 403:
-          throw new errors_1.AuthorizationError(`Authorization failure, check auth_key${message}`);
-        case 456:
-          throw new errors_1.QuotaExceededError(`Quota for this billing period has been exceeded${message}`);
-        case 404:
-          if (usingGlossary)
-            throw new errors_1.GlossaryNotFoundError(`Glossary not found${message}`);
-          throw new errors_1.DeepLError(`Not found${message}`);
-        case 400:
-          throw new errors_1.DeepLError(`Bad request${message}`);
-        case 429:
-          throw new errors_1.TooManyRequestsError(`Too many requests, DeepL servers are currently experiencing high load${message}`);
-        case 503:
-          if (inDocumentDownload) {
-            throw new errors_1.DocumentNotReadyError(`Document not ready${message}`);
-          } else {
-            throw new errors_1.DeepLError(`Service unavailable${message}`);
-          }
-        default: {
-          const statusName = http_1.STATUS_CODES[statusCode] || "Unknown";
-          throw new errors_1.DeepLError(`Unexpected status code: ${statusCode} ${statusName}${message}, content: ${content}`);
-        }
-      }
+      const error3 = createStatusCodeError(statusCode, message, content, usingGlossary, inDocumentDownload);
+      error3.httpStatusCode = statusCode;
+      error3.shouldRetry = statusCode === 429 || statusCode >= 500;
+      throw error3;
     }
     exports2.checkStatusCode = checkStatusCode;
     var Translator2 = class {
@@ -44005,7 +45124,8 @@ var require_translator = __commonJS({
        * @param options Additional options controlling Translator behavior.
        */
       constructor(authKey, options) {
-        var _a2;
+        if ((0, utils_1.isString)(authKey))
+          authKey = authKey.trim();
         if (!(0, utils_1.isString)(authKey) || authKey.length === 0) {
           throw new errors_1.DeepLError("authKey must be a non-empty string");
         }
@@ -44017,15 +45137,9 @@ var require_translator = __commonJS({
         } else {
           serverUrl = "https://api.deepl.com";
         }
-        const headers = {
-          Authorization: `DeepL-Auth-Key ${authKey}`,
-          "User-Agent": this.constructUserAgentString((options === null || options === void 0 ? void 0 : options.sendPlatformInfo) === false ? false : true, options === null || options === void 0 ? void 0 : options.appInfo),
-          ...(_a2 = options === null || options === void 0 ? void 0 : options.headers) !== null && _a2 !== void 0 ? _a2 : {}
-        };
-        const maxRetries = (options === null || options === void 0 ? void 0 : options.maxRetries) !== void 0 ? options.maxRetries : 5;
-        const minTimeout = (options === null || options === void 0 ? void 0 : options.minTimeout) !== void 0 ? options.minTimeout : 5e3;
-        this.httpClient = new client_1.HttpClient(serverUrl, headers, maxRetries, minTimeout, options === null || options === void 0 ? void 0 : options.proxy);
-        this.storageHttpClient = new client_1.HttpClient(serverUrl, { "User-Agent": headers["User-Agent"] }, maxRetries, minTimeout, options === null || options === void 0 ? void 0 : options.proxy);
+        const headers = (0, client_1.buildRequestHeaders)(authKey, options);
+        this.httpClient = (0, client_1.createHttpClient)(serverUrl, headers, options);
+        this.storageHttpClient = (0, client_1.createHttpClient)(serverUrl, { "User-Agent": headers["User-Agent"] }, options);
       }
       /**
        * Queries character and document usage during the current billing period.
@@ -44041,30 +45155,36 @@ var require_translator = __commonJS({
        * @return Fulfills with array of Language objects containing available source languages.
        */
       async getSourceLanguages() {
-        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("GET", "/v2/languages");
+        const data = new url_1.URLSearchParams({ resource: "translate_text" });
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("GET", "/v3/languages", {
+          data
+        });
         await checkStatusCode(statusCode, content);
-        return (0, parsing_1.parseLanguageArray)(content);
+        return (0, parsing_1.parseSourceLanguageArrayV3)(content);
       }
       /**
        * Queries target languages supported by DeepL API.
        * @return Fulfills with array of Language objects containing available target languages.
        */
       async getTargetLanguages() {
-        const data = new url_1.URLSearchParams({ type: "target" });
-        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("GET", "/v2/languages", {
+        const data = new url_1.URLSearchParams({ resource: "translate_text" });
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("GET", "/v3/languages", {
           data
         });
         await checkStatusCode(statusCode, content);
-        return (0, parsing_1.parseLanguageArray)(content);
+        return (0, parsing_1.parseTargetLanguageArrayV3)(content);
       }
       /**
        * Queries language pairs supported for glossaries by DeepL API.
        * @return Fulfills with an array of GlossaryLanguagePair objects containing languages supported for glossaries.
        */
       async getGlossaryLanguagePairs() {
-        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("GET", "/v2/glossary-language-pairs");
+        const data = new url_1.URLSearchParams({ resource: "glossary" });
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("GET", "/v3/languages", {
+          data
+        });
         await checkStatusCode(statusCode, content);
-        return (0, parsing_1.parseGlossaryLanguagePairArray)(content);
+        return (0, parsing_1.parseGlossaryLanguagePairArrayV3)(content);
       }
       /**
        * Translates specified text string or array of text strings into the target language.
@@ -44076,10 +45196,11 @@ var require_translator = __commonJS({
        */
       async translateText(texts, sourceLang, targetLang, options) {
         var _a2;
-        const data = (0, utils_1.buildURLSearchParams)(sourceLang, targetLang, options === null || options === void 0 ? void 0 : options.formality, options === null || options === void 0 ? void 0 : options.glossary, options === null || options === void 0 ? void 0 : options.extraRequestParameters, options === null || options === void 0 ? void 0 : options.glossaryIds);
+        const data = (0, utils_1.buildURLSearchParams)(sourceLang, targetLang, options === null || options === void 0 ? void 0 : options.formality, options === null || options === void 0 ? void 0 : options.glossary, options === null || options === void 0 ? void 0 : options.glossaryIds);
         data.append("show_billed_characters", "1");
         const singular = (0, utils_1.appendTextsAndReturnIsSingular)(data, texts);
         (0, utils_1.validateAndAppendTextOptions)(data, options);
+        (0, utils_1.setExtraBodyParameters)(data, (0, utils_1.resolveExtraBodyParameters)(options));
         const translatePath = (_a2 = options === null || options === void 0 ? void 0 : options.__path) !== null && _a2 !== void 0 ? _a2 : "/v2/translate";
         const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("POST", translatePath, { data });
         await checkStatusCode(statusCode, content);
@@ -44091,7 +45212,8 @@ var require_translator = __commonJS({
        * translation to complete, then downloads translated document to specified output path.
        * @param inputFile String containing file path of document to be translated, or a Stream,
        *     Buffer, or FileHandle containing file data. Note: unless file path is used, then
-       *     `options.filename` must be specified.
+       *     `options.filename` must be specified. For a file path, `options.filename` defaults to
+       *     the path's base name.
        * @param outputFile String containing file path to create translated document, or Stream or
        *     FileHandle to write translated document content.
        * @param sourceLang Language code of input document, or null to use auto-detection.
@@ -44099,36 +45221,52 @@ var require_translator = __commonJS({
        * @param options Optional DocumentTranslateOptions object containing additional options controlling translation.
        * @return Fulfills with a DocumentStatus object for the completed translation. You can use the
        *     billedCharacters property to check how many characters were billed for the document.
-       * @throws {Error} If no file exists at the input file path, or a file already exists at the output file path.
-       * @throws {DocumentTranslationError} If any error occurs during document upload, translation or
-       *     download. The `documentHandle` property of the error may be used to recover the document.
+       * @throws {Error} The Node error (`EEXIST`, `ENOENT`, `EACCES`) if a file already exists at
+       *     the output file path or the output directory is missing or not writable; no request is
+       *     sent.
+       * @throws {DocumentMinificationError} If minifying the input document fails.
+       * @throws {DocumentTranslationError} If any other error occurs, including an input file path
+       *     that cannot be read (checked before any request), upload, translation or download. The
+       *     `documentHandle` property of the error may be used to recover the document, and
+       *     `httpStatusCode` and `shouldRetry` are copied from a DeepLError cause.
        */
       async translateDocument(inputFile, outputFile, sourceLang, targetLang, options) {
         var _a2;
-        async function getOutputHandleAndOnError() {
-          if ((0, utils_1.isString)(outputFile)) {
-            const outputHandle2 = await fs4.promises.open(outputFile, "wx");
-            const onError2 = async () => {
-              try {
-                await outputHandle2.close();
-                await util.promisify(fs4.unlink)(outputFile);
-              } catch {
-              }
-            };
-            return { outputHandle: outputHandle2, onError: onError2 };
-          } else {
-            return { outputHandle: outputFile };
-          }
+        let onError;
+        let outputHandle;
+        if ((0, utils_1.isString)(outputFile)) {
+          const createdHandle = await fs4.promises.open(outputFile, "wx");
+          outputHandle = createdHandle;
+          onError = async () => {
+            try {
+              await createdHandle.close();
+              await util.promisify(fs4.unlink)(outputFile);
+            } catch {
+            }
+          };
+        } else {
+          outputHandle = outputFile;
         }
-        const { outputHandle, onError } = await getOutputHandleAndOnError();
-        const documentMinifier = new documentMinifier_1.DocumentMinifier();
-        const willMinify = ((_a2 = options === null || options === void 0 ? void 0 : options.enableDocumentMinification) !== null && _a2 !== void 0 ? _a2 : false) && (0, utils_1.isString)(inputFile) && documentMinifier_1.DocumentMinifier.canMinifyFile(inputFile) && (0, utils_1.isString)(outputFile);
-        const fileToUpload = willMinify ? documentMinifier.minifyDocument(inputFile, true) : inputFile;
         let documentHandle = void 0;
+        let minificationFailed = false;
         try {
-          documentHandle = await this.uploadDocument(fileToUpload, sourceLang, targetLang, options);
-          const { status } = await this.isDocumentTranslationComplete(documentHandle);
-          await this.downloadDocument(documentHandle, outputHandle);
+          if ((0, utils_1.isString)(inputFile)) {
+            await fs4.promises.access(inputFile, fs4.constants.R_OK);
+          }
+          const documentMinifier = new documentMinifier_1.DocumentMinifier();
+          const inputExt = (0, utils_1.isString)(inputFile) ? path_1.default.extname(inputFile).slice(1).toLowerCase() : "";
+          const willMinify = ((_a2 = options === null || options === void 0 ? void 0 : options.enableDocumentMinification) !== null && _a2 !== void 0 ? _a2 : false) && (0, utils_1.isString)(inputFile) && documentMinifier_1.DocumentMinifier.canMinifyFile(inputFile) && (0, utils_1.isString)(outputFile) && ((options === null || options === void 0 ? void 0 : options.outputFormat) === void 0 || options.outputFormat.toLowerCase() === inputExt);
+          let fileToUpload = inputFile;
+          if (willMinify) {
+            minificationFailed = true;
+            fileToUpload = documentMinifier.minifyDocument(inputFile, true);
+            minificationFailed = false;
+          }
+          documentHandle = await this.translateDocumentUpload(fileToUpload, sourceLang, targetLang, options);
+          const status = await this.translateDocumentWaitUntilDone(documentHandle, {
+            timeoutMs: options === null || options === void 0 ? void 0 : options.timeoutMs
+          });
+          await this.translateDocumentDownload(documentHandle, outputHandle);
           if (willMinify) {
             documentMinifier.deminifyDocument(outputFile, outputFile, true);
           }
@@ -44136,7 +45274,9 @@ var require_translator = __commonJS({
         } catch (errorUnknown) {
           if (onError)
             await onError();
-          const error3 = errorUnknown instanceof Error ? errorUnknown : void 0;
+          if (minificationFailed)
+            throw errorUnknown;
+          const error3 = errorUnknown instanceof Error || util.types.isNativeError(errorUnknown) ? errorUnknown : void 0;
           const message = "Error occurred while translating document: " + ((error3 === null || error3 === void 0 ? void 0 : error3.message) ? error3 === null || error3 === void 0 ? void 0 : error3.message : errorUnknown);
           throw new errors_1.DocumentTranslationError(message, documentHandle, error3);
         }
@@ -44145,15 +45285,17 @@ var require_translator = __commonJS({
        * Uploads specified document to DeepL to translate into target language, and returns handle associated with the document.
        * @param inputFile String containing file path, stream containing file data, or FileHandle.
        *     Note: if a Buffer, Stream, or FileHandle is used, then `options.filename` must be specified.
+       *     For a file path, `options.filename` defaults to the path's base name.
        * @param sourceLang Language code of input document, or null to use auto-detection.
        * @param targetLang Language code of language to translate into.
        * @param options Optional DocumentTranslateOptions object containing additional options controlling translation.
        * @return Fulfills with DocumentHandle associated with the in-progress translation.
        */
-      async uploadDocument(inputFile, sourceLang, targetLang, options) {
+      async translateDocumentUpload(inputFile, sourceLang, targetLang, options) {
+        var _a2;
         if ((0, utils_1.isString)(inputFile)) {
           const buffer = await fs4.promises.readFile(inputFile);
-          return this.internalUploadDocument(buffer, sourceLang, targetLang, path_1.default.basename(inputFile), options);
+          return this.internalUploadDocument(buffer, sourceLang, targetLang, (_a2 = options === null || options === void 0 ? void 0 : options.filename) !== null && _a2 !== void 0 ? _a2 : path_1.default.basename(inputFile), options);
         } else {
           if ((options === null || options === void 0 ? void 0 : options.filename) === void 0) {
             throw new errors_1.DeepLError("options.filename must be specified unless using input file path");
@@ -44172,30 +45314,52 @@ var require_translator = __commonJS({
         }
       }
       /**
+       * Uploads specified document to DeepL to translate into target language, and returns handle associated with the document.
+       * @deprecated Use {@link translateDocumentUpload} instead. Will be removed in the next major version.
+       */
+      async uploadDocument(inputFile, sourceLang, targetLang, options) {
+        return this.translateDocumentUpload(inputFile, sourceLang, targetLang, options);
+      }
+      /**
        * Retrieves the status of the document translation associated with the given document handle.
        * @param handle Document handle associated with document.
        * @return Fulfills with a DocumentStatus giving the document translation status.
        */
-      async getDocumentStatus(handle) {
+      async translateDocumentGetStatus(handle) {
         const data = new url_1.URLSearchParams({ document_key: handle.documentKey });
-        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("POST", `/v2/document/${handle.documentId}`, { data });
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("POST", `/v2/document/${encodeURIComponent(handle.documentId)}`, { data });
         await checkStatusCode(statusCode, content, false, true);
         return (0, parsing_1.parseDocumentStatus)(content);
+      }
+      /**
+       * Retrieves the status of the document translation associated with the given document handle.
+       * @deprecated Use {@link translateDocumentGetStatus} instead. Will be removed in the next major version.
+       */
+      async getDocumentStatus(handle) {
+        return this.translateDocumentGetStatus(handle);
       }
       /**
        * Downloads the translated document associated with the given document handle to the specified output file path or stream.handle.
        * @param handle Document handle associated with document.
        * @param outputFile String containing output file path, or Stream or FileHandle to store file data.
        * @return Fulfills with undefined, or rejects if the document translation has not been completed.
+       * @throws {DocumentNotReadyError} If the document translation has not completed yet.
+       * @throws {ConnectionError} If the connection fails while the document is downloaded.
+       * @throws {Error} If the output file path already exists or cannot be created; this happens
+       *     before any request is sent.
        */
-      async downloadDocument(handle, outputFile) {
+      async translateDocumentDownload(handle, outputFile) {
         if ((0, utils_1.isString)(outputFile)) {
-          const fileStream = await fs4.createWriteStream(outputFile, { flags: "wx" });
+          const fd = await util.promisify(fs4.open)(outputFile, "wx");
+          const fileStream = fs4.createWriteStream(outputFile, { fd });
+          const streamClosed = new Promise((resolve) => fileStream.once("close", resolve));
           try {
             await this.internalDownloadDocument(handle, fileStream);
+            await streamClosed;
           } catch (e5) {
-            await new Promise((resolve) => fileStream.close(resolve));
-            await fs4.promises.unlink(outputFile);
+            fileStream.destroy();
+            await streamClosed;
+            await fs4.promises.unlink(outputFile).catch(() => void 0);
             throw e5;
           }
         } else if (outputFile instanceof fs4.WriteStream) {
@@ -44211,24 +45375,55 @@ var require_translator = __commonJS({
         }
       }
       /**
-       * Returns a promise that resolves when the given document translation completes, or rejects if
-       * there was an error communicating with the DeepL API or the document translation failed.
-       * @param handle {DocumentHandle} Handle to the document translation.
-       * @return Fulfills with input DocumentHandle and DocumentStatus when the document translation
-       * completes successfully, rejects if translation fails or a communication error occurs.
+       * Downloads the translated document associated with the given document handle.
+       * @deprecated Use {@link translateDocumentDownload} instead. Will be removed in the next major version.
        */
-      async isDocumentTranslationComplete(handle) {
-        let status = await this.getDocumentStatus(handle);
+      async downloadDocument(handle, outputFile) {
+        return this.translateDocumentDownload(handle, outputFile);
+      }
+      /**
+       * Polls the status of the given document translation every 5 seconds until it completes.
+       * Statuses this library does not know are polled through.
+       * @param handle {DocumentHandle} Handle to the document translation.
+       * @param options {WaitOptions} Optional `timeoutMs`: maximum time to wait in milliseconds.
+       * @return Fulfills with the final DocumentStatus when the document translation completes
+       * successfully, rejects with a DeepLError if the translation fails, the timeout expires or a
+       * communication error occurs.
+       */
+      async translateDocumentWaitUntilDone(handle, options) {
+        const timeoutMs = options === null || options === void 0 ? void 0 : options.timeoutMs;
+        const deadline = timeoutMs !== void 0 ? Date.now() + timeoutMs : void 0;
+        let status = await this.translateDocumentGetStatus(handle);
         while (!status.done() && status.ok()) {
-          const secs = 5;
-          await (0, utils_1.timeout)(secs * 1e3);
-          (0, utils_1.logInfo)(`Rechecking document translation status after sleeping for ${secs} seconds.`);
-          status = await this.getDocumentStatus(handle);
+          let sleepMs = 5e3;
+          if (deadline !== void 0) {
+            const remainingMs = deadline - Date.now();
+            if (remainingMs <= 0) {
+              throw new errors_1.DeepLError(`Timeout of ${timeoutMs}ms exceeded for document translation`);
+            }
+            sleepMs = Math.min(sleepMs, remainingMs);
+          }
+          await (0, utils_1.timeout)(sleepMs);
+          (0, utils_1.logInfo)(`Rechecking document translation status after sleeping for ${sleepMs} ms.`);
+          status = await this.translateDocumentGetStatus(handle);
         }
         if (!status.ok()) {
           const message = status.errorMessage || "unknown error";
           throw new errors_1.DeepLError(message);
         }
+        return status;
+      }
+      /**
+       * Returns a promise that resolves when the given document translation completes, or rejects if
+       * there was an error communicating with the DeepL API or the document translation failed.
+       * @param handle {DocumentHandle} Handle to the document translation.
+       * @return Fulfills with input DocumentHandle and DocumentStatus when the document translation
+       * completes successfully, rejects if translation fails or a communication error occurs.
+       * @deprecated Use {@link translateDocumentWaitUntilDone} instead, which resolves with the
+       * DocumentStatus. This method will be removed in the next major version.
+       */
+      async isDocumentTranslationComplete(handle) {
+        const status = await this.translateDocumentWaitUntilDone(handle);
         return { handle, status };
       }
       /**
@@ -44314,8 +45509,19 @@ var require_translator = __commonJS({
        * @private
        */
       async internalUploadDocument(fileBuffer, sourceLang, targetLang, filename, options) {
-        const data = (0, utils_1.buildURLSearchParams)(sourceLang, targetLang, options === null || options === void 0 ? void 0 : options.formality, options === null || options === void 0 ? void 0 : options.glossary, options === null || options === void 0 ? void 0 : options.extraRequestParameters, options === null || options === void 0 ? void 0 : options.glossaryIds);
+        const data = (0, utils_1.buildURLSearchParams)(sourceLang, targetLang, options === null || options === void 0 ? void 0 : options.formality, options === null || options === void 0 ? void 0 : options.glossary, options === null || options === void 0 ? void 0 : options.glossaryIds);
+        const hasGlossary = (options === null || options === void 0 ? void 0 : options.glossary) !== void 0 || (options === null || options === void 0 ? void 0 : options.glossaryIds) !== void 0 && options.glossaryIds.length > 0;
+        if (hasGlossary && sourceLang === null) {
+          throw new errors_1.DeepLError("sourceLang is required if using a glossary");
+        }
         (0, utils_1.appendStyleAndTranslationMemoryOptions)(data, options !== null && options !== void 0 ? options : {});
+        if ((options === null || options === void 0 ? void 0 : options.outputFormat) !== void 0) {
+          data.append("output_format", options.outputFormat);
+        }
+        if ((options === null || options === void 0 ? void 0 : options.enableWatermark) !== void 0) {
+          data.append("enable_watermark", String(options.enableWatermark));
+        }
+        (0, utils_1.setExtraBodyParameters)(data, (0, utils_1.resolveExtraBodyParameters)(options));
         const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("POST", "/v2/document", {
           data,
           fileBuffer,
@@ -44330,13 +45536,9 @@ var require_translator = __commonJS({
        */
       async internalDownloadDocument(handle, outputStream) {
         const data = new url_1.URLSearchParams({ document_key: handle.documentKey });
-        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("POST", `/v2/document/${handle.documentId}/result`, { data }, true);
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("POST", `/v2/document/${encodeURIComponent(handle.documentId)}/result`, { data }, true);
         await checkStatusCode(statusCode, content, false, true);
-        content.pipe(outputStream);
-        return new Promise((resolve, reject) => {
-          outputStream.on("finish", resolve);
-          outputStream.on("error", reject);
-        });
+        return (0, utils_1.pipeToStream)(content, outputStream);
       }
       /**
        * Create glossary with given details.
@@ -44359,27 +45561,210 @@ var require_translator = __commonJS({
         await checkStatusCode(statusCode, content, true);
         return (0, parsing_1.parseGlossaryInfo)(content);
       }
-      constructUserAgentString(sendPlatformInfo, appInfo) {
-        let libraryInfoString = "deepl-node/1.28.1";
-        if (sendPlatformInfo) {
-          const systemType = os5.type();
-          const systemVersion = os5.version();
-          const nodeVersion = process.version.substring(1);
-          libraryInfoString += ` (${systemType} ${systemVersion}) node/${nodeVersion}`;
-        }
-        if (appInfo) {
-          libraryInfoString += ` ${appInfo.appName}/${appInfo.appVersion}`;
-        }
-        return libraryInfoString;
-      }
     };
     exports2.Translator = Translator2;
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/deeplClient.js
+// node_modules/.pnpm/deepl-node@1.29.0_debug@4.4.3/node_modules/deepl-node/dist/adminClient.js
+var require_adminClient = __commonJS({
+  "node_modules/.pnpm/deepl-node@1.29.0_debug@4.4.3/node_modules/deepl-node/dist/adminClient.js"(exports2) {
+    "use strict";
+    Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.DeepLAdminClient = void 0;
+    var client_1 = require_client2();
+    var errors_1 = require_errors2();
+    var parsing_1 = require_parsing();
+    var translator_1 = require_translator();
+    var utils_1 = require_utils3();
+    var url_1 = require("url");
+    var DeepLAdminClient = class _DeepLAdminClient {
+      /**
+       * Construct a DeepLAdminClient object wrapping the DeepL Admin API using your admin key.
+       * This does not connect to the API, and returns immediately.
+       * @param adminKey Admin API key as specified in your account.
+       * @param options Additional options controlling client behavior.
+       */
+      constructor(adminKey, options) {
+        var _a2;
+        if ((0, utils_1.isString)(adminKey))
+          adminKey = adminKey.trim();
+        if (!(0, utils_1.isString)(adminKey) || adminKey.length === 0) {
+          throw new errors_1.ArgumentError("adminKey must be a non-empty string");
+        }
+        this.httpClient = (0, client_1.createHttpClient)((_a2 = options === null || options === void 0 ? void 0 : options.serverUrl) !== null && _a2 !== void 0 ? _a2 : "https://api.deepl.com", (0, client_1.buildRequestHeaders)(adminKey, options), options);
+      }
+      /**
+       * Retrieves usage statistics of the organization within the given date range. Dates are UTC
+       * calendar days and both the start and the end day are included. The API requires endDate to
+       * be after startDate (a report covers at least two days) and at most 366 days after it.
+       * @param startDate Start date of the report, as a 'YYYY-MM-DD' string such as '2025-09-29', or
+       *     as a Date. For a Date, the UTC date of that moment is sent, so local midnight in UTC+2
+       *     (2026-10-20T00:00+02:00) is sent as 2026-10-19.
+       * @param endDate End date of the report, in the same format as startDate.
+       * @param groupBy Optional grouping of the usage by key ('key') or by key and day
+       *     ('key_and_day'); not sent if omitted.
+       * @throws {ArgumentError} If a date is not a valid Date or 'YYYY-MM-DD' string.
+       * @return Fulfills with an AdminUsageReport.
+       */
+      async getUsageAnalytics(startDate, endDate, groupBy) {
+        const data = _DeepLAdminClient.dateRangeParams(startDate, endDate);
+        if (groupBy !== void 0) {
+          data.append("group_by", groupBy);
+        }
+        const content = await this.request("GET", "/v2/admin/analytics", { data });
+        return (0, parsing_1.parseAdminUsageReport)(content);
+      }
+      /**
+       * Retrieves usage statistics per custom tag within the given date range. Results are
+       * paginated: pass the `nextPage` value of a report as `page` to retrieve the following
+       * page. Dates are UTC calendar days and both the start and the end day are included. The API
+       * requires endDate to be after startDate (a report covers at least two days) and at most 366
+       * days after it.
+       * @param startDate Start date of the report, as a 'YYYY-MM-DD' string such as '2025-09-29', or
+       *     as a Date. For a Date, the UTC date of that moment is sent, so local midnight in UTC+2
+       *     (2026-10-20T00:00+02:00) is sent as 2026-10-19.
+       * @param endDate End date of the report, in the same format as startDate.
+       * @param aggregateBy Optional aggregation over the whole period ('period', the API default) or
+       *     by day ('day'); not sent if omitted.
+       * @param page Optional page number, from the `nextPage` value of a previous report.
+       * @throws {ArgumentError} If a date is not a valid Date or 'YYYY-MM-DD' string.
+       * @return Fulfills with a CustomTagUsageReport.
+       */
+      async getCustomTagUsageAnalytics(startDate, endDate, aggregateBy, page) {
+        const data = _DeepLAdminClient.dateRangeParams(startDate, endDate);
+        if (aggregateBy !== void 0) {
+          data.append("aggregate_by", aggregateBy);
+        }
+        if (page !== void 0) {
+          data.append("page", String(page));
+        }
+        const content = await this.request("GET", "/v2/admin/analytics/custom-tags", { data });
+        return (0, parsing_1.parseCustomTagUsageReport)(content);
+      }
+      /**
+       * Creates a developer key in the organization.
+       * @param options Optional label and extra body parameters, see
+       *     {@link CreateDeveloperKeyOptions}. The API uses "DeepL API Key" if no label is given.
+       * @return Fulfills with the created DeveloperKey.
+       */
+      async createDeveloperKey(options) {
+        const jsonBody = {};
+        if ((options === null || options === void 0 ? void 0 : options.label) !== void 0) {
+          jsonBody.label = options.label;
+        }
+        const content = await this.request("POST", "/v2/admin/developer-keys", {
+          jsonBody: _DeepLAdminClient.withExtraBodyParameters(jsonBody, options),
+          retryOnlyUnprocessed: true
+        });
+        return (0, parsing_1.parseDeveloperKey)(content);
+      }
+      /**
+       * Retrieves all developer keys of the organization, including deactivated ones.
+       * @return Fulfills with an array of DeveloperKey objects.
+       */
+      async listDeveloperKeys() {
+        const content = await this.request("GET", "/v2/admin/developer-keys");
+        return (0, parsing_1.parseDeveloperKeyList)(content);
+      }
+      /**
+       * Deactivates a developer key. Deactivation is permanent.
+       * @param key Key ID or DeveloperKey to deactivate.
+       * @param options Additional options, see {@link DeactivateDeveloperKeyOptions}.
+       * @return Fulfills with the deactivated DeveloperKey.
+       */
+      async deactivateDeveloperKey(key, options) {
+        const keyId = _DeepLAdminClient.keyId(key);
+        return this.putDeveloperKey("deactivate", { key_id: keyId }, options);
+      }
+      /**
+       * Changes the label of a developer key.
+       * @param key Key ID or DeveloperKey to rename.
+       * @param label New label for the key.
+       * @param options Additional options, see {@link RenameDeveloperKeyOptions}.
+       * @return Fulfills with the renamed DeveloperKey.
+       */
+      async renameDeveloperKey(key, label, options) {
+        const keyId = _DeepLAdminClient.keyId(key);
+        return this.putDeveloperKey("label", { key_id: keyId, label }, options);
+      }
+      /**
+       * Changes the usage limits of a developer key. Only the given limits are changed; omitted
+       * limits keep their current value. A null limit means unlimited and 0 blocks that usage.
+       * @param key Key ID or DeveloperKey to modify.
+       * @param limits Usage limits to change.
+       * @param options Additional options, see {@link SetDeveloperKeyUsageLimitsOptions}.
+       * @return Fulfills with the modified DeveloperKey.
+       */
+      async setDeveloperKeyUsageLimits(key, limits, options) {
+        const keyId = _DeepLAdminClient.keyId(key);
+        const limitsBody = {};
+        if ((limits === null || limits === void 0 ? void 0 : limits.characters) !== void 0) {
+          limitsBody.characters = limits.characters;
+        }
+        if ((limits === null || limits === void 0 ? void 0 : limits.speechToTextMilliseconds) !== void 0) {
+          limitsBody.speech_to_text_milliseconds = limits.speechToTextMilliseconds;
+        }
+        if ((limits === null || limits === void 0 ? void 0 : limits.speechToSpeechMilliseconds) !== void 0) {
+          limitsBody.speech_to_speech_milliseconds = limits.speechToSpeechMilliseconds;
+        }
+        return this.putDeveloperKey("limits", { key_id: keyId, ...limitsBody }, options);
+      }
+      async putDeveloperKey(action, jsonBody, options) {
+        const content = await this.request("PUT", `/v2/admin/developer-keys/${action}`, {
+          jsonBody: _DeepLAdminClient.withExtraBodyParameters(jsonBody, options)
+        });
+        return (0, parsing_1.parseDeveloperKey)(content);
+      }
+      static withExtraBodyParameters(jsonBody, options) {
+        const extraBodyParameters = (0, utils_1.resolveExtraBodyParameters)(options);
+        return extraBodyParameters === void 0 ? jsonBody : { ...jsonBody, ...extraBodyParameters };
+      }
+      async request(method, url, options) {
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff(method, url, options);
+        try {
+          await (0, translator_1.checkStatusCode)(statusCode, content);
+        } catch (error3) {
+          if ((options === null || options === void 0 ? void 0 : options.retryOnlyUnprocessed) && error3 instanceof errors_1.DeepLError) {
+            error3.shouldRetry = statusCode === 429;
+          }
+          throw error3;
+        }
+        return content;
+      }
+      static dateRangeParams(startDate, endDate) {
+        const start = _DeepLAdminClient.formatDate(startDate);
+        const end2 = _DeepLAdminClient.formatDate(endDate);
+        return new url_1.URLSearchParams({ start_date: start, end_date: end2 });
+      }
+      static formatDate(date2) {
+        if ((0, utils_1.isString)(date2)) {
+          const parsed = /* @__PURE__ */ new Date(`${date2}T00:00:00Z`);
+          if (isNaN(parsed.getTime()) || parsed.toISOString().substring(0, 10) !== date2) {
+            throw new errors_1.ArgumentError(`Invalid date '${date2}', expected format YYYY-MM-DD`);
+          }
+          return date2;
+        }
+        if (!(date2 instanceof Date) || isNaN(date2.getTime())) {
+          throw new errors_1.ArgumentError("Invalid date, expected a valid Date or a YYYY-MM-DD string");
+        }
+        return date2.toISOString().substring(0, 10);
+      }
+      static keyId(key) {
+        const keyId = (0, utils_1.isString)(key) ? key : key === null || key === void 0 ? void 0 : key.keyId;
+        if (!(0, utils_1.isString)(keyId) || keyId.length === 0) {
+          throw new errors_1.ArgumentError("key must be a non-empty key ID or a DeveloperKey");
+        }
+        return keyId;
+      }
+    };
+    exports2.DeepLAdminClient = DeepLAdminClient;
+  }
+});
+
+// node_modules/.pnpm/deepl-node@1.29.0_debug@4.4.3/node_modules/deepl-node/dist/deeplClient.js
 var require_deeplClient = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/deeplClient.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.29.0_debug@4.4.3/node_modules/deepl-node/dist/deeplClient.js"(exports2) {
     "use strict";
     var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m3, k5, k22) {
       if (k22 === void 0) k22 = k5;
@@ -44414,8 +45799,89 @@ var require_deeplClient = __commonJS({
     var parsing_1 = require_parsing();
     var utils_1 = require_utils3();
     var errors_1 = require_errors2();
+    var glossaryEntries_1 = require_glossaryEntries();
+    var http_1 = require("http");
     var fs4 = __importStar(require("fs"));
     var path = __importStar(require("path"));
+    var util = __importStar(require("util"));
+    function uvErrno(name) {
+      const getSystemErrorMap = util.getSystemErrorMap;
+      if (!getSystemErrorMap) {
+        return void 0;
+      }
+      for (const [errno, [errName]] of getSystemErrorMap()) {
+        if (errName === name) {
+          return errno;
+        }
+      }
+      return void 0;
+    }
+    function spokenTermsEntriesToJson(entries) {
+      const terms = entries.entries.map((term) => typeof term === "string" ? term.trim() : term);
+      terms.forEach((term) => glossaryEntries_1.GlossaryEntries.validateGlossaryTerm(term));
+      return { lang: entries.lang, entries: terms.join("\n") };
+    }
+    async function throwStorageError(action, statusCode, content) {
+      if (content instanceof http_1.IncomingMessage) {
+        content = await (0, utils_1.streamToString)(content).catch((e5) => `error reading response: ${e5}`);
+      }
+      const error3 = new errors_1.DeepLError(`${action}, HTTP status: ${statusCode}, content: ${content}`);
+      error3.httpStatusCode = statusCode;
+      error3.shouldRetry = statusCode === 429 || statusCode >= 500;
+      throw error3;
+    }
+    function multilingualGlossaryPath(glossary) {
+      return `/v3/glossaries/${encodeURIComponent((0, utils_1.extractGlossaryId)(glossary))}`;
+    }
+    function addExtraBodyParametersToJson(body, options) {
+      const extraBodyParameters = (0, utils_1.resolveExtraBodyParameters)(options);
+      return extraBodyParameters === void 0 ? body : { ...body, ...extraBodyParameters };
+    }
+    function styleProfileOptionsToJson(options) {
+      const body = {};
+      if (options === void 0)
+        return body;
+      if (options.description !== void 0)
+        body.description = options.description;
+      if (options.industry !== void 0)
+        body.industry = options.industry;
+      if (options.glossaryIds !== void 0) {
+        body.glossary_ids = options.glossaryIds.map(utils_1.extractGlossaryId);
+      }
+      if (options.styleRuleIds !== void 0) {
+        body.style_rule_ids = options.styleRuleIds.map((styleRule) => (0, utils_1.isString)(styleRule) ? styleRule : styleRule.styleId);
+      }
+      if (options.translationMemoryIds !== void 0) {
+        body.translation_memory_ids = options.translationMemoryIds.map(utils_1.extractTranslationMemoryId);
+      }
+      if (options.glossaryPriorityOrderEnabled !== void 0) {
+        body.glossary_priority_order_enabled = options.glossaryPriorityOrderEnabled;
+      }
+      return body;
+    }
+    function extractStyleRuleId(styleRule) {
+      const styleId = (0, utils_1.isString)(styleRule) ? styleRule : styleRule === null || styleRule === void 0 ? void 0 : styleRule.styleId;
+      if (!styleId) {
+        throw new errors_1.ArgumentError('Parameter "styleRule" must not be empty');
+      }
+      return styleId;
+    }
+    function extractCustomInstructionId(instruction) {
+      const instructionId = (0, utils_1.isString)(instruction) ? instruction : instruction === null || instruction === void 0 ? void 0 : instruction.id;
+      if (!instructionId) {
+        throw new errors_1.ArgumentError('Parameter "instructionId" must not be empty');
+      }
+      return instructionId;
+    }
+    function customInstructionPath(styleId, instructionId) {
+      return `/v3/style_rules/${encodeURIComponent(styleId)}/custom_instructions/${encodeURIComponent(instructionId)}`;
+    }
+    function customInstructionToWire(label, prompt, sourceLanguage) {
+      const body = { label, prompt };
+      if (sourceLanguage !== void 0)
+        body.source_language = sourceLanguage;
+      return body;
+    }
     var WritingStyle;
     (function(WritingStyle2) {
       WritingStyle2["ACADEMIC"] = "academic";
@@ -44440,11 +45906,22 @@ var require_deeplClient = __commonJS({
       WritingTone2["PREFER_ENTHUSIASTIC"] = "prefer_enthusiastic";
       WritingTone2["PREFER_FRIENDLY"] = "prefer_friendly";
     })(WritingTone = exports2.WritingTone || (exports2.WritingTone = {}));
-    var DeepLClient = class _DeepLClient extends translator_1.Translator {
+    var DeepLClient = class extends translator_1.Translator {
       constructor(authKey, options = {}) {
         super(authKey, options);
       }
-      async rephraseText(texts, targetLang, writingStyle, tone) {
+      async rephraseText(texts, targetLang, writingStyleOrOptions, tone) {
+        let writingStyle;
+        let extraBodyParameters;
+        if (typeof writingStyleOrOptions === "object" && writingStyleOrOptions !== null) {
+          if (tone !== void 0 && tone !== null) {
+            throw new errors_1.ArgumentError("tone cannot be passed as a separate argument together with an options object");
+          }
+          ({ writingStyle, tone } = writingStyleOrOptions);
+          extraBodyParameters = (0, utils_1.resolveExtraBodyParameters)(writingStyleOrOptions);
+        } else {
+          writingStyle = writingStyleOrOptions;
+        }
         const data = new URLSearchParams();
         if (targetLang) {
           data.append("target_lang", targetLang);
@@ -44456,9 +45933,30 @@ var require_deeplClient = __commonJS({
           data.append("tone", tone);
         }
         const singular = (0, utils_1.appendTextsAndReturnIsSingular)(data, texts);
+        (0, utils_1.setExtraBodyParameters)(data, extraBodyParameters);
         const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("POST", "/v2/write/rephrase", { data });
         await (0, translator_1.checkStatusCode)(statusCode, content);
-        const writeResults = (0, parsing_1.parseWriteResultArray)(content);
+        const writeResults = (0, parsing_1.parseWriteResultArray)(content, singular ? 1 : texts.length);
+        return singular ? writeResults[0] : writeResults;
+      }
+      /**
+       * Corrects grammar, spelling and punctuation of the given text(s).
+       * @param texts Text to correct, or an array of texts.
+       * @param targetLang Target language code, or `null` to keep the language of the input text.
+       * @param options Additional options, see {@link CorrectTextOptions}.
+       * @return Promise of a {@link WriteResult}, or an array of them if `texts` is an array.
+       * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
+       */
+      async correctText(texts, targetLang, options) {
+        const data = new URLSearchParams();
+        if (targetLang) {
+          data.append("target_lang", targetLang);
+        }
+        const singular = (0, utils_1.appendTextsAndReturnIsSingular)(data, texts);
+        (0, utils_1.setExtraBodyParameters)(data, (0, utils_1.resolveExtraBodyParameters)(options));
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("POST", "/v2/write/correct", { data });
+        await (0, translator_1.checkStatusCode)(statusCode, content);
+        const writeResults = (0, parsing_1.parseWriteResultArray)(content, singular ? 1 : texts.length);
         return singular ? writeResults[0] : writeResults;
       }
       /**
@@ -44474,24 +45972,31 @@ var require_deeplClient = __commonJS({
        * This function requires the glossary entries for each dictionary to be
        * provided as a dictionary of source-target terms. To create a glossary
        * from a CSV file downloaded from the DeepL website, see
-       * {@link createMultilingualGlossaryWithCsv}.
+       * {@link createMultilingualGlossaryFromCsv}.
        *
        * @param name user-defined name to attach to glossary.
        * @param glossaryDicts the dictionaries of the glossary, see {@link MultilingualGlossaryDictionaryEntries}.
+       * @param options Additional options, see {@link CreateMultilingualGlossaryOptions}.
        * @return {Promise<MultilingualGlossaryInfo>} object with details about the newly created glossary.
        *
        * @throws {ArgumentError} If any argument is invalid.
        * @throws {DeepLError} If any error occurs while communicating with the DeepL API
        */
-      async createMultilingualGlossary(name, glossaryDicts) {
+      async createMultilingualGlossary(name, glossaryDicts, options) {
         if (!name) {
           throw new errors_1.ArgumentError("glossary name must not be empty");
         }
         const data = new URLSearchParams();
         data.append("name", name);
         (0, utils_1.appendDictionaryEntries)(data, glossaryDicts);
+        (0, utils_1.setExtraBodyParameters)(data, (0, utils_1.resolveExtraBodyParameters)(options));
         const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("POST", "/v3/glossaries", { data });
-        await (0, translator_1.checkStatusCode)(statusCode, content);
+        await (0, translator_1.checkStatusCode)(
+          statusCode,
+          content,
+          true
+          /* usingGlossary */
+        );
         return (0, parsing_1.parseMultilingualGlossaryInfo)(content);
       }
       /**
@@ -44508,12 +46013,13 @@ var require_deeplClient = __commonJS({
        * @param sourceLanguageCode Source language code for the glossary.
        * @param targetLanguageCode Target language code for the glossary.
        * @param csvContent String in CSV format containing the entries.
+       * @param options Additional options, see {@link CreateMultilingualGlossaryOptions}.
        * @returns {Promise<MultilingualGlossaryInfo>} Object with details about the newly created glossary.
        *
        * @throws {ArgumentError} If any argument is invalid.
        * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
        */
-      async createMultilingualGlossaryWithCsv(name, sourceLanguageCode, targetLanguageCode, csvContent) {
+      async createMultilingualGlossaryFromCsv(name, sourceLanguageCode, targetLanguageCode, csvContent, options) {
         if (!name) {
           throw new errors_1.ArgumentError('Parameter "name" must not be empty');
         }
@@ -44529,22 +46035,35 @@ var require_deeplClient = __commonJS({
         const data = new URLSearchParams();
         data.append("name", name);
         (0, utils_1.appendCsvDictionaryEntries)(data, sourceLanguageCode, targetLanguageCode, csvContent);
+        (0, utils_1.setExtraBodyParameters)(data, (0, utils_1.resolveExtraBodyParameters)(options));
         const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("POST", "/v3/glossaries", { data });
-        await (0, translator_1.checkStatusCode)(statusCode, content);
+        await (0, translator_1.checkStatusCode)(
+          statusCode,
+          content,
+          true
+          /* usingGlossary */
+        );
         return (0, parsing_1.parseMultilingualGlossaryInfo)(content);
+      }
+      /**
+       * @deprecated Use {@link createMultilingualGlossaryFromCsv} instead. Will be removed in the
+       * next major version.
+       */
+      async createMultilingualGlossaryWithCsv(name, sourceLanguageCode, targetLanguageCode, csvContent) {
+        return this.createMultilingualGlossaryFromCsv(name, sourceLanguageCode, targetLanguageCode, csvContent);
       }
       /**
        * Retrieves information about the glossary with the specified ID.
        * This does not retrieve the glossary entries.
-       * @param glossaryId ID of glossary to retrieve.
+       * @param glossary The ID of the glossary or MultilingualGlossaryInfo object to retrieve.
        * @returns {Promise<MultilingualGlossaryInfo>} object with details about the specified glossary.
        * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
        */
-      async getMultilingualGlossary(glossaryId) {
-        if (!glossaryId) {
+      async getMultilingualGlossary(glossary) {
+        if (!glossary || !(0, utils_1.extractGlossaryId)(glossary)) {
           throw new errors_1.ArgumentError("glossaryId must not be empty");
         }
-        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("GET", `/v3/glossaries/${glossaryId}`);
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("GET", multilingualGlossaryPath(glossary));
         await (0, translator_1.checkStatusCode)(
           statusCode,
           content,
@@ -44577,19 +46096,17 @@ var require_deeplClient = __commonJS({
         if (!targetLanguageCode) {
           throw new errors_1.ArgumentError('Parameter "targetLanguageCode" must not be empty');
         }
-        const glossaryId = (0, utils_1.extractGlossaryId)(glossary);
         const queryParams = new URLSearchParams();
         queryParams.append("source_lang", sourceLanguageCode);
         queryParams.append("target_lang", targetLanguageCode);
-        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("GET", `/v3/glossaries/${glossaryId}/entries`, { data: queryParams });
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("GET", `${multilingualGlossaryPath(glossary)}/entries`, { data: queryParams });
         await (0, translator_1.checkStatusCode)(
           statusCode,
           content,
           true
           /* usingGlossary */
         );
-        const response = JSON.parse(content);
-        const dictionaryEntriesList = (0, parsing_1.parseMultilingualGlossaryDictionaryEntries)(response);
+        const dictionaryEntriesList = (0, parsing_1.parseResponse)(content, parsing_1.parseMultilingualGlossaryDictionaryEntries);
         if (!dictionaryEntriesList || dictionaryEntriesList.length === 0) {
           throw new errors_1.GlossaryNotFoundError("Glossary dictionary not found");
         }
@@ -44604,9 +46121,13 @@ var require_deeplClient = __commonJS({
        */
       async listMultilingualGlossaries() {
         const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("GET", "/v3/glossaries");
-        await (0, translator_1.checkStatusCode)(statusCode, content);
-        const response = JSON.parse(content);
-        return (0, parsing_1.parseListMultilingualGlossaries)(response);
+        await (0, translator_1.checkStatusCode)(
+          statusCode,
+          content,
+          true
+          /* usingGlossary */
+        );
+        return (0, parsing_1.parseResponse)(content, parsing_1.parseListMultilingualGlossaries);
       }
       /**
        * Deletes the glossary with the specified ID or MultilingualGlossaryInfo object.
@@ -44619,7 +46140,7 @@ var require_deeplClient = __commonJS({
         if (!glossaryId) {
           throw new Error("glossaryId must not be empty");
         }
-        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("DELETE", `/v3/glossaries/${glossaryId}`);
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("DELETE", multilingualGlossaryPath(glossaryId));
         await (0, translator_1.checkStatusCode)(
           statusCode,
           content,
@@ -44646,8 +46167,11 @@ var require_deeplClient = __commonJS({
         if (!targetLanguageCode) {
           throw new errors_1.ArgumentError('Parameter "targetLanguageCode" must not be empty');
         }
-        const glossaryId = (0, utils_1.extractGlossaryId)(glossary);
-        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("DELETE", `/v3/glossaries/${glossaryId}/dictionaries?source_lang=${sourceLanguageCode}&target_lang=${targetLanguageCode}`);
+        const query = (0, utils_1.buildQueryString)({
+          source_lang: sourceLanguageCode,
+          target_lang: targetLanguageCode
+        });
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("DELETE", `${multilingualGlossaryPath(glossary)}/dictionaries?${query}`);
         await (0, translator_1.checkStatusCode)(
           statusCode,
           content,
@@ -44658,52 +46182,43 @@ var require_deeplClient = __commonJS({
       /**
        * Replaces the dictionary entries for a specific source and target language pair in a multilingual glossary.
        *
-       * @param glossary ID of the glossary or MultilingualGlossaryInfo object from which the dictionary will be deleted.
-       * @param sourceLanguageCode Source language code of the dictionary to replace.
-       * @param targetLanguageCode Target language code of the dictionary to replace.
-       * @param entries Dictionary entries to replace, formatted as a string in TSV format.
+       * @param glossary ID of the glossary or MultilingualGlossaryInfo object containing the dictionary.
+       * @param glossaryDict The language pair and the new entries of the dictionary.
+       * @param options Additional options, see {@link ReplaceMultilingualGlossaryDictionaryOptions}.
        * @returns {Promise<MultilingualGlossaryDictionaryInfo>} Object containing details about the updated dictionary.
        *
        * @throws {ArgumentError} If any argument is invalid.
        * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
        */
-      async replaceMultilingualGlossaryDictionary(glossary, glossaryDict) {
+      async replaceMultilingualGlossaryDictionary(glossary, glossaryDict, options) {
         if (!glossary) {
           throw new errors_1.ArgumentError('Parameter "glossary" must not be empty/null');
         }
         if (!glossaryDict) {
           throw new errors_1.ArgumentError('Parameter "glossaryDict" must not be null');
         }
-        const glossaryId = (0, utils_1.extractGlossaryId)(glossary);
-        const data = new URLSearchParams();
-        data.append("source_lang", glossaryDict.sourceLangCode);
-        data.append("target_lang", glossaryDict.targetLangCode);
-        data.append("entries", glossaryDict.entries.toTsv());
-        data.append("entries_format", "tsv");
-        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("PUT", `/v3/glossaries/${glossaryId}/dictionaries`, { data });
-        await (0, translator_1.checkStatusCode)(
-          statusCode,
-          content,
-          true
-          /* usingGlossary */
-        );
-        const response = JSON.parse(content);
-        return (0, parsing_1.parseMultilingualGlossaryDictionaryInfo)(response);
+        return this.putMultilingualGlossaryDictionary(glossary, {
+          source_lang: glossaryDict.sourceLangCode,
+          target_lang: glossaryDict.targetLangCode,
+          entries: glossaryDict.entries.toTsv(),
+          entries_format: "tsv"
+        }, options);
       }
       /**
        * Replaces the dictionary entries for a specific source and target language pair in a multilingual glossary
        * using entries from a CSV file.
        *
-       * @param glossary ID of the glossary or MultilingualGlossaryInfo object from which the dictionary will be deleted.
+       * @param glossary ID of the glossary or MultilingualGlossaryInfo object containing the dictionary.
        * @param sourceLanguageCode Source language code of the dictionary to replace.
        * @param targetLanguageCode Target language code of the dictionary to replace.
        * @param csvContent String in CSV format containing the new entries.
+       * @param options Additional options, see {@link ReplaceMultilingualGlossaryDictionaryOptions}.
        * @returns {Promise<MultilingualGlossaryDictionaryInfo>} Object containing details about the updated dictionary.
        *
        * @throws {ArgumentError} If any argument is invalid.
        * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
        */
-      async replaceMultilingualGlossaryDictionaryWithCsv(glossary, sourceLanguageCode, targetLanguageCode, csvContent) {
+      async replaceMultilingualGlossaryDictionaryFromCsv(glossary, sourceLanguageCode, targetLanguageCode, csvContent, options) {
         if (!glossary) {
           throw new errors_1.ArgumentError('Parameter "glossary" must not be empty/null');
         }
@@ -44716,40 +46231,61 @@ var require_deeplClient = __commonJS({
         if (!csvContent) {
           throw new errors_1.ArgumentError('Parameter "csvContent" must not be empty');
         }
-        const glossaryId = (0, utils_1.extractGlossaryId)(glossary);
-        const data = new URLSearchParams();
-        data.append("source_lang", sourceLanguageCode);
-        data.append("target_lang", targetLanguageCode);
-        data.append("entries", csvContent);
-        data.append("entries_format", "csv");
-        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("PUT", `/v3/glossaries/${glossaryId}/dictionaries`, { data });
+        return this.putMultilingualGlossaryDictionary(glossary, {
+          source_lang: sourceLanguageCode,
+          target_lang: targetLanguageCode,
+          entries: csvContent,
+          entries_format: "csv"
+        }, options);
+      }
+      /**
+       * @deprecated Use {@link replaceMultilingualGlossaryDictionaryFromCsv} instead. Will be
+       * removed in the next major version.
+       */
+      async replaceMultilingualGlossaryDictionaryWithCsv(glossary, sourceLanguageCode, targetLanguageCode, csvContent) {
+        return this.replaceMultilingualGlossaryDictionaryFromCsv(glossary, sourceLanguageCode, targetLanguageCode, csvContent);
+      }
+      /** @private */
+      async putMultilingualGlossaryDictionary(glossary, body, options) {
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("PUT", `${multilingualGlossaryPath(glossary)}/dictionaries`, { jsonBody: addExtraBodyParametersToJson(body, options) });
         await (0, translator_1.checkStatusCode)(
           statusCode,
           content,
           true
           /* usingGlossary */
         );
-        const response = JSON.parse(content);
-        return (0, parsing_1.parseMultilingualGlossaryDictionaryInfo)(response);
+        return (0, parsing_1.parseResponse)(content, parsing_1.parseMultilingualGlossaryDictionaryInfo);
       }
       /**
-       * Updates the name of a multilingual glossary.
+       * Updates the name and/or dictionaries of a multilingual glossary. The entries of each given
+       * dictionary are merged into the existing dictionary of the same language pair, which is
+       * created if it does not exist; fields left unset are not changed.
        *
-       * @param glossary ID of the glossary or MultilingualGlossaryInfo object from which the dictionary will be deleted.
-       * @param name New name for the glossary.
+       * @param glossary ID of the glossary or MultilingualGlossaryInfo object to update.
+       * @param options Fields to change, see {@link UpdateMultilingualGlossaryOptions}. If omitted
+       *     or empty, an empty body is sent.
        * @returns {Promise<MultilingualGlossaryInfo>} Object containing details about the updated glossary.
        *
-       * @throws {ArgumentError} If the name is invalid.
+       * @throws {ArgumentError} If any argument is invalid.
        * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
        */
-      async updateMultilingualGlossaryName(glossary, name) {
-        if (!name) {
-          throw new errors_1.ArgumentError('Parameter "name" must not be empty');
+      async updateMultilingualGlossary(glossary, options) {
+        if (!glossary || !(0, utils_1.extractGlossaryId)(glossary)) {
+          throw new errors_1.ArgumentError('Parameter "glossary" must not be empty/null');
         }
-        const glossaryId = (0, utils_1.extractGlossaryId)(glossary);
-        const data = new URLSearchParams();
-        data.append("name", name);
-        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("PATCH", `/v3/glossaries/${glossaryId}`, { data });
+        const body = {};
+        if ((options === null || options === void 0 ? void 0 : options.name) !== void 0) {
+          body.name = options.name;
+        }
+        if ((options === null || options === void 0 ? void 0 : options.dictionaries) !== void 0) {
+          body.dictionaries = options.dictionaries.map((dict) => ({
+            source_lang: dict.sourceLangCode,
+            target_lang: dict.targetLangCode,
+            entries: dict.entries.toTsv(),
+            entries_format: "tsv"
+          }));
+        }
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("PATCH", multilingualGlossaryPath(glossary), { jsonBody: addExtraBodyParametersToJson(body, options) });
         await (0, translator_1.checkStatusCode)(
           statusCode,
           content,
@@ -44757,35 +46293,47 @@ var require_deeplClient = __commonJS({
           /* usingGlossary */
         );
         return (0, parsing_1.parseMultilingualGlossaryInfo)(content);
+      }
+      /**
+       * Updates the name of a multilingual glossary.
+       *
+       * @param glossary ID of the glossary or MultilingualGlossaryInfo object to update.
+       * @param name New name for the glossary.
+       * @param options Additional options, see {@link BaseRequestOptions}.
+       * @returns {Promise<MultilingualGlossaryInfo>} Object containing details about the updated glossary.
+       *
+       * @throws {ArgumentError} If the name is invalid.
+       * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
+       */
+      async updateMultilingualGlossaryName(glossary, name, options) {
+        if (!name) {
+          throw new errors_1.ArgumentError('Parameter "name" must not be empty');
+        }
+        const data = new URLSearchParams();
+        data.append("name", name);
+        return this.patchMultilingualGlossaryForm(glossary, data, options);
       }
       /**
        * Updates the dictionary entries for a specific source and target language pair in a multilingual glossary.
        *
        * @param glossary ID of the glossary or MultilingualGlossaryInfo object to update.
        * @param glossaryDict The new or updated glossary dictionary.
+       * @param options Additional options, see {@link BaseRequestOptions}.
        * @returns {Promise<MultilingualGlossaryInfo>} Object containing details about the updated glossary.
        *
        * @throws {ArgumentError} If any argument is invalid.
        * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
        */
-      async updateMultilingualGlossaryDictionary(glossary, glossaryDict) {
+      async updateMultilingualGlossaryDictionary(glossary, glossaryDict, options) {
         if (!glossary) {
           throw new errors_1.ArgumentError('Parameter "glossary" must not be empty/null');
         }
         if (!glossaryDict) {
           throw new errors_1.ArgumentError('Parameter "glossaryDict" must not be null');
         }
-        const glossaryId = (0, utils_1.extractGlossaryId)(glossary);
         const data = new URLSearchParams();
         (0, utils_1.appendDictionaryEntries)(data, [glossaryDict]);
-        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("PATCH", `/v3/glossaries/${glossaryId}`, { data });
-        await (0, translator_1.checkStatusCode)(
-          statusCode,
-          content,
-          true
-          /* usingGlossary */
-        );
-        return (0, parsing_1.parseMultilingualGlossaryInfo)(content);
+        return this.patchMultilingualGlossaryForm(glossary, data, options);
       }
       /**
        * Updates the dictionary entries for a specific source and target language pair in a multilingual glossary
@@ -44795,12 +46343,13 @@ var require_deeplClient = __commonJS({
        * @param sourceLanguageCode Source language code of the dictionary to update.
        * @param targetLanguageCode Target language code of the dictionary to update.
        * @param csvContent String in CSV format containing the new entries.
+       * @param options Additional options, see {@link BaseRequestOptions}.
        * @returns {Promise<MultilingualGlossaryInfo>} Object containing details about the updated glossary.
        *
        * @throws {ArgumentError} If any argument is invalid.
        * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
        */
-      async updateMultilingualGlossaryDictionaryWithCsv(glossary, sourceLanguageCode, targetLanguageCode, csvContent) {
+      async updateMultilingualGlossaryDictionaryFromCsv(glossary, sourceLanguageCode, targetLanguageCode, csvContent, options) {
         if (!glossary) {
           throw new errors_1.ArgumentError('Parameter "glossary" must not be empty/null');
         }
@@ -44813,10 +46362,21 @@ var require_deeplClient = __commonJS({
         if (!csvContent) {
           throw new errors_1.ArgumentError('Parameter "csvContent" must not be empty');
         }
-        const glossaryId = (0, utils_1.extractGlossaryId)(glossary);
         const data = new URLSearchParams();
         (0, utils_1.appendCsvDictionaryEntries)(data, sourceLanguageCode, targetLanguageCode, csvContent);
-        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("PATCH", `/v3/glossaries/${glossaryId}`, { data });
+        return this.patchMultilingualGlossaryForm(glossary, data, options);
+      }
+      /**
+       * @deprecated Use {@link updateMultilingualGlossaryDictionaryFromCsv} instead. Will be
+       * removed in the next major version.
+       */
+      async updateMultilingualGlossaryDictionaryWithCsv(glossary, sourceLanguageCode, targetLanguageCode, csvContent) {
+        return this.updateMultilingualGlossaryDictionaryFromCsv(glossary, sourceLanguageCode, targetLanguageCode, csvContent);
+      }
+      /** @private */
+      async patchMultilingualGlossaryForm(glossary, data, options) {
+        (0, utils_1.setExtraBodyParameters)(data, (0, utils_1.resolveExtraBodyParameters)(options));
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("PATCH", multilingualGlossaryPath(glossary), { data });
         await (0, translator_1.checkStatusCode)(
           statusCode,
           content,
@@ -44824,6 +46384,171 @@ var require_deeplClient = __commonJS({
           /* usingGlossary */
         );
         return (0, parsing_1.parseMultilingualGlossaryInfo)(content);
+      }
+      /**
+       * Creates a spoken terms collection with the given name and term lists. Spoken terms
+       * improve the transcription of the given terms in speech recognition.
+       *
+       * @param name User-defined name of the collection.
+       * @param termLists The term lists of the collection, one per language,
+       *     see {@link SpokenTermsEntries}.
+       * @param options Additional options, see {@link CreateSpokenTermsOptions}.
+       * @returns {Promise<SpokenTerms>} Object with details about the new collection.
+       *
+       * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
+       */
+      async createSpokenTerms(name, termLists, options) {
+        const body = addExtraBodyParametersToJson({ name, term_lists: termLists.map(spokenTermsEntriesToJson) }, options);
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("POST", "/v3/spoken-terms", { jsonBody: body });
+        await (0, translator_1.checkStatusCode)(statusCode, content);
+        return (0, parsing_1.parseSpokenTerms)(content);
+      }
+      /**
+       * Lists all spoken terms collections of the account.
+       *
+       * @returns {Promise<SpokenTerms[]>} Details about each collection, excluding the terms.
+       *
+       * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
+       */
+      async listSpokenTerms() {
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("GET", "/v3/spoken-terms");
+        await (0, translator_1.checkStatusCode)(statusCode, content);
+        return (0, parsing_1.parseSpokenTermsArray)(content);
+      }
+      /**
+       * Retrieves details about a spoken terms collection, excluding the terms.
+       *
+       * @param spokenTerms ID of the collection, or a SpokenTerms object.
+       * @returns {Promise<SpokenTerms>} Object with details about the collection.
+       *
+       * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
+       */
+      async getSpokenTerms(spokenTerms) {
+        const spokenTermsId = (0, utils_1.extractSpokenTermsId)(spokenTerms);
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("GET", `/v3/spoken-terms/${encodeURIComponent(spokenTermsId)}`);
+        await (0, translator_1.checkStatusCode)(statusCode, content);
+        return (0, parsing_1.parseSpokenTerms)(content);
+      }
+      /**
+       * Updates the name and/or term lists of a spoken terms collection. The terms of each given
+       * list are merged into the existing list of that language; fields left unset are not changed.
+       *
+       * @param spokenTerms ID of the collection, or a SpokenTerms object.
+       * @param options Fields to change, see {@link UpdateSpokenTermsOptions}. If omitted or
+       *     empty, an empty body is sent.
+       * @returns {Promise<SpokenTerms>} Object with details about the updated collection.
+       *
+       * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
+       */
+      async updateSpokenTerms(spokenTerms, options) {
+        const spokenTermsId = (0, utils_1.extractSpokenTermsId)(spokenTerms);
+        const body = {};
+        if ((options === null || options === void 0 ? void 0 : options.name) !== void 0) {
+          body.name = options.name;
+        }
+        if ((options === null || options === void 0 ? void 0 : options.termLists) !== void 0) {
+          body.term_lists = options.termLists.map(spokenTermsEntriesToJson);
+        }
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("PATCH", `/v3/spoken-terms/${encodeURIComponent(spokenTermsId)}`, { jsonBody: addExtraBodyParametersToJson(body, options) });
+        await (0, translator_1.checkStatusCode)(statusCode, content);
+        return (0, parsing_1.parseSpokenTerms)(content);
+      }
+      /**
+       * Retrieves the terms of one language in a spoken terms collection.
+       *
+       * @param spokenTerms ID of the collection, or a SpokenTerms object.
+       * @param lang Language code of the term list, for example 'en'.
+       * @returns {Promise<SpokenTermsEntries>} The terms of the list.
+       *
+       * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
+       */
+      async getSpokenTermsEntries(spokenTerms, lang) {
+        const spokenTermsId = (0, utils_1.extractSpokenTermsId)(spokenTerms);
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("GET", `/v3/spoken-terms/${encodeURIComponent(spokenTermsId)}/entries`, { data: new URLSearchParams({ lang }) });
+        await (0, translator_1.checkStatusCode)(statusCode, content);
+        return (0, parsing_1.parseSpokenTermsEntries)(content);
+      }
+      /**
+       * Replaces the term list of one language in a spoken terms collection, or adds it if the
+       * collection has no list for that language.
+       *
+       * @param spokenTerms ID of the collection, or a SpokenTerms object.
+       * @param entries The language and its new terms.
+       * @param options Additional options, see {@link ReplaceSpokenTermsListOptions}.
+       * @returns {Promise<SpokenTermsList>} Details about the new term list.
+       *
+       * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
+       */
+      async replaceSpokenTermsList(spokenTerms, entries, options) {
+        const spokenTermsId = (0, utils_1.extractSpokenTermsId)(spokenTerms);
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("PUT", `/v3/spoken-terms/${encodeURIComponent(spokenTermsId)}/term-lists`, { jsonBody: addExtraBodyParametersToJson(spokenTermsEntriesToJson(entries), options) });
+        await (0, translator_1.checkStatusCode)(statusCode, content);
+        return (0, parsing_1.parseSpokenTermsList)(content);
+      }
+      /**
+       * Deletes a spoken terms collection.
+       *
+       * @param spokenTerms ID of the collection, or a SpokenTerms object.
+       *
+       * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
+       */
+      async deleteSpokenTerms(spokenTerms) {
+        const spokenTermsId = (0, utils_1.extractSpokenTermsId)(spokenTerms);
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("DELETE", `/v3/spoken-terms/${encodeURIComponent(spokenTermsId)}`);
+        await (0, translator_1.checkStatusCode)(statusCode, content);
+      }
+      /**
+       * Deletes the term list of one language from a spoken terms collection.
+       *
+       * @param spokenTerms ID of the collection, or a SpokenTerms object.
+       * @param lang Language code of the term list to delete, for example 'de'.
+       *
+       * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
+       */
+      async deleteSpokenTermsList(spokenTerms, lang) {
+        const spokenTermsId = (0, utils_1.extractSpokenTermsId)(spokenTerms);
+        const query = (0, utils_1.buildQueryString)({ lang });
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("DELETE", `/v3/spoken-terms/${encodeURIComponent(spokenTermsId)}/term-lists?${query}`);
+        await (0, translator_1.checkStatusCode)(statusCode, content);
+      }
+      /**
+       * Retrieves the languages supported by the given DeepL API resource, along with whether each
+       * language is usable as source and/or target language and the features it supports.
+       *
+       * @param {LanguageResourceName} resource - The resource to query languages for, e.g.
+       *     'translate_text' or 'glossary'.
+       * @param {GetLanguagesForResourceOptions} [options] - Optional settings; `include` adds beta languages and
+       *     features, or features relying on third-party providers.
+       * @returns {Promise<LanguageSupport[]>} An array of objects, one per supported language.
+       *
+       * @throws {ArgumentError} If the resource is empty.
+       * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
+       */
+      async getLanguagesForResource(resource, options) {
+        var _a2;
+        if (!resource) {
+          throw new errors_1.ArgumentError("resource must be a non-empty string");
+        }
+        const data = new URLSearchParams({ resource });
+        for (const include of (_a2 = options === null || options === void 0 ? void 0 : options.include) !== null && _a2 !== void 0 ? _a2 : []) {
+          data.append("include", include);
+        }
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("GET", "/v3/languages", { data });
+        await (0, translator_1.checkStatusCode)(statusCode, content);
+        return (0, parsing_1.parseLanguageSupportList)(content);
+      }
+      /**
+       * Retrieves the resources supported by the DeepL API, along with their features and whether
+       * each feature requires support from the source and/or target language.
+       *
+       * @returns {Promise<LanguageResource[]>} An array of objects, one per supported resource.
+       *
+       * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
+       */
+      async getLanguageResources() {
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("GET", "/v3/languages/resources");
+        await (0, translator_1.checkStatusCode)(statusCode, content);
+        return (0, parsing_1.parseLanguageResourceList)(content);
       }
       /**
        * Retrieves a list of all style rules available for the authenticated user.
@@ -44882,7 +46607,7 @@ var require_deeplClient = __commonJS({
        */
       async getTranslationMemory(translationMemory) {
         const translationMemoryId = (0, utils_1.extractTranslationMemoryId)(translationMemory);
-        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("GET", `/v3/translation_memories/${translationMemoryId}`);
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("GET", `/v3/translation_memories/${encodeURIComponent(translationMemoryId)}`);
         await (0, translator_1.checkStatusCode)(statusCode, content);
         return (0, parsing_1.parseTranslationMemoryInfoJson)(content);
       }
@@ -44915,7 +46640,7 @@ var require_deeplClient = __commonJS({
         if ((options === null || options === void 0 ? void 0 : options.filterCaseSensitive) !== void 0) {
           queryParams.append("filter_case_sensitive", String(options.filterCaseSensitive).toLowerCase());
         }
-        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("GET", `/v3/translation_memories/${translationMemoryId}/segments`, { data: queryParams });
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("GET", `/v3/translation_memories/${encodeURIComponent(translationMemoryId)}/segments`, { data: queryParams });
         await (0, translator_1.checkStatusCode)(statusCode, content);
         return (0, parsing_1.parseTranslationMemorySegments)(content);
       }
@@ -44928,7 +46653,7 @@ var require_deeplClient = __commonJS({
        */
       async deleteTranslationMemory(translationMemory) {
         const translationMemoryId = (0, utils_1.extractTranslationMemoryId)(translationMemory);
-        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("DELETE", `/v3/translation_memories/${translationMemoryId}`);
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("DELETE", `/v3/translation_memories/${encodeURIComponent(translationMemoryId)}`);
         await (0, translator_1.checkStatusCode)(statusCode, content);
       }
       /**
@@ -44940,8 +46665,9 @@ var require_deeplClient = __commonJS({
        *
        * @param fileName: Name of the TMX file to import, for example 'legal.tmx'.
        * @param contentLength: Size of the TMX file in bytes.
-       * @param options: Optional contentType (defaults to 'application/xml') and displayName for the
-       * resulting translation memory (defaults to the file name).
+       * @param options: Optional contentType (defaults to 'application/xml'), displayName for the
+       * resulting translation memory (defaults to the file name) and extraBodyParameters, see
+       * {@link CreateTranslationMemoryImportOptions}.
        * @returns {Promise<TranslationMemoryImport>} The job ID and upload URL.
        *
        * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
@@ -44964,7 +46690,7 @@ var require_deeplClient = __commonJS({
         if ((options === null || options === void 0 ? void 0 : options.displayName) !== void 0) {
           jsonBody.parameters = { display_name: options.displayName };
         }
-        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("POST", "/v3/translation_memories/import", { jsonBody });
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("POST", "/v3/translation_memories/import", { jsonBody: addExtraBodyParametersToJson(jsonBody, options) });
         await (0, translator_1.checkStatusCode)(statusCode, content);
         return (0, parsing_1.parseTranslationMemoryImport)(content);
       }
@@ -44982,7 +46708,8 @@ var require_deeplClient = __commonJS({
        * @param contentType: MIME type of the file, which must match the content type declared when
        * the import job was created. Defaults to 'application/xml'.
        *
-       * @throws {DeepLError} If any error occurs while uploading the file.
+       * @throws {DeepLError} If any error occurs while uploading the file. An error response from the
+       * upload URL is a plain DeepLError carrying httpStatusCode, never one of its subclasses.
        */
       async uploadTranslationMemoryFile(translationMemoryImport, fileBuffer, contentType = "application/xml") {
         const uploadUrl = typeof translationMemoryImport === "string" ? translationMemoryImport : translationMemoryImport.uploadUrl;
@@ -44991,7 +46718,7 @@ var require_deeplClient = __commonJS({
         }
         const { statusCode, content } = await this.storageHttpClient.sendRequestWithBackoff("PUT", uploadUrl, { rawBody: fileBuffer, headers: { "Content-Type": contentType } });
         if (statusCode < 200 || statusCode >= 300) {
-          throw new errors_1.DeepLError(`Error uploading translation memory file, HTTP status: ${statusCode}, content: ${content}`);
+          await throwStorageError("Error uploading translation memory file", statusCode, content);
         }
       }
       /**
@@ -45008,65 +46735,76 @@ var require_deeplClient = __commonJS({
        */
       async createTranslationMemoryExport(translationMemory) {
         const translationMemoryId = (0, utils_1.extractTranslationMemoryId)(translationMemory);
-        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("POST", `/v3/translation_memories/${translationMemoryId}/export`);
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("POST", `/v3/translation_memories/${encodeURIComponent(translationMemoryId)}/export`);
         await (0, translator_1.checkStatusCode)(statusCode, content);
         return (0, parsing_1.parseTranslationMemoryExport)(content, statusCode === 200);
       }
       /**
        * Retrieves the status of a translation memory import or export job.
        *
-       * @param jobId: ID of the job to query.
+       * @param job: ID of the job to query, or a TranslationMemoryJob object.
        * @returns {Promise<TranslationMemoryJob>} The current status of the job.
        *
        * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
        */
-      async getTranslationMemoryJob(jobId) {
+      async getTranslationMemoryJob(job) {
+        const jobId = typeof job === "string" ? job : job === null || job === void 0 ? void 0 : job.jobId;
         if (!jobId) {
           throw new errors_1.ArgumentError("jobId must not be empty");
         }
-        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("GET", `/v3/translation_memories/jobs/${jobId}`);
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("GET", `/v3/translation_memories/jobs/${encodeURIComponent(jobId)}`);
         await (0, translator_1.checkStatusCode)(statusCode, content);
         return (0, parsing_1.parseTranslationMemoryJob)(content);
       }
       /**
-       * Polls a translation memory job until it finishes, sleeping between requests, and resolves
-       * with the final status.
+       * Polls a translation memory job every 5 seconds until it completes (status 'completed', or the
+       * deprecated 'downloaded'), and resolves with the completed job.
        *
        * Note that an import job keeps reporting 'awaiting_input' for a while after its file has been
-       * uploaded, because the API detects the upload asynchronously. That status is therefore polled
-       * through like any other non-terminal one. A job whose file is never uploaded does not finish
-       * on its own, so pass timeoutMs when that is a possibility.
+       * uploaded, because the API detects the upload asynchronously. That status, and statuses this
+       * library does not know, are polled through. A job whose file is never uploaded does not finish
+       * on its own, so set a timeout when that is a possibility.
        *
-       * @param jobId: ID of the job to wait for.
-       * @param timeoutMs: (Optional) Maximum time to wait in milliseconds before rejecting. Note that
-       * this is not accurate to the millisecond, as the job is only polled every 5 seconds.
-       * @returns {Promise<TranslationMemoryJob>} The job once it has finished.
+       * @param job: ID of the job to wait for, or a TranslationMemoryJob object.
+       * @param options: (Optional) WaitOptions with timeoutMs, or the timeout in milliseconds as a
+       * number: maximum time to wait before rejecting. Note that this is not accurate to the
+       * millisecond, as the job is only polled every 5 seconds.
+       * @returns {Promise<TranslationMemoryJob>} The completed job.
        *
-       * @throws {DeepLError} If the job fails, the timeout is exceeded, or any error occurs while
-       * communicating with the DeepL API.
+       * @throws {DeepLError} If the job fails or expires (with the job's error message), the timeout
+       * is exceeded, or any error occurs while communicating with the DeepL API.
        */
-      async isTranslationMemoryJobComplete(jobId, timeoutMs) {
+      async waitUntilTranslationMemoryJobDone(job, options) {
         var _a2;
-        let job = await this.getTranslationMemoryJob(jobId);
-        const startTimeMs = Date.now();
-        while (!_DeepLClient.isJobDone(job)) {
-          const status = (_a2 = job.results[0]) === null || _a2 === void 0 ? void 0 : _a2.status;
-          if (job.results.length === 0 || !_DeepLClient.KNOWN_JOB_STATUSES.includes(status)) {
-            throw new errors_1.DeepLError(`Translation memory job ${jobId} returned an unusable status: ${status !== null && status !== void 0 ? status : "none"}`);
+        const timeoutMs = typeof options === "number" ? options : options === null || options === void 0 ? void 0 : options.timeoutMs;
+        const deadline = timeoutMs !== void 0 ? Date.now() + timeoutMs : void 0;
+        let current = await this.getTranslationMemoryJob(job);
+        while (!(0, parsing_1.isTranslationMemoryJobStatusDone)(current.status) && (0, parsing_1.isTranslationMemoryJobStatusOk)(current.status)) {
+          let sleepMs = 5e3;
+          if (deadline !== void 0) {
+            const remainingMs = deadline - Date.now();
+            if (remainingMs <= 0) {
+              throw new errors_1.DeepLError(`Timeout of ${timeoutMs}ms exceeded for translation memory job`);
+            }
+            sleepMs = Math.min(sleepMs, remainingMs);
           }
-          if (timeoutMs !== void 0 && Date.now() - startTimeMs > timeoutMs) {
-            throw new errors_1.DeepLError(`Timeout of ${timeoutMs}ms exceeded for translation memory job`);
-          }
-          const secs = 5;
-          await (0, utils_1.timeout)(secs * 1e3);
-          (0, utils_1.logInfo)(`Rechecking translation memory job status after sleeping for ${secs} seconds.`);
-          job = await this.getTranslationMemoryJob(jobId);
+          await (0, utils_1.timeout)(sleepMs);
+          (0, utils_1.logInfo)(`Rechecking translation memory job status after sleeping for ${sleepMs} ms.`);
+          current = await this.getTranslationMemoryJob(current.jobId);
         }
-        const result = job.results[0];
-        if (result !== void 0 && (result.status === "failed" || result.status === "expired")) {
-          throw new errors_1.DeepLError(result.errorMessage || `Job ${result.status}`);
+        if (!(0, parsing_1.isTranslationMemoryJobStatusOk)(current.status)) {
+          throw new errors_1.DeepLError(((_a2 = current.result) === null || _a2 === void 0 ? void 0 : _a2.errorMessage) || `Job ${current.status}`);
         }
-        return job;
+        return current;
+      }
+      /**
+       * Polls a translation memory job until it completes, and resolves with the completed job.
+       *
+       * @deprecated Use {@link waitUntilTranslationMemoryJobDone} instead. Will be removed in the
+       * next major version.
+       */
+      async isTranslationMemoryJobComplete(job, timeoutMs) {
+        return this.waitUntilTranslationMemoryJobDone(job, timeoutMs);
       }
       /**
        * Downloads the TMX file of a completed export job to the given output file path or stream.
@@ -45075,6 +46813,8 @@ var require_deeplClient = __commonJS({
        * @param outputFile: String containing output file path, or a WriteStream to store file data.
        *
        * @throws {DeepLError} If the job has no download URL, or any error occurs while downloading.
+       * An error response from the download URL is mapped like a document download response
+       * (e.g. 403 to AuthorizationError, 503 to DocumentNotReadyError), with httpStatusCode set.
        */
       async downloadTranslationMemoryExport(job, outputFile) {
         var _a2;
@@ -45082,40 +46822,33 @@ var require_deeplClient = __commonJS({
         if (!downloadUrl) {
           throw new errors_1.ArgumentError("translation memory export job has no download URL; it may not have completed yet");
         }
-        const { statusCode, content } = await this.storageHttpClient.sendRequestWithBackoff("GET", downloadUrl, {}, true);
-        await (0, translator_1.checkStatusCode)(statusCode, content, false, true);
+        let fd;
+        let fileStream;
+        let streamClosed;
         if (typeof outputFile === "string") {
-          const fileStream = fs4.createWriteStream(outputFile, { flags: "wx" });
-          try {
-            await _DeepLClient.pipeToStream(content, fileStream);
-          } catch (e5) {
-            await new Promise((resolve) => fileStream.close(resolve));
-            if ((e5 === null || e5 === void 0 ? void 0 : e5.code) !== "EEXIST") {
-              await fs4.promises.unlink(outputFile).catch(() => void 0);
-            }
-            throw e5;
-          }
-          return;
+          fd = await util.promisify(fs4.open)(outputFile, "wx");
         }
-        return _DeepLClient.pipeToStream(content, outputFile);
-      }
-      /**
-       * Pipes a response stream to the given writable, rejecting if either side errors and
-       * destroying the other so neither is left dangling.
-       * @private
-       */
-      static pipeToStream(content, outputStream) {
-        return new Promise((resolve, reject) => {
-          const fail = (error3) => {
-            content.destroy();
-            outputStream.destroy();
-            reject(error3);
-          };
-          content.on("error", fail);
-          outputStream.on("error", fail);
-          outputStream.on("finish", resolve);
-          content.pipe(outputStream);
-        });
+        try {
+          const { statusCode, content } = await this.storageHttpClient.sendRequestWithBackoff("GET", downloadUrl, {}, true);
+          await (0, translator_1.checkStatusCode)(statusCode, content, false, true);
+          if (fd === void 0) {
+            return await (0, utils_1.pipeToStream)(content, outputFile);
+          }
+          fileStream = fs4.createWriteStream(outputFile, { fd });
+          streamClosed = new Promise((resolve) => fileStream === null || fileStream === void 0 ? void 0 : fileStream.once("close", resolve));
+          await (0, utils_1.pipeToStream)(content, fileStream);
+          await streamClosed;
+        } catch (e5) {
+          if (fd !== void 0) {
+            if (streamClosed !== void 0) {
+              await streamClosed;
+            } else {
+              await util.promisify(fs4.close)(fd).catch(() => void 0);
+            }
+            await fs4.promises.unlink(outputFile).catch(() => void 0);
+          }
+          throw e5;
+        }
       }
       /**
        * Imports a TMX file as a new translation memory: creates the import job, uploads the file,
@@ -45124,22 +46857,42 @@ var require_deeplClient = __commonJS({
        * Note that the API detects the upload asynchronously, so the job keeps reporting
        * 'awaiting_input' for a while (usually well under a minute) before it completes.
        *
-       * @param inputPath: Path of the TMX file to import.
+       * @param input: Path of the TMX file to import, or a Buffer or ReadStream with its content.
        * @param options: Optional displayName for the resulting translation memory (defaults to the
-       * file name), contentType (defaults to 'application/xml'), and timeoutMs limiting how long to
-       * wait for the import to finish.
+       * file name), contentType (defaults to 'application/xml'), fileName (required for a Buffer or
+       * stream unless displayName is set), extraBodyParameters, and timeoutMs limiting how long to
+       * wait for the import to finish, see {@link ImportTranslationMemoryOptions}.
        * @returns {Promise<TranslationMemoryJob>} The completed import job; its result carries the
        * new translation memory ID.
        *
+       * @throws {Error} The Node error (e.g. `ENOENT`, `EISDIR`) if reading the input fails; for a
+       * file path, no request is sent.
+       * @throws {ArgumentError} If a Buffer or stream is given without fileName or displayName.
        * @throws {DeepLError} If the import fails, the timeout is exceeded, or any error occurs while
        * communicating with the DeepL API.
        */
-      async importTranslationMemoryFromFilepath(inputPath, options) {
-        var _a2;
-        const fileBuffer = await fs4.promises.readFile(inputPath);
-        const created = await this.createTranslationMemoryImport(path.basename(inputPath), fileBuffer.length, { displayName: options === null || options === void 0 ? void 0 : options.displayName, contentType: options === null || options === void 0 ? void 0 : options.contentType });
-        await this.uploadTranslationMemoryFile(created, fileBuffer, (_a2 = options === null || options === void 0 ? void 0 : options.contentType) !== null && _a2 !== void 0 ? _a2 : "application/xml");
-        return this.isTranslationMemoryJobComplete(created.jobId, options === null || options === void 0 ? void 0 : options.timeoutMs);
+      async importTranslationMemoryFromFilepath(input, options) {
+        var _a2, _b, _c5;
+        let fileBuffer;
+        let fileName;
+        if ((0, utils_1.isString)(input)) {
+          fileName = (_a2 = options === null || options === void 0 ? void 0 : options.fileName) !== null && _a2 !== void 0 ? _a2 : path.basename(input);
+          fileBuffer = await fs4.promises.readFile(input);
+        } else {
+          fileName = (_b = options === null || options === void 0 ? void 0 : options.fileName) !== null && _b !== void 0 ? _b : options === null || options === void 0 ? void 0 : options.displayName;
+          if (!fileName) {
+            throw new errors_1.ArgumentError("options.fileName or options.displayName must be specified unless using an input file path");
+          }
+          fileBuffer = input instanceof fs4.ReadStream ? await (0, utils_1.streamToBuffer)(input) : input;
+        }
+        const created = await this.createTranslationMemoryImport(fileName, fileBuffer.length, {
+          displayName: options === null || options === void 0 ? void 0 : options.displayName,
+          contentType: options === null || options === void 0 ? void 0 : options.contentType,
+          extraBodyParameters: options === null || options === void 0 ? void 0 : options.extraBodyParameters,
+          extraRequestParameters: options === null || options === void 0 ? void 0 : options.extraRequestParameters
+        });
+        await this.uploadTranslationMemoryFile(created, fileBuffer, (_c5 = options === null || options === void 0 ? void 0 : options.contentType) !== null && _c5 !== void 0 ? _c5 : "application/xml");
+        return this.waitUntilTranslationMemoryJobDone(created.jobId, options);
       }
       /**
        * Exports a translation memory to a TMX file: creates the export job, waits for it to finish,
@@ -45147,217 +46900,268 @@ var require_deeplClient = __commonJS({
        *
        * @param translationMemory: Translation memory ID, or TranslationMemoryInfo object.
        * @param outputFile: String containing output file path, or a WriteStream to store file data.
-       * @param options: Optional timeoutMs limiting how long to wait for the export to finish.
+       * @param options: Optional WaitOptions with timeoutMs limiting how long to wait for the export
+       * to finish.
        * @returns {Promise<TranslationMemoryJob>} The completed export job.
        *
+       * @throws {Error} The Node error (`EEXIST`, `ENOENT`, `EACCES`) if a file already exists at
+       * the output path or the output directory is missing or not writable. These are checked before
+       * the export job is created. Errors writing the output are also passed through unchanged.
        * @throws {DeepLError} If the export fails, the timeout is exceeded, or any error occurs while
        * communicating with the DeepL API.
        */
       async exportTranslationMemoryToFilepath(translationMemory, outputFile, options) {
+        if ((0, utils_1.isString)(outputFile)) {
+          if (fs4.existsSync(outputFile)) {
+            throw Object.assign(new Error(`EEXIST: file already exists, open '${outputFile}'`), {
+              errno: uvErrno("EEXIST"),
+              code: "EEXIST",
+              syscall: "open",
+              path: outputFile
+            });
+          }
+          await fs4.promises.access(path.dirname(outputFile), fs4.constants.W_OK);
+        }
         const created = await this.createTranslationMemoryExport(translationMemory);
-        const job = await this.isTranslationMemoryJobComplete(created.jobId, options === null || options === void 0 ? void 0 : options.timeoutMs);
+        const job = await this.waitUntilTranslationMemoryJobDone(created.jobId, options);
         await this.downloadTranslationMemoryExport(job, outputFile);
         return job;
       }
-      /**
-       * True once the job has finished, successfully or not.
-       * @private
-       */
-      static isJobDone(job) {
-        var _a2;
-        const status = (_a2 = job.results[0]) === null || _a2 === void 0 ? void 0 : _a2.status;
-        return status === "completed" || status === "downloaded" || status === "failed" || status === "expired";
-      }
-      /**
-       * Creates a new style rule.
-       *
-       * @param styleRule: The style rule parameters including name, language, and optional configured_rules and custom_instructions.
-       * @returns {Promise<StyleRuleInfo>} The created style rule info.
-       *
-       * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
-       */
-      async createStyleRule(styleRule) {
-        if (!styleRule.name) {
+      async createStyleRule(nameOrStyleRule, language, configuredRules, customInstructions, options) {
+        let body;
+        if (typeof nameOrStyleRule === "string") {
+          body = { name: nameOrStyleRule, language };
+          if (configuredRules !== void 0)
+            body.configured_rules = configuredRules;
+          if (customInstructions !== void 0)
+            body.custom_instructions = customInstructions;
+        } else {
+          body = nameOrStyleRule;
+        }
+        if (!body.name) {
           throw new errors_1.ArgumentError('Parameter "name" must not be empty');
         }
-        if (!styleRule.language) {
+        if (!body.language) {
           throw new errors_1.ArgumentError('Parameter "language" must not be empty');
         }
-        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("POST", "/v3/style_rules", { jsonBody: styleRule });
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("POST", "/v3/style_rules", { jsonBody: addExtraBodyParametersToJson(body, options) });
         await (0, translator_1.checkStatusCode)(statusCode, content);
-        return (0, parsing_1.parseStyleRuleInfo)(JSON.parse(content));
+        return (0, parsing_1.parseResponse)(content, parsing_1.parseStyleRuleInfo);
       }
       /**
        * Retrieves a single style rule by ID.
        *
-       * @param styleId: The ID of the style rule to retrieve.
+       * @param styleRule: The style rule to retrieve, as an ID or a StyleRuleInfo object.
        * @returns {Promise<StyleRuleInfo>} The style rule info.
        *
        * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
        */
-      async getStyleRule(styleId) {
-        if (!styleId) {
-          throw new errors_1.ArgumentError('Parameter "styleId" must not be empty');
-        }
+      async getStyleRule(styleRule) {
+        const styleId = extractStyleRuleId(styleRule);
         const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("GET", `/v3/style_rules/${encodeURIComponent(styleId)}`);
         await (0, translator_1.checkStatusCode)(statusCode, content);
-        return (0, parsing_1.parseStyleRuleInfo)(JSON.parse(content));
+        return (0, parsing_1.parseResponse)(content, parsing_1.parseStyleRuleInfo);
       }
       /**
        * Updates the name of a style rule.
        *
-       * @param styleId: The ID of the style rule to update.
+       * @param styleRule: The style rule to update, as an ID or a StyleRuleInfo object.
        * @param name: The new name for the style rule.
+       * @param options: Optional request options, see {@link UpdateStyleRuleNameOptions}.
        * @returns {Promise<StyleRuleInfo>} The updated style rule info.
        *
        * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
        */
-      async updateStyleRuleName(styleId, name) {
-        if (!styleId) {
-          throw new errors_1.ArgumentError('Parameter "styleId" must not be empty');
-        }
+      async updateStyleRuleName(styleRule, name, options) {
+        const styleId = extractStyleRuleId(styleRule);
         if (!name) {
           throw new errors_1.ArgumentError('Parameter "name" must not be empty');
         }
-        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("PATCH", `/v3/style_rules/${encodeURIComponent(styleId)}`, { jsonBody: { name } });
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("PATCH", `/v3/style_rules/${encodeURIComponent(styleId)}`, { jsonBody: addExtraBodyParametersToJson({ name }, options) });
         await (0, translator_1.checkStatusCode)(statusCode, content);
-        return (0, parsing_1.parseStyleRuleInfo)(JSON.parse(content));
+        return (0, parsing_1.parseResponse)(content, parsing_1.parseStyleRuleInfo);
       }
       /**
        * Deletes a style rule.
        *
-       * @param styleId: The ID of the style rule to delete.
+       * @param styleRule: The style rule to delete, as an ID or a StyleRuleInfo object.
        *
        * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
        */
-      async deleteStyleRule(styleId) {
-        if (!styleId) {
-          throw new errors_1.ArgumentError('Parameter "styleId" must not be empty');
-        }
+      async deleteStyleRule(styleRule) {
+        const styleId = extractStyleRuleId(styleRule);
         const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("DELETE", `/v3/style_rules/${encodeURIComponent(styleId)}`);
         await (0, translator_1.checkStatusCode)(statusCode, content);
       }
       /**
        * Updates the configured rules of a style rule.
        *
-       * @param styleId: The ID of the style rule to update.
+       * @param styleRule: The style rule to update, as an ID or a StyleRuleInfo object.
        * @param configuredRules: The new configured rules mapping.
+       * @param options: Optional request options, see {@link UpdateStyleRuleConfiguredRulesOptions}.
        * @returns {Promise<StyleRuleInfo>} The updated style rule info.
        *
        * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
        */
-      async updateStyleRuleConfiguredRules(styleId, configuredRules) {
-        if (!styleId) {
-          throw new errors_1.ArgumentError('Parameter "styleId" must not be empty');
-        }
-        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("PUT", `/v3/style_rules/${encodeURIComponent(styleId)}/configured_rules`, { jsonBody: configuredRules });
+      async updateStyleRuleConfiguredRules(styleRule, configuredRules, options) {
+        const styleId = extractStyleRuleId(styleRule);
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("PUT", `/v3/style_rules/${encodeURIComponent(styleId)}/configured_rules`, { jsonBody: addExtraBodyParametersToJson(configuredRules, options) });
         await (0, translator_1.checkStatusCode)(statusCode, content);
-        return (0, parsing_1.parseStyleRuleInfo)(JSON.parse(content));
+        return (0, parsing_1.parseResponse)(content, parsing_1.parseStyleRuleInfo);
       }
-      /**
-       * Creates a custom instruction for a style rule.
-       *
-       * @param styleId: The ID of the style rule.
-       * @param instruction: The custom instruction parameters including label, prompt, and optional source_language.
-       * @returns {Promise<CustomInstruction>} The created custom instruction.
-       *
-       * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
-       */
-      async createStyleRuleCustomInstruction(styleId, instruction) {
-        if (!styleId) {
-          throw new errors_1.ArgumentError('Parameter "styleId" must not be empty');
-        }
+      async createStyleRuleCustomInstruction(styleRule, labelOrInstruction, prompt, sourceLanguage, options) {
+        const styleId = extractStyleRuleId(styleRule);
+        const instruction = typeof labelOrInstruction === "string" ? customInstructionToWire(labelOrInstruction, prompt, sourceLanguage) : labelOrInstruction;
         if (!instruction.label) {
           throw new errors_1.ArgumentError('Parameter "label" must not be empty');
         }
         if (!instruction.prompt) {
           throw new errors_1.ArgumentError('Parameter "prompt" must not be empty');
         }
-        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("POST", `/v3/style_rules/${encodeURIComponent(styleId)}/custom_instructions`, { jsonBody: instruction });
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("POST", `/v3/style_rules/${encodeURIComponent(styleId)}/custom_instructions`, { jsonBody: addExtraBodyParametersToJson(instruction, options) });
         await (0, translator_1.checkStatusCode)(statusCode, content);
-        return (0, parsing_1.parseCustomInstruction)(JSON.parse(content));
+        return (0, parsing_1.parseResponse)(content, parsing_1.parseCustomInstruction);
       }
       /**
        * Retrieves a custom instruction for a style rule.
        *
-       * @param styleId: The ID of the style rule.
-       * @param instructionId: The ID of the custom instruction.
+       * @param styleRule: The style rule, as an ID or a StyleRuleInfo object.
+       * @param instructionId: The custom instruction, as an ID or a CustomInstruction object.
        * @returns {Promise<CustomInstruction>} The custom instruction.
        *
        * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
        */
-      async getStyleRuleCustomInstruction(styleId, instructionId) {
-        if (!styleId) {
-          throw new errors_1.ArgumentError('Parameter "styleId" must not be empty');
-        }
-        if (!instructionId) {
-          throw new errors_1.ArgumentError('Parameter "instructionId" must not be empty');
-        }
-        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("GET", `/v3/style_rules/${encodeURIComponent(styleId)}/custom_instructions/${encodeURIComponent(instructionId)}`);
+      async getStyleRuleCustomInstruction(styleRule, instructionId) {
+        const styleId = extractStyleRuleId(styleRule);
+        const id = extractCustomInstructionId(instructionId);
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("GET", customInstructionPath(styleId, id));
         await (0, translator_1.checkStatusCode)(statusCode, content);
-        return (0, parsing_1.parseCustomInstruction)(JSON.parse(content));
+        return (0, parsing_1.parseResponse)(content, parsing_1.parseCustomInstruction);
       }
-      /**
-       * Updates a custom instruction for a style rule.
-       *
-       * @param styleId: The ID of the style rule.
-       * @param instructionId: The ID of the custom instruction to update.
-       * @param instruction: The custom instruction parameters including label, prompt, and optional source_language.
-       * @returns {Promise<CustomInstruction>} The updated custom instruction.
-       *
-       * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
-       */
-      async updateStyleRuleCustomInstruction(styleId, instructionId, instruction) {
-        if (!styleId) {
-          throw new errors_1.ArgumentError('Parameter "styleId" must not be empty');
-        }
-        if (!instructionId) {
-          throw new errors_1.ArgumentError('Parameter "instructionId" must not be empty');
-        }
+      async updateStyleRuleCustomInstruction(styleRule, instructionId, labelOrInstruction, prompt, sourceLanguage, options) {
+        const styleId = extractStyleRuleId(styleRule);
+        const id = extractCustomInstructionId(instructionId);
+        const instruction = typeof labelOrInstruction === "string" ? customInstructionToWire(labelOrInstruction, prompt, sourceLanguage) : labelOrInstruction;
         if (!instruction.label) {
           throw new errors_1.ArgumentError('Parameter "label" must not be empty');
         }
         if (!instruction.prompt) {
           throw new errors_1.ArgumentError('Parameter "prompt" must not be empty');
         }
-        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("PUT", `/v3/style_rules/${encodeURIComponent(styleId)}/custom_instructions/${encodeURIComponent(instructionId)}`, { jsonBody: instruction });
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("PUT", customInstructionPath(styleId, id), { jsonBody: addExtraBodyParametersToJson(instruction, options) });
         await (0, translator_1.checkStatusCode)(statusCode, content);
-        return (0, parsing_1.parseCustomInstruction)(JSON.parse(content));
+        return (0, parsing_1.parseResponse)(content, parsing_1.parseCustomInstruction);
       }
       /**
        * Deletes a custom instruction from a style rule.
        *
-       * @param styleId: The ID of the style rule.
-       * @param instructionId: The ID of the custom instruction to delete.
+       * @param styleRule: The style rule, as an ID or a StyleRuleInfo object.
+       * @param instructionId: The custom instruction to delete, as an ID or a CustomInstruction object.
        *
        * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
        */
-      async deleteStyleRuleCustomInstruction(styleId, instructionId) {
-        if (!styleId) {
-          throw new errors_1.ArgumentError('Parameter "styleId" must not be empty');
+      async deleteStyleRuleCustomInstruction(styleRule, instructionId) {
+        const styleId = extractStyleRuleId(styleRule);
+        const id = extractCustomInstructionId(instructionId);
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("DELETE", customInstructionPath(styleId, id));
+        await (0, translator_1.checkStatusCode)(statusCode, content);
+      }
+      /**
+       * Retrieves a page of the style profiles of the account.
+       *
+       * @param page: Page number for pagination, 0-indexed (optional, API default 0).
+       * @param pageSize: Number of items per page (optional, API default 10, at most 100).
+       * @returns {Promise<StyleProfile[]>} The style profiles on the page.
+       *
+       * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
+       */
+      async listStyleProfiles(page, pageSize) {
+        const queryParams = new URLSearchParams();
+        if (page !== void 0) {
+          queryParams.append("page", String(page));
         }
-        if (!instructionId) {
-          throw new errors_1.ArgumentError('Parameter "instructionId" must not be empty');
+        if (pageSize !== void 0) {
+          queryParams.append("page_size", String(pageSize));
         }
-        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("DELETE", `/v3/style_rules/${encodeURIComponent(styleId)}/custom_instructions/${encodeURIComponent(instructionId)}`);
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("GET", "/v3/style_profiles", { data: queryParams });
+        await (0, translator_1.checkStatusCode)(statusCode, content);
+        return (0, parsing_1.parseStyleProfileList)(content);
+      }
+      /**
+       * Creates a style profile. Only the name is required; options left undefined are not sent.
+       * If any of the linked IDs cannot be used, the API rejects the request and creates nothing.
+       *
+       * @param name: Name of the style profile.
+       * @param options: Description, industry and the IDs of the glossaries, style rule lists and
+       *     translation memories to link, see {@link CreateStyleProfileOptions}.
+       * @returns {Promise<StyleProfile>} The created style profile.
+       *
+       * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
+       */
+      async createStyleProfile(name, options) {
+        const body = addExtraBodyParametersToJson({ name, ...styleProfileOptionsToJson(options) }, options);
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("POST", "/v3/style_profiles", { jsonBody: body });
+        await (0, translator_1.checkStatusCode)(statusCode, content);
+        return (0, parsing_1.parseStyleProfile)(content);
+      }
+      /**
+       * Retrieves a style profile.
+       *
+       * @param styleProfile: ID of the style profile, or a StyleProfile object.
+       * @returns {Promise<StyleProfile>} The style profile.
+       *
+       * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
+       */
+      async getStyleProfile(styleProfile) {
+        const styleProfileId = (0, utils_1.extractStyleProfileId)(styleProfile);
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("GET", `/v3/style_profiles/${encodeURIComponent(styleProfileId)}`);
+        await (0, translator_1.checkStatusCode)(statusCode, content);
+        return (0, parsing_1.parseStyleProfile)(content);
+      }
+      /**
+       * Updates a style profile. Options left undefined are not changed. An empty string clears
+       * the description or industry; an ID array replaces the linked components of that kind in
+       * full, and an empty array unlinks all of them. With no options set, `{}` is sent and nothing
+       * changes.
+       *
+       * @param styleProfile: ID of the style profile, or a StyleProfile object.
+       * @param options: The fields to change (optional), see {@link UpdateStyleProfileOptions}.
+       * @returns {Promise<StyleProfile>} The updated style profile.
+       *
+       * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
+       */
+      async updateStyleProfile(styleProfile, options) {
+        const styleProfileId = (0, utils_1.extractStyleProfileId)(styleProfile);
+        const fields = styleProfileOptionsToJson(options);
+        if ((options === null || options === void 0 ? void 0 : options.name) !== void 0) {
+          fields.name = options.name;
+        }
+        const body = addExtraBodyParametersToJson(fields, options);
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("PATCH", `/v3/style_profiles/${encodeURIComponent(styleProfileId)}`, { jsonBody: body });
+        await (0, translator_1.checkStatusCode)(statusCode, content);
+        return (0, parsing_1.parseStyleProfile)(content);
+      }
+      /**
+       * Deletes a style profile. The linked glossaries, style rule lists and translation memories
+       * are not deleted.
+       *
+       * @param styleProfile: ID of the style profile, or a StyleProfile object.
+       *
+       * @throws {DeepLError} If any error occurs while communicating with the DeepL API.
+       */
+      async deleteStyleProfile(styleProfile) {
+        const styleProfileId = (0, utils_1.extractStyleProfileId)(styleProfile);
+        const { statusCode, content } = await this.httpClient.sendRequestWithBackoff("DELETE", `/v3/style_profiles/${encodeURIComponent(styleProfileId)}`);
         await (0, translator_1.checkStatusCode)(statusCode, content);
       }
     };
     exports2.DeepLClient = DeepLClient;
-    DeepLClient.KNOWN_JOB_STATUSES = [
-      "awaiting_input",
-      "processing",
-      "completed",
-      "downloaded",
-      "failed",
-      "expired"
-    ];
   }
 });
 
-// node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/index.js
+// node_modules/.pnpm/deepl-node@1.29.0_debug@4.4.3/node_modules/deepl-node/dist/index.js
 var require_dist2 = __commonJS({
-  "node_modules/.pnpm/deepl-node@1.28.1_debug@4.4.3/node_modules/deepl-node/dist/index.js"(exports2) {
+  "node_modules/.pnpm/deepl-node@1.29.0_debug@4.4.3/node_modules/deepl-node/dist/index.js"(exports2) {
     "use strict";
     var __createBinding = exports2 && exports2.__createBinding || (Object.create ? (function(o3, m3, k5, k22) {
       if (k22 === void 0) k22 = k5;
@@ -45376,11 +47180,17 @@ var require_dist2 = __commonJS({
       for (var p3 in m3) if (p3 !== "default" && !Object.prototype.hasOwnProperty.call(exports3, p3)) __createBinding(exports3, m3, p3);
     };
     Object.defineProperty(exports2, "__esModule", { value: true });
+    exports2.isFreeAccountAuthKey = void 0;
     __exportStar(require_errors2(), exports2);
     __exportStar(require_glossaryEntries(), exports2);
     __exportStar(require_types(), exports2);
+    __exportStar(require_adminClient(), exports2);
     __exportStar(require_deeplClient(), exports2);
     __exportStar(require_translator(), exports2);
+    var utils_1 = require_utils3();
+    Object.defineProperty(exports2, "isFreeAccountAuthKey", { enumerable: true, get: function() {
+      return utils_1.isFreeAccountAuthKey;
+    } });
   }
 });
 
@@ -49110,10 +50920,10 @@ var require_node_ponyfill = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/emitWarningIfUnsupportedVersion.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/emitWarningIfUnsupportedVersion.js
 var state, emitWarningIfUnsupportedVersion;
 var init_emitWarningIfUnsupportedVersion = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/emitWarningIfUnsupportedVersion.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/emitWarningIfUnsupportedVersion.js"() {
     state = {
       warningEmitted: false
     };
@@ -49141,10 +50951,10 @@ More information can be found at: https://a.co/c895JFp`);
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/longPollMiddleware.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/longPollMiddleware.js
 var longPollMiddleware, longPollMiddlewareOptions, getLongPollPlugin;
 var init_longPollMiddleware = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/longPollMiddleware.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/longPollMiddleware.js"() {
     longPollMiddleware = () => (next, context) => async (args) => {
       context.__retryLongPoll = true;
       return next(args);
@@ -49163,7 +50973,7 @@ var init_longPollMiddleware = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/setCredentialFeature.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/setCredentialFeature.js
 function setCredentialFeature(credentials, feature, value) {
   if (!credentials.$source) {
     credentials.$source = {};
@@ -49172,23 +50982,23 @@ function setCredentialFeature(credentials, feature, value) {
   return credentials;
 }
 var init_setCredentialFeature = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/setCredentialFeature.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/setCredentialFeature.js"() {
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/isStreamingPayload/isStreamingPayload.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/isStreamingPayload/isStreamingPayload.js
 var import_node_stream, isStreamingPayload;
 var init_isStreamingPayload = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/isStreamingPayload/isStreamingPayload.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/isStreamingPayload/isStreamingPayload.js"() {
     import_node_stream = require("node:stream");
     isStreamingPayload = (request) => request?.body instanceof import_node_stream.Readable || typeof ReadableStream !== "undefined" && request?.body instanceof ReadableStream;
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/middleware-stack/MiddlewareStack.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/middleware-stack/MiddlewareStack.js
 var getAllAliases, getMiddlewareNameWithAliases, constructStack, stepWeights, priorityWeights;
 var init_MiddlewareStack = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/middleware-stack/MiddlewareStack.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/middleware-stack/MiddlewareStack.js"() {
     getAllAliases = (name, aliases) => {
       const _aliases = [];
       if (name) {
@@ -49333,8 +51143,9 @@ var init_MiddlewareStack = __esm({
           const aliases = getAllAliases(name, _aliases);
           if (aliases.length > 0) {
             if (aliases.some((alias) => entriesNameSet.has(alias))) {
-              if (!override)
+              if (!override) {
                 throw new Error(`Duplicate middleware name '${getMiddlewareNameWithAliases(name, _aliases)}'`);
+              }
               for (const alias of aliases) {
                 const toOverrideIndex = absoluteEntries.findIndex((entry2) => entry2.name === alias || entry2.aliases?.some((a5) => a5 === alias));
                 if (toOverrideIndex === -1) {
@@ -49362,8 +51173,9 @@ var init_MiddlewareStack = __esm({
           const aliases = getAllAliases(name, _aliases);
           if (aliases.length > 0) {
             if (aliases.some((alias) => entriesNameSet.has(alias))) {
-              if (!override)
+              if (!override) {
                 throw new Error(`Duplicate middleware name '${getMiddlewareNameWithAliases(name, _aliases)}'`);
+              }
               for (const alias of aliases) {
                 const toOverrideIndex = relativeEntries.findIndex((entry2) => entry2.name === alias || entry2.aliases?.some((a5) => a5 === alias));
                 if (toOverrideIndex === -1) {
@@ -49387,10 +51199,11 @@ var init_MiddlewareStack = __esm({
           plugin.applyToStack(stack);
         },
         remove: (toRemove) => {
-          if (typeof toRemove === "string")
+          if (typeof toRemove === "string") {
             return removeByName(toRemove);
-          else
+          } else {
             return removeByReference(toRemove);
+          }
         },
         removeByTag: (toRemove) => {
           let isRemoved = false;
@@ -49424,8 +51237,9 @@ var init_MiddlewareStack = __esm({
           });
         },
         identifyOnResolve(toggle) {
-          if (typeof toggle === "boolean")
+          if (typeof toggle === "boolean") {
             identifyOnResolve = toggle;
+          }
           return identifyOnResolve;
         },
         resolve: (handler, context) => {
@@ -49455,9 +51269,9 @@ var init_MiddlewareStack = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+types@4.19.0/node_modules/@smithy/types/dist-cjs/index.js
+// node_modules/.pnpm/@smithy+types@4.20.0/node_modules/@smithy/types/dist-cjs/index.js
 var require_dist_cjs = __commonJS({
-  "node_modules/.pnpm/@smithy+types@4.19.0/node_modules/@smithy/types/dist-cjs/index.js"(exports2) {
+  "node_modules/.pnpm/@smithy+types@4.20.0/node_modules/@smithy/types/dist-cjs/index.js"(exports2) {
     var HttpAuthLocation;
     (function(HttpAuthLocation2) {
       HttpAuthLocation2["HEADER"] = "header";
@@ -49522,7 +51336,7 @@ var require_dist_cjs = __commonJS({
       FieldPosition3[FieldPosition3["HEADER"] = 0] = "HEADER";
       FieldPosition3[FieldPosition3["TRAILER"] = 1] = "TRAILER";
     })(FieldPosition2 || (FieldPosition2 = {}));
-    var SMITHY_CONTEXT_KEY4 = "__smithy_context";
+    var SMITHY_CONTEXT_KEY5 = "__smithy_context";
     var IniSectionType4;
     (function(IniSectionType5) {
       IniSectionType5["PROFILE"] = "profile";
@@ -49542,31 +51356,31 @@ var require_dist_cjs = __commonJS({
     exports2.HttpAuthLocation = HttpAuthLocation;
     exports2.IniSectionType = IniSectionType4;
     exports2.RequestHandlerProtocol = RequestHandlerProtocol;
-    exports2.SMITHY_CONTEXT_KEY = SMITHY_CONTEXT_KEY4;
+    exports2.SMITHY_CONTEXT_KEY = SMITHY_CONTEXT_KEY5;
     exports2.getDefaultClientConfiguration = getDefaultClientConfiguration2;
     exports2.resolveDefaultRuntimeConfig = resolveDefaultRuntimeConfig2;
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/transport/getSmithyContext.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/transport/getSmithyContext.js
 var import_types, getSmithyContext;
 var init_getSmithyContext = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/transport/getSmithyContext.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/transport/getSmithyContext.js"() {
     import_types = __toESM(require_dist_cjs());
     getSmithyContext = (context) => context[import_types.SMITHY_CONTEXT_KEY] || (context[import_types.SMITHY_CONTEXT_KEY] = {});
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/transport/hasOwn.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/transport/hasOwn.js
 function hasOwn(o3, k5) {
   return Object.prototype.hasOwnProperty.call(o3, k5);
 }
 var init_hasOwn = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/transport/hasOwn.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/transport/hasOwn.js"() {
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/transport/httpRequest.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/transport/httpRequest.js
 function cloneQuery(query) {
   return Object.keys(query).reduce((carry, paramName) => {
     const param = query[paramName];
@@ -49578,7 +51392,7 @@ function cloneQuery(query) {
 }
 var HttpRequest;
 var init_httpRequest = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/transport/httpRequest.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/transport/httpRequest.js"() {
     HttpRequest = class _HttpRequest {
       method;
       protocol;
@@ -49628,10 +51442,10 @@ var init_httpRequest = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/transport/httpResponse.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/transport/httpResponse.js
 var HttpResponse;
 var init_httpResponse = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/transport/httpResponse.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/transport/httpResponse.js"() {
     HttpResponse = class {
       statusCode;
       reason;
@@ -49644,8 +51458,9 @@ var init_httpResponse = __esm({
         this.body = options.body;
       }
       static isInstance(response) {
-        if (!response)
+        if (!response) {
           return false;
+        }
         const resp = response;
         return typeof resp.statusCode === "number" && typeof resp.headers === "object";
       }
@@ -49653,10 +51468,10 @@ var init_httpResponse = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/transport/isValidHostLabel.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/transport/isValidHostLabel.js
 var VALID_HOST_LABEL_REGEX, isValidHostLabel;
 var init_isValidHostLabel = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/transport/isValidHostLabel.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/transport/isValidHostLabel.js"() {
     VALID_HOST_LABEL_REGEX = new RegExp(`^(?!.*-$)(?!-)[a-zA-Z0-9-]{1,63}$`);
     isValidHostLabel = (value, allowSubDomains = false) => {
       if (!allowSubDomains) {
@@ -49673,30 +51488,31 @@ var init_isValidHostLabel = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/transport/isValidHostname.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/transport/isValidHostname.js
 function isValidHostname(hostname) {
   const hostPattern = /^[a-z0-9][a-z0-9.-]*[a-z0-9]$/;
   return hostPattern.test(hostname);
 }
 var init_isValidHostname = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/transport/isValidHostname.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/transport/isValidHostname.js"() {
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/transport/normalizeProvider.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/transport/normalizeProvider.js
 var normalizeProvider;
 var init_normalizeProvider = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/transport/normalizeProvider.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/transport/normalizeProvider.js"() {
     normalizeProvider = (input) => {
-      if (typeof input === "function")
+      if (typeof input === "function") {
         return input;
+      }
       const promisified = Promise.resolve(input);
       return () => promisified;
     };
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/transport/parseQueryString.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/transport/parseQueryString.js
 function parseQueryString(querystring) {
   const query = {};
   querystring = querystring.replace(/^\?/, "");
@@ -49719,14 +51535,14 @@ function parseQueryString(querystring) {
   return query;
 }
 var init_parseQueryString = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/transport/parseQueryString.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/transport/parseQueryString.js"() {
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/transport/parseUrl.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/transport/parseUrl.js
 var parseUrl;
 var init_parseUrl = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/transport/parseUrl.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/transport/parseUrl.js"() {
     init_parseQueryString();
     parseUrl = (url) => {
       if (typeof url === "string") {
@@ -49748,10 +51564,10 @@ var init_parseUrl = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/transport/toEndpointV1.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/transport/toEndpointV1.js
 var toEndpointV1;
 var init_toEndpointV1 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/transport/toEndpointV1.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/transport/toEndpointV1.js"() {
     init_hasOwn();
     init_parseUrl();
     toEndpointV1 = (endpoint) => {
@@ -49761,8 +51577,9 @@ var init_toEndpointV1 = __esm({
           if (endpoint.headers) {
             v1Endpoint.headers = {};
             for (const name in endpoint.headers) {
-              if (!hasOwn(endpoint.headers, name))
+              if (!hasOwn(endpoint.headers, name)) {
                 continue;
+              }
               v1Endpoint.headers[name.toLowerCase()] = endpoint.headers[name].join(", ");
             }
           }
@@ -49775,9 +51592,9 @@ var init_toEndpointV1 = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/transport/index.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/transport/index.js
 var init_transport = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/transport/index.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/transport/index.js"() {
     init_getSmithyContext();
     init_hasOwn();
     init_httpRequest();
@@ -49791,28 +51608,28 @@ var init_transport = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/invalid-dependency/invalidFunction.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/invalid-dependency/invalidFunction.js
 var invalidFunction;
 var init_invalidFunction = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/invalid-dependency/invalidFunction.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/invalid-dependency/invalidFunction.js"() {
     invalidFunction = (message) => () => {
       throw new Error(message);
     };
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/invalid-dependency/invalidProvider.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/invalid-dependency/invalidProvider.js
 var invalidProvider;
 var init_invalidProvider = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/invalid-dependency/invalidProvider.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/invalid-dependency/invalidProvider.js"() {
     invalidProvider = (message) => () => Promise.reject(message);
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/util-waiter/circularReplacer.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/util-waiter/circularReplacer.js
 var getCircularReplacer;
 var init_circularReplacer = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/util-waiter/circularReplacer.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/util-waiter/circularReplacer.js"() {
     getCircularReplacer = () => {
       const seen = /* @__PURE__ */ new WeakSet();
       return (key, value) => {
@@ -49828,20 +51645,20 @@ var init_circularReplacer = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/util-waiter/utils/sleep.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/util-waiter/utils/sleep.js
 var sleep;
 var init_sleep = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/util-waiter/utils/sleep.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/util-waiter/utils/sleep.js"() {
     sleep = (seconds) => {
       return new Promise((resolve) => setTimeout(resolve, seconds * 1e3));
     };
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/util-waiter/waiter.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/util-waiter/waiter.js
 var waiterServiceDefaults, WaiterState, checkExceptions;
 var init_waiter = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/util-waiter/waiter.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/util-waiter/waiter.js"() {
     init_circularReplacer();
     waiterServiceDefaults = {
       minDelay: 2,
@@ -49877,10 +51694,10 @@ var init_waiter = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/util-waiter/poller.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/util-waiter/poller.js
 var runPolling, checkWarn403, createMessageFromResponse, exponentialBackoffWithJitter, randomInRange;
 var init_poller = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/util-waiter/poller.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/util-waiter/poller.js"() {
     init_circularReplacer();
     init_sleep();
     init_waiter();
@@ -49969,10 +51786,10 @@ var init_poller = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/util-waiter/utils/validate.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/util-waiter/utils/validate.js
 var validateWaiterOptions;
 var init_validate = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/util-waiter/utils/validate.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/util-waiter/utils/validate.js"() {
     validateWaiterOptions = (options) => {
       if (options.maxWaitTime <= 0) {
         throw new Error(`WaiterConfiguration.maxWaitTime must be greater than 0`);
@@ -49989,10 +51806,10 @@ var init_validate = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/util-waiter/createWaiter.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/util-waiter/createWaiter.js
 var abortTimeout, createWaiter;
 var init_createWaiter = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/util-waiter/createWaiter.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/util-waiter/createWaiter.js"() {
     init_poller();
     init_validate();
     init_waiter();
@@ -50043,10 +51860,10 @@ var init_createWaiter = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/client.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/client.js
 var Client;
 var init_client = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/client.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/client.js"() {
     init_MiddlewareStack();
     Client = class {
       config;
@@ -50097,10 +51914,10 @@ var init_client = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/deref.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/deref.js
 var deref;
 var init_deref = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/deref.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/deref.js"() {
     deref = (schemaRef) => {
       if (typeof schemaRef === "function") {
         return schemaRef();
@@ -50110,10 +51927,10 @@ var init_deref = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/schemas/operation.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/schemas/operation.js
 var operation;
 var init_operation = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/schemas/operation.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/schemas/operation.js"() {
     operation = (namespace, name, traits, input, output) => ({
       name,
       namespace,
@@ -50124,10 +51941,10 @@ var init_operation = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/middleware/schemaDeserializationMiddleware.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/middleware/schemaDeserializationMiddleware.js
 var schemaDeserializationMiddleware, findHeader;
 var init_schemaDeserializationMiddleware = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/middleware/schemaDeserializationMiddleware.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/middleware/schemaDeserializationMiddleware.js"() {
     init_transport();
     init_operation();
     schemaDeserializationMiddleware = (config) => (next, context) => async (args) => {
@@ -50191,10 +52008,10 @@ var init_schemaDeserializationMiddleware = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/middleware/schemaSerializationMiddleware.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/middleware/schemaSerializationMiddleware.js
 var schemaSerializationMiddleware;
 var init_schemaSerializationMiddleware = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/middleware/schemaSerializationMiddleware.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/middleware/schemaSerializationMiddleware.js"() {
     init_transport();
     init_operation();
     schemaSerializationMiddleware = (config) => (next, context) => async (args) => {
@@ -50214,7 +52031,7 @@ var init_schemaSerializationMiddleware = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/middleware/getSchemaSerdePlugin.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/middleware/getSchemaSerdePlugin.js
 function getSchemaSerdePlugin(config) {
   return {
     applyToStack: (commandStack) => {
@@ -50226,7 +52043,7 @@ function getSchemaSerdePlugin(config) {
 }
 var deserializerMiddlewareOption, serializerMiddlewareOption;
 var init_getSchemaSerdePlugin = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/middleware/getSchemaSerdePlugin.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/middleware/getSchemaSerdePlugin.js"() {
     init_schemaDeserializationMiddleware();
     init_schemaSerializationMiddleware();
     deserializerMiddlewareOption = {
@@ -50244,10 +52061,10 @@ var init_getSchemaSerdePlugin = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/schemas/Schema.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/schemas/Schema.js
 var Schema;
 var init_Schema = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/schemas/Schema.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/schemas/Schema.js"() {
     Schema = class {
       name;
       namespace;
@@ -50271,10 +52088,10 @@ var init_Schema = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/schemas/ListSchema.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/schemas/ListSchema.js
 var ListSchema, list;
 var init_ListSchema = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/schemas/ListSchema.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/schemas/ListSchema.js"() {
     init_Schema();
     ListSchema = class _ListSchema extends Schema {
       static symbol = /* @__PURE__ */ Symbol.for("@smithy/lis");
@@ -50290,10 +52107,10 @@ var init_ListSchema = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/schemas/MapSchema.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/schemas/MapSchema.js
 var MapSchema, map;
 var init_MapSchema = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/schemas/MapSchema.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/schemas/MapSchema.js"() {
     init_Schema();
     MapSchema = class _MapSchema extends Schema {
       static symbol = /* @__PURE__ */ Symbol.for("@smithy/map");
@@ -50311,10 +52128,10 @@ var init_MapSchema = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/schemas/OperationSchema.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/schemas/OperationSchema.js
 var OperationSchema, op;
 var init_OperationSchema = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/schemas/OperationSchema.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/schemas/OperationSchema.js"() {
     init_Schema();
     OperationSchema = class _OperationSchema extends Schema {
       static symbol = /* @__PURE__ */ Symbol.for("@smithy/ope");
@@ -50332,10 +52149,10 @@ var init_OperationSchema = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/schemas/StructureSchema.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/schemas/StructureSchema.js
 var StructureSchema, struct;
 var init_StructureSchema = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/schemas/StructureSchema.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/schemas/StructureSchema.js"() {
     init_Schema();
     StructureSchema = class _StructureSchema extends Schema {
       static symbol = /* @__PURE__ */ Symbol.for("@smithy/str");
@@ -50353,10 +52170,10 @@ var init_StructureSchema = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/schemas/ErrorSchema.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/schemas/ErrorSchema.js
 var ErrorSchema, error2;
 var init_ErrorSchema = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/schemas/ErrorSchema.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/schemas/ErrorSchema.js"() {
     init_Schema();
     init_StructureSchema();
     ErrorSchema = class _ErrorSchema extends StructureSchema {
@@ -50375,7 +52192,7 @@ var init_ErrorSchema = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/schemas/translateTraits.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/schemas/translateTraits.js
 function translateTraits(indicator) {
   if (typeof indicator === "object") {
     return indicator;
@@ -50403,12 +52220,12 @@ function translateTraits(indicator) {
 }
 var traitsCache;
 var init_translateTraits = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/schemas/translateTraits.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/schemas/translateTraits.js"() {
     traitsCache = [];
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/schemas/NormalizedSchema.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/schemas/NormalizedSchema.js
 function member(memberSchema, memberName) {
   if (memberSchema instanceof NormalizedSchema) {
     return Object.assign(memberSchema, {
@@ -50421,7 +52238,7 @@ function member(memberSchema, memberName) {
 }
 var anno, simpleSchemaCacheN, simpleSchemaCacheS, NormalizedSchema, isMemberSchema, isStaticSchema;
 var init_NormalizedSchema = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/schemas/NormalizedSchema.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/schemas/NormalizedSchema.js"() {
     init_deref();
     init_translateTraits();
     anno = {
@@ -50697,10 +52514,10 @@ var init_NormalizedSchema = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/schemas/SimpleSchema.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/schemas/SimpleSchema.js
 var SimpleSchema, sim, simAdapter;
 var init_SimpleSchema = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/schemas/SimpleSchema.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/schemas/SimpleSchema.js"() {
     init_Schema();
     SimpleSchema = class _SimpleSchema extends Schema {
       static symbol = /* @__PURE__ */ Symbol.for("@smithy/sim");
@@ -50722,10 +52539,10 @@ var init_SimpleSchema = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/schemas/sentinels.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/schemas/sentinels.js
 var SCHEMA;
 var init_sentinels = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/schemas/sentinels.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/schemas/sentinels.js"() {
     SCHEMA = {
       BLOB: 21,
       STREAMING_BLOB: 42,
@@ -50745,10 +52562,10 @@ var init_sentinels = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/TypeRegistry.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/TypeRegistry.js
 var TypeRegistry;
 var init_TypeRegistry = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/TypeRegistry.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/TypeRegistry.js"() {
     TypeRegistry = class _TypeRegistry {
       namespace;
       schemas;
@@ -50861,7 +52678,7 @@ var init_TypeRegistry = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/index.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/index.js
 var schema_exports = {};
 __export(schema_exports, {
   ErrorSchema: () => ErrorSchema,
@@ -50893,7 +52710,7 @@ __export(schema_exports, {
   translateTraits: () => translateTraits
 });
 var init_schema = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/schema/index.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/schema/index.js"() {
     init_deref();
     init_getSchemaSerdePlugin();
     init_ListSchema();
@@ -50911,7 +52728,7 @@ var init_schema = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/schemaLogFilter.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/schemaLogFilter.js
 function schemaLogFilter(schema, data) {
   if (data == null) {
     return data;
@@ -50921,14 +52738,20 @@ function schemaLogFilter(schema, data) {
     return SENSITIVE_STRING;
   }
   if (ns.isListSchema()) {
-    const isSensitive = !!ns.getValueSchema().getMergedTraits().sensitive;
-    if (isSensitive) {
+    const valueSchema = ns.getValueSchema();
+    if (valueSchema.getMergedTraits().sensitive) {
       return SENSITIVE_STRING;
     }
+    if (Array.isArray(data)) {
+      return data.map((value) => schemaLogFilter(valueSchema, value));
+    }
   } else if (ns.isMapSchema()) {
-    const isSensitive = !!ns.getKeySchema().getMergedTraits().sensitive || !!ns.getValueSchema().getMergedTraits().sensitive;
-    if (isSensitive) {
+    const valueSchema = ns.getValueSchema();
+    if (ns.getKeySchema().getMergedTraits().sensitive || valueSchema.getMergedTraits().sensitive) {
       return SENSITIVE_STRING;
+    }
+    if (typeof data === "object") {
+      return Object.fromEntries(Object.entries(data).map(([key, value]) => [key, schemaLogFilter(valueSchema, value)]));
     }
   } else if (ns.isStructSchema() && typeof data === "object") {
     const object = data;
@@ -50944,16 +52767,16 @@ function schemaLogFilter(schema, data) {
 }
 var SENSITIVE_STRING;
 var init_schemaLogFilter = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/schemaLogFilter.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/schemaLogFilter.js"() {
     init_schema();
     SENSITIVE_STRING = "***SensitiveInformation***";
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/command.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/command.js
 var import_types2, operationEventStreamMarker, Command2, ClassBuilder;
 var init_command = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/command.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/command.js"() {
     import_types2 = __toESM(require_dist_cjs());
     init_MiddlewareStack();
     init_schemaLogFilter();
@@ -50983,7 +52806,8 @@ var init_command = __esm({
             ...additionalSmithyContext,
             commandInstance: this,
             ...smithyContext,
-            ...options?.metricsRecorder === void 0 ? {} : { metricsRecorder: options.metricsRecorder }
+            ...options?.metricsRecorder === void 0 ? {} : { metricsRecorder: options.metricsRecorder },
+            ...options?.abortSignal === void 0 ? {} : { abortSignal: options.abortSignal }
           }
         };
         const { requestHandler } = configuration;
@@ -51109,18 +52933,18 @@ var init_command = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/constants.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/constants.js
 var SENSITIVE_STRING2;
 var init_constants = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/constants.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/constants.js"() {
     SENSITIVE_STRING2 = "***SensitiveInformation***";
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/create-aggregated-client.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/create-aggregated-client.js
 var createAggregatedClient;
 var init_create_aggregated_client = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/create-aggregated-client.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/create-aggregated-client.js"() {
     createAggregatedClient = (commands5, Client2, options) => {
       for (const [command5, CommandCtor] of Object.entries(commands5)) {
         const methodImpl = async function(args, optionsOrCb, cb) {
@@ -51128,8 +52952,9 @@ var init_create_aggregated_client = __esm({
           if (typeof optionsOrCb === "function") {
             this.send(command6, optionsOrCb);
           } else if (typeof cb === "function") {
-            if (typeof optionsOrCb !== "object")
+            if (typeof optionsOrCb !== "object") {
               throw new Error(`Expected http options but got ${typeof optionsOrCb}`);
+            }
             this.send(command6, optionsOrCb || {}, cb);
           } else {
             return this.send(command6, optionsOrCb);
@@ -51169,10 +52994,10 @@ var init_create_aggregated_client = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/exceptions.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/exceptions.js
 var ServiceException, decorateServiceException;
 var init_exceptions = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/exceptions.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/exceptions.js"() {
     ServiceException = class _ServiceException extends Error {
       static shapeId = "smithy.ts.sdk.synthetic.nonamespace.client#ServiceException";
       $fault;
@@ -51187,14 +53012,16 @@ var init_exceptions = __esm({
         this.$metadata = options.$metadata;
       }
       static isInstance(value) {
-        if (!value)
+        if (!value) {
           return false;
+        }
         const candidate = value;
         return _ServiceException.prototype.isPrototypeOf(candidate) || Boolean(candidate.$fault) && Boolean(candidate.$metadata) && (candidate.$fault === "client" || candidate.$fault === "server");
       }
       static [Symbol.hasInstance](instance) {
-        if (!instance)
+        if (!instance) {
           return false;
+        }
         const candidate = instance;
         if (this === _ServiceException) {
           return _ServiceException.isInstance(instance);
@@ -51254,10 +53081,10 @@ var init_exceptions = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/default-error-handler.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/default-error-handler.js
 var throwDefaultError, withBaseException, deserializeMetadata;
 var init_default_error_handler = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/default-error-handler.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/default-error-handler.js"() {
     init_exceptions();
     throwDefaultError = ({ output, parsedBody, exceptionCtor, errorCode }) => {
       const $metadata = deserializeMetadata(output);
@@ -51283,10 +53110,10 @@ var init_default_error_handler = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/defaults-mode.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/defaults-mode.js
 var loadConfigsForDefaultMode;
 var init_defaults_mode = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/defaults-mode.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/defaults-mode.js"() {
     loadConfigsForDefaultMode = (mode) => {
       switch (mode) {
         case "standard":
@@ -51316,10 +53143,10 @@ var init_defaults_mode = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/emitWarningIfUnsupportedVersion.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/emitWarningIfUnsupportedVersion.js
 var warningEmitted, emitWarningIfUnsupportedVersion2;
 var init_emitWarningIfUnsupportedVersion2 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/emitWarningIfUnsupportedVersion.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/emitWarningIfUnsupportedVersion.js"() {
     warningEmitted = false;
     emitWarningIfUnsupportedVersion2 = (version) => {
       if (version && !warningEmitted && parseInt(version.substring(1, version.indexOf("."))) < 16) {
@@ -51329,18 +53156,19 @@ var init_emitWarningIfUnsupportedVersion2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/extensions/checksum.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/extensions/checksum.js
 var import_types3, knownAlgorithms, getChecksumConfiguration, resolveChecksumRuntimeConfig;
 var init_checksum = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/extensions/checksum.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/extensions/checksum.js"() {
     init_transport();
     import_types3 = __toESM(require_dist_cjs());
     knownAlgorithms = Object.values(import_types3.AlgorithmId);
     getChecksumConfiguration = (runtimeConfig) => {
       const checksumAlgorithms = [];
       for (const id in import_types3.AlgorithmId) {
-        if (!hasOwn(import_types3.AlgorithmId, id))
+        if (!hasOwn(import_types3.AlgorithmId, id)) {
           continue;
+        }
         const algorithmId = import_types3.AlgorithmId[id];
         if (runtimeConfig[algorithmId] === void 0) {
           continue;
@@ -51386,10 +53214,10 @@ var init_checksum = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/extensions/retry.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/extensions/retry.js
 var getRetryConfiguration, resolveRetryRuntimeConfig;
 var init_retry = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/extensions/retry.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/extensions/retry.js"() {
     getRetryConfiguration = (runtimeConfig) => {
       return {
         setRetryStrategy(retryStrategy) {
@@ -51408,10 +53236,10 @@ var init_retry = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/extensions/defaultExtensionConfiguration.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/extensions/defaultExtensionConfiguration.js
 var getDefaultExtensionConfiguration, getDefaultClientConfiguration, resolveDefaultRuntimeConfig;
 var init_defaultExtensionConfiguration = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/extensions/defaultExtensionConfiguration.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/extensions/defaultExtensionConfiguration.js"() {
     init_checksum();
     init_retry();
     getDefaultExtensionConfiguration = (runtimeConfig) => {
@@ -51424,24 +53252,25 @@ var init_defaultExtensionConfiguration = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/get-array-if-single-item.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/get-array-if-single-item.js
 var getArrayIfSingleItem;
 var init_get_array_if_single_item = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/get-array-if-single-item.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/get-array-if-single-item.js"() {
     getArrayIfSingleItem = (mayBeArray) => Array.isArray(mayBeArray) ? mayBeArray : [mayBeArray];
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/get-value-from-text-node.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/get-value-from-text-node.js
 var getValueFromTextNode;
 var init_get_value_from_text_node = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/get-value-from-text-node.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/get-value-from-text-node.js"() {
     init_transport();
     getValueFromTextNode = (obj) => {
       const textNodeName = "#text";
       for (const key in obj) {
-        if (!hasOwn(obj, key))
+        if (!hasOwn(obj, key)) {
           continue;
+        }
         if (obj[key][textNodeName] !== void 0) {
           obj[key] = obj[key][textNodeName];
         } else if (typeof obj[key] === "object" && obj[key] !== null) {
@@ -51453,20 +53282,20 @@ var init_get_value_from_text_node = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/is-serializable-header-value.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/is-serializable-header-value.js
 var isSerializableHeaderValue;
 var init_is_serializable_header_value = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/is-serializable-header-value.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/is-serializable-header-value.js"() {
     isSerializableHeaderValue = (value) => {
       return value != null;
     };
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/NoOpLogger.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/NoOpLogger.js
 var NoOpLogger;
 var init_NoOpLogger = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/NoOpLogger.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/NoOpLogger.js"() {
     NoOpLogger = class {
       trace() {
       }
@@ -51482,7 +53311,7 @@ var init_NoOpLogger = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/object-mapping.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/object-mapping.js
 function map2(arg0, arg1, arg2) {
   let target;
   let filter;
@@ -51501,8 +53330,9 @@ function map2(arg0, arg1, arg2) {
     }
   }
   for (const key in instructions) {
-    if (!hasOwn(instructions, key))
+    if (!hasOwn(instructions, key)) {
       continue;
+    }
     if (!Array.isArray(instructions[key])) {
       target[key] = instructions[key];
       continue;
@@ -51513,7 +53343,7 @@ function map2(arg0, arg1, arg2) {
 }
 var convertMap, take, mapWithFilter, applyInstruction, nonNullish, pass;
 var init_object_mapping = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/object-mapping.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/object-mapping.js"() {
     init_transport();
     convertMap = (target) => {
       const output = {};
@@ -51525,8 +53355,9 @@ var init_object_mapping = __esm({
     take = (source, instructions) => {
       const out = {};
       for (const key in instructions) {
-        if (!hasOwn(instructions, key))
+        if (!hasOwn(instructions, key)) {
           continue;
+        }
         applyInstruction(out, source, instructions, key);
       }
       return out;
@@ -51580,10 +53411,10 @@ var init_object_mapping = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/ser-utils.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/ser-utils.js
 var serializeFloat, serializeDateTime;
 var init_ser_utils = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/ser-utils.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/ser-utils.js"() {
     serializeFloat = (value) => {
       if (value !== value) {
         return "NaN";
@@ -51601,10 +53432,10 @@ var init_ser_utils = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/serde-json.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/serde-json.js
 var _json;
 var init_serde_json = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/serde-json.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/serde-json.js"() {
     init_transport();
     _json = (obj) => {
       if (obj == null) {
@@ -51616,8 +53447,9 @@ var init_serde_json = __esm({
       if (typeof obj === "object") {
         const target = {};
         for (const key in obj) {
-          if (!hasOwn(obj, key))
+          if (!hasOwn(obj, key)) {
             continue;
+          }
           if (obj[key] == null) {
             continue;
           }
@@ -51630,7 +53462,7 @@ var init_serde_json = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/client-command-builder.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/client-command-builder.js
 function makeBuilder(common, service, name, ep) {
   return function makeCommand(added, plugins, op2, $, smithyContext = {}) {
     const epMerged = Object.assign({}, common, added);
@@ -51642,12 +53474,12 @@ function makeBuilder(common, service, name, ep) {
   };
 }
 var init_client_command_builder = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/client-command-builder.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/smithy-client/client-command-builder.js"() {
     init_command();
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/index.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/index.js
 var client_exports = {};
 __export(client_exports, {
   AlgorithmId: () => import_types3.AlgorithmId,
@@ -51691,7 +53523,7 @@ __export(client_exports, {
   withBaseException: () => withBaseException
 });
 var init_client2 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/client/index.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/client/index.js"() {
     init_MiddlewareStack();
     init_transport();
     init_transport();
@@ -51722,18 +53554,18 @@ var init_client2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/is-array-buffer/is-array-buffer.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/is-array-buffer/is-array-buffer.js
 var isArrayBuffer;
 var init_is_array_buffer = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/is-array-buffer/is-array-buffer.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/is-array-buffer/is-array-buffer.js"() {
     isArrayBuffer = (arg) => typeof ArrayBuffer === "function" && arg instanceof ArrayBuffer || Object.prototype.toString.call(arg) === "[object ArrayBuffer]";
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-buffer-from/buffer-from.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-buffer-from/buffer-from.js
 var fromArrayBuffer, fromString;
 var init_buffer_from = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-buffer-from/buffer-from.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-buffer-from/buffer-from.js"() {
     init_is_array_buffer();
     fromArrayBuffer = (input, offset = 0, length = input.byteLength - offset) => {
       if (!isArrayBuffer(input)) {
@@ -51750,10 +53582,10 @@ var init_buffer_from = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-base64/fromBase64.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-base64/fromBase64.js
 var BASE64_REGEX, fromBase64;
 var init_fromBase64 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-base64/fromBase64.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-base64/fromBase64.js"() {
     init_buffer_from();
     BASE64_REGEX = /^[A-Za-z0-9+/]*={0,2}$/;
     fromBase64 = (input) => {
@@ -51769,10 +53601,10 @@ var init_fromBase64 = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-utf8/fromUtf8.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-utf8/fromUtf8.js
 var fromUtf8;
 var init_fromUtf8 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-utf8/fromUtf8.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-utf8/fromUtf8.js"() {
     init_buffer_from();
     fromUtf8 = (input) => {
       const buf2 = fromString(input, "utf8");
@@ -51781,10 +53613,10 @@ var init_fromUtf8 = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-base64/toBase64.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-base64/toBase64.js
 var toBase64;
 var init_toBase64 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-base64/toBase64.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-base64/toBase64.js"() {
     init_buffer_from();
     init_fromUtf8();
     toBase64 = (_input) => {
@@ -51802,7 +53634,7 @@ var init_toBase64 = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/blob/Uint8ArrayBlobAdapter.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/blob/Uint8ArrayBlobAdapter.js
 function bindUint8ArrayBlobAdapter(toUtf83, fromUtf83, toBase643, fromBase642) {
   return class Uint8ArrayBlobAdapter2 extends Uint8Array {
     static fromString(source, encoding = "utf-8") {
@@ -51827,14 +53659,14 @@ function bindUint8ArrayBlobAdapter(toUtf83, fromUtf83, toBase643, fromBase642) {
   };
 }
 var init_Uint8ArrayBlobAdapter = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/blob/Uint8ArrayBlobAdapter.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/blob/Uint8ArrayBlobAdapter.js"() {
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-utf8/toUtf8.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-utf8/toUtf8.js
 var toUtf8;
 var init_toUtf8 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-utf8/toUtf8.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-utf8/toUtf8.js"() {
     init_buffer_from();
     toUtf8 = (input) => {
       if (typeof input === "string") {
@@ -51848,7 +53680,7 @@ var init_toUtf8 = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/uuid/v4.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/uuid/v4.js
 function bindV4(getRandomValues2) {
   if (typeof crypto !== "undefined" && typeof crypto.randomUUID === "function") {
     return () => crypto.randomUUID();
@@ -51863,23 +53695,23 @@ function bindV4(getRandomValues2) {
 }
 var decimalToHex;
 var init_v4 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/uuid/v4.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/uuid/v4.js"() {
     decimalToHex = Array.from({ length: 256 }, (_, i5) => i5.toString(16).padStart(2, "0"));
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/copyDocumentWithTransform.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/copyDocumentWithTransform.js
 var copyDocumentWithTransform;
 var init_copyDocumentWithTransform = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/copyDocumentWithTransform.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/copyDocumentWithTransform.js"() {
     copyDocumentWithTransform = (source, _schemaRef, _transform = (_) => _) => source;
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/parse-utils.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/parse-utils.js
 var parseBoolean, expectBoolean, expectNumber, MAX_FLOAT, expectFloat32, expectLong, expectInt, expectInt32, expectShort, expectByte, expectSizedInt, castInt, expectNonNull, expectObject, expectString, expectUnion, strictParseDouble, strictParseFloat, strictParseFloat32, NUMBER_REGEX, parseNumber, limitedParseDouble, handleFloat, limitedParseFloat, limitedParseFloat32, parseFloatString, strictParseLong, strictParseInt, strictParseInt32, strictParseShort, strictParseByte, stackTraceWarning, logger;
 var init_parse_utils = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/parse-utils.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/parse-utils.js"() {
     init_transport();
     parseBoolean = (value) => {
       switch (value) {
@@ -52020,8 +53852,9 @@ var init_parse_utils = __esm({
       const asObject = expectObject(value);
       const setKeys = [];
       for (const k5 in asObject) {
-        if (!hasOwn(asObject, k5))
+        if (!hasOwn(asObject, k5)) {
           continue;
+        }
         if (asObject[k5] != null) {
           setKeys.push(k5);
         }
@@ -52115,7 +53948,7 @@ var init_parse_utils = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/date-utils.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/date-utils.js
 function dateToUtcString(date2) {
   const year2 = date2.getUTCFullYear();
   const month = date2.getUTCMonth();
@@ -52132,7 +53965,7 @@ function dateToUtcString(date2) {
 }
 var DAYS, MONTHS, RFC3339, parseRfc3339DateTime, RFC3339_WITH_OFFSET, parseRfc3339DateTimeWithOffset, IMF_FIXDATE, RFC_850_DATE, ASC_TIME, parseRfc7231DateTime, parseEpochTimestamp, buildDate, parseTwoDigitYear, FIFTY_YEARS_IN_MILLIS, adjustRfc850Year, parseMonthByShortName, DAYS_IN_MONTH, validateDayOfMonth, isLeapYear, parseDateValue, parseMilliseconds, parseOffsetToMilliseconds, stripLeadingZeroes;
 var init_date_utils = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/date-utils.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/date-utils.js"() {
     init_parse_utils();
     DAYS = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"];
     MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
@@ -52307,10 +54140,10 @@ var init_date_utils = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/lazy-json.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/lazy-json.js
 var LazyJsonString;
 var init_lazy_json = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/lazy-json.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/lazy-json.js"() {
     LazyJsonString = function LazyJsonString2(val) {
       const str = Object.assign(new String(val), {
         deserializeJSON() {
@@ -52337,7 +54170,7 @@ var init_lazy_json = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/quote-header.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/quote-header.js
 function quoteHeader(part) {
   if (part.includes(",") || part.includes('"')) {
     part = `"${part.replace(/"/g, '\\"')}"`;
@@ -52345,11 +54178,11 @@ function quoteHeader(part) {
   return part;
 }
 var init_quote_header = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/quote-header.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/quote-header.js"() {
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/schema-serde-lib/schema-date-utils.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/schema-serde-lib/schema-date-utils.js
 function range(v, min, max) {
   const _v = Number(v);
   if (_v < min || _v > max) {
@@ -52358,7 +54191,7 @@ function range(v, min, max) {
 }
 var ddd, mmm, time, date, year, RFC3339_WITH_OFFSET2, IMF_FIXDATE2, RFC_850_DATE2, ASC_TIME2, months, _parseEpochTimestamp, _parseRfc3339DateTimeWithOffset, _parseRfc7231DateTime;
 var init_schema_date_utils = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/schema-serde-lib/schema-date-utils.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/schema-serde-lib/schema-date-utils.js"() {
     ddd = `(?:Mon|Tue|Wed|Thu|Fri|Sat|Sun)(?:[ne|u?r]?s?day)?`;
     mmm = `(Jan|Feb|Mar|Apr|May|Jun|Jul|Aug|Sep|Oct|Nov|Dec)`;
     time = `(\\d?\\d):(\\d{2}):(\\d{2})(?:\\.(\\d+))?`;
@@ -52453,7 +54286,7 @@ var init_schema_date_utils = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/split-every.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/split-every.js
 function splitEvery(value, delimiter, numDelimiters) {
   if (numDelimiters <= 0 || !Number.isInteger(numDelimiters)) {
     throw new Error("Invalid number of delimiters (" + numDelimiters + ") for splitEvery.");
@@ -52481,14 +54314,14 @@ function splitEvery(value, delimiter, numDelimiters) {
   return compoundSegments;
 }
 var init_split_every = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/split-every.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/split-every.js"() {
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/split-header.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/split-header.js
 var splitHeader;
 var init_split_header = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/split-header.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/split-header.js"() {
     splitHeader = (value) => {
       const z = value.length;
       const values = [];
@@ -52529,13 +54362,13 @@ var init_split_header = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/value/NumericValue.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/value/NumericValue.js
 function nv(input) {
   return new NumericValue(String(input), "bigDecimal");
 }
 var format, NumericValue;
 var init_NumericValue = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/value/NumericValue.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/value/NumericValue.js"() {
     format = /^-?((0|[1-9]\d*)(\.\d+)?|\.\d+)([eE][+-]?\d+)?$/;
     NumericValue = class _NumericValue {
       string;
@@ -52561,7 +54394,7 @@ var init_NumericValue = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-hex-encoding/hex-encoding.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-hex-encoding/hex-encoding.js
 function fromHex(encoded) {
   if (encoded.length % 2 !== 0) {
     throw new Error("Hex encoded strings must have an even number length");
@@ -52586,7 +54419,7 @@ function toHex(bytes) {
 }
 var SHORT_TO_HEX, HEX_TO_SHORT;
 var init_hex_encoding = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-hex-encoding/hex-encoding.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-hex-encoding/hex-encoding.js"() {
     SHORT_TO_HEX = {};
     HEX_TO_SHORT = {};
     for (let i5 = 0; i5 < 256; i5++) {
@@ -52600,10 +54433,10 @@ var init_hex_encoding = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-body-length/calculateBodyLength.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-body-length/calculateBodyLength.js
 var import_node_fs2, calculateBodyLength;
 var init_calculateBodyLength = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-body-length/calculateBodyLength.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-body-length/calculateBodyLength.js"() {
     import_node_fs2 = require("node:fs");
     calculateBodyLength = (body) => {
       if (!body) {
@@ -52629,10 +54462,10 @@ var init_calculateBodyLength = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-utf8/toUint8Array.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-utf8/toUint8Array.js
 var toUint8Array;
 var init_toUint8Array = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-utf8/toUint8Array.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-utf8/toUint8Array.js"() {
     init_fromUtf8();
     toUint8Array = (data) => {
       if (data instanceof Uint8Array) {
@@ -52649,7 +54482,7 @@ var init_toUint8Array = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/concatBytes.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/concatBytes.js
 function concatBytes(arrays, length) {
   if (length === void 0) {
     length = 0;
@@ -52666,14 +54499,14 @@ function concatBytes(arrays, length) {
   return result;
 }
 var init_concatBytes = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/concatBytes.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/concatBytes.js"() {
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/middleware-serde/deserializerMiddleware.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/middleware-serde/deserializerMiddleware.js
 var deserializerMiddleware, findHeader2;
 var init_deserializerMiddleware = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/middleware-serde/deserializerMiddleware.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/middleware-serde/deserializerMiddleware.js"() {
     init_transport();
     deserializerMiddleware = (options, deserializer) => (next, context) => async (args) => {
       const { response } = await next(args);
@@ -52731,10 +54564,10 @@ var init_deserializerMiddleware = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/property-provider/ProviderError.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/property-provider/ProviderError.js
 var ProviderError2;
 var init_ProviderError = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/property-provider/ProviderError.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/property-provider/ProviderError.js"() {
     ProviderError2 = class _ProviderError extends Error {
       name = "ProviderError";
       tryNextLink;
@@ -52760,10 +54593,10 @@ var init_ProviderError = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/property-provider/CredentialsProviderError.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/property-provider/CredentialsProviderError.js
 var CredentialsProviderError;
 var init_CredentialsProviderError = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/property-provider/CredentialsProviderError.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/property-provider/CredentialsProviderError.js"() {
     init_ProviderError();
     CredentialsProviderError = class _CredentialsProviderError extends ProviderError2 {
       name = "CredentialsProviderError";
@@ -52775,10 +54608,10 @@ var init_CredentialsProviderError = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/property-provider/TokenProviderError.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/property-provider/TokenProviderError.js
 var TokenProviderError;
 var init_TokenProviderError = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/property-provider/TokenProviderError.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/property-provider/TokenProviderError.js"() {
     init_ProviderError();
     TokenProviderError = class _TokenProviderError extends ProviderError2 {
       name = "TokenProviderError";
@@ -52790,10 +54623,10 @@ var init_TokenProviderError = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/property-provider/chain.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/property-provider/chain.js
 var chain;
 var init_chain = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/property-provider/chain.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/property-provider/chain.js"() {
     init_ProviderError();
     chain = (...providers) => async () => {
       if (providers.length === 0) {
@@ -52817,18 +54650,18 @@ var init_chain = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/property-provider/fromValue.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/property-provider/fromValue.js
 var fromValue;
 var init_fromValue = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/property-provider/fromValue.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/property-provider/fromValue.js"() {
     fromValue = (staticValue) => () => Promise.resolve(staticValue);
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/property-provider/memoize.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/property-provider/memoize.js
 var memoize;
 var init_memoize = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/property-provider/memoize.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/property-provider/memoize.js"() {
     memoize = (provider, isExpired, requiresRefresh) => {
       let resolved;
       let pending;
@@ -52876,29 +54709,33 @@ var init_memoize = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/util-config-provider/booleanSelector.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/util-config-provider/booleanSelector.js
 var booleanSelector;
 var init_booleanSelector = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/util-config-provider/booleanSelector.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/util-config-provider/booleanSelector.js"() {
     booleanSelector = (obj, key, type) => {
-      if (!(key in obj))
+      if (!(key in obj)) {
         return void 0;
-      if (obj[key] === "true")
+      }
+      if (obj[key] === "true") {
         return true;
-      if (obj[key] === "false")
+      }
+      if (obj[key] === "false") {
         return false;
+      }
       throw new Error(`Cannot load ${type} "${key}". Expected "true" or "false", got ${obj[key]}.`);
     };
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/util-config-provider/numberSelector.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/util-config-provider/numberSelector.js
 var numberSelector;
 var init_numberSelector = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/util-config-provider/numberSelector.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/util-config-provider/numberSelector.js"() {
     numberSelector = (obj, key, type) => {
-      if (!(key in obj))
+      if (!(key in obj)) {
         return void 0;
+      }
       const numberValue = parseInt(obj[key], 10);
       if (Number.isNaN(numberValue)) {
         throw new TypeError(`Cannot load ${type} '${key}'. Expected number, got '${obj[key]}'.`);
@@ -52908,10 +54745,10 @@ var init_numberSelector = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/util-config-provider/types.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/util-config-provider/types.js
 var SelectorType;
 var init_types = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/util-config-provider/types.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/util-config-provider/types.js"() {
     (function(SelectorType2) {
       SelectorType2["ENV"] = "env";
       SelectorType2["CONFIG"] = "shared config entry";
@@ -52919,10 +54756,10 @@ var init_types = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getHomeDir.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getHomeDir.js
 var import_node_os, import_node_path, homeDirCache, getHomeDirCacheKey, getHomeDir;
 var init_getHomeDir = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getHomeDir.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getHomeDir.js"() {
     import_node_os = require("node:os");
     import_node_path = require("node:path");
     homeDirCache = {};
@@ -52934,34 +54771,38 @@ var init_getHomeDir = __esm({
     };
     getHomeDir = () => {
       const { HOME, USERPROFILE, HOMEPATH, HOMEDRIVE = `C:${import_node_path.sep}` } = process.env;
-      if (HOME)
+      if (HOME) {
         return HOME;
-      if (USERPROFILE)
+      }
+      if (USERPROFILE) {
         return USERPROFILE;
-      if (HOMEPATH)
+      }
+      if (HOMEPATH) {
         return `${HOMEDRIVE}${HOMEPATH}`;
+      }
       const homeDirCacheKey = getHomeDirCacheKey();
-      if (!homeDirCache[homeDirCacheKey])
+      if (!homeDirCache[homeDirCacheKey]) {
         homeDirCache[homeDirCacheKey] = (0, import_node_os.homedir)();
+      }
       return homeDirCache[homeDirCacheKey];
     };
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getProfileName.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getProfileName.js
 var ENV_PROFILE, DEFAULT_PROFILE, getProfileName;
 var init_getProfileName = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getProfileName.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getProfileName.js"() {
     ENV_PROFILE = "AWS_PROFILE";
     DEFAULT_PROFILE = "default";
     getProfileName = (init) => init.profile || process.env[ENV_PROFILE] || DEFAULT_PROFILE;
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getSSOTokenFilepath.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getSSOTokenFilepath.js
 var import_node_crypto, import_node_path2, getSSOTokenFilepath;
 var init_getSSOTokenFilepath = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getSSOTokenFilepath.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getSSOTokenFilepath.js"() {
     import_node_crypto = require("node:crypto");
     import_node_path2 = require("node:path");
     init_getHomeDir();
@@ -52973,10 +54814,10 @@ var init_getSSOTokenFilepath = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getSSOTokenFromFile.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getSSOTokenFromFile.js
 var import_promises, tokenIntercept, getSSOTokenFromFile;
 var init_getSSOTokenFromFile = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getSSOTokenFromFile.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getSSOTokenFromFile.js"() {
     import_promises = require("node:fs/promises");
     init_getSSOTokenFilepath();
     tokenIntercept = {};
@@ -52991,18 +54832,18 @@ var init_getSSOTokenFromFile = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/constants.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/constants.js
 var CONFIG_PREFIX_SEPARATOR;
 var init_constants2 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/constants.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/constants.js"() {
     CONFIG_PREFIX_SEPARATOR = ".";
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getConfigData.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getConfigData.js
 var import_types4, getConfigData;
 var init_getConfigData = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getConfigData.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getConfigData.js"() {
     import_types4 = __toESM(require_dist_cjs());
     init_constants2();
     getConfigData = (data) => Object.entries(data).filter(([key]) => {
@@ -53022,10 +54863,10 @@ var init_getConfigData = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getConfigFilepath.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getConfigFilepath.js
 var import_node_path3, ENV_CONFIG_PATH, getConfigFilepath;
 var init_getConfigFilepath = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getConfigFilepath.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getConfigFilepath.js"() {
     import_node_path3 = require("node:path");
     init_getHomeDir();
     ENV_CONFIG_PATH = "AWS_CONFIG_FILE";
@@ -53033,10 +54874,10 @@ var init_getConfigFilepath = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getCredentialsFilepath.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getCredentialsFilepath.js
 var import_node_path4, ENV_CREDENTIALS_PATH, getCredentialsFilepath;
 var init_getCredentialsFilepath = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getCredentialsFilepath.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getCredentialsFilepath.js"() {
     import_node_path4 = require("node:path");
     init_getHomeDir();
     ENV_CREDENTIALS_PATH = "AWS_SHARED_CREDENTIALS_FILE";
@@ -53044,10 +54885,10 @@ var init_getCredentialsFilepath = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/parseIni.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/parseIni.js
 var import_types5, prefixKeyRegex, profileNameBlockList, parseIni;
 var init_parseIni = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/parseIni.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/parseIni.js"() {
     import_types5 = __toESM(require_dist_cjs());
     init_constants2();
     prefixKeyRegex = /^([\w-]+)\s(["'])?([\w-@+.%:/]+)\2$/;
@@ -53100,10 +54941,10 @@ var init_parseIni = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/readFile.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/readFile.js
 var import_promises2, filePromises, fileIntercept, readFile2;
 var init_readFile = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/readFile.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/readFile.js"() {
     import_promises2 = require("node:fs/promises");
     filePromises = {};
     fileIntercept = {};
@@ -53119,10 +54960,10 @@ var init_readFile = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/loadSharedConfigFiles.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/loadSharedConfigFiles.js
 var import_node_path5, swallowError, loadSharedConfigFiles;
 var init_loadSharedConfigFiles = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/loadSharedConfigFiles.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/loadSharedConfigFiles.js"() {
     import_node_path5 = require("node:path");
     init_getConfigData();
     init_getConfigFilepath();
@@ -53160,20 +55001,20 @@ var init_loadSharedConfigFiles = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getSsoSessionData.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getSsoSessionData.js
 var import_types6, getSsoSessionData;
 var init_getSsoSessionData = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getSsoSessionData.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/getSsoSessionData.js"() {
     import_types6 = __toESM(require_dist_cjs());
     init_loadSharedConfigFiles();
     getSsoSessionData = (data) => Object.entries(data).filter(([key]) => key.startsWith(import_types6.IniSectionType.SSO_SESSION + CONFIG_PREFIX_SEPARATOR)).reduce((acc, [key, value]) => ({ ...acc, [key.substring(key.indexOf(CONFIG_PREFIX_SEPARATOR) + 1)]: value }), {});
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/loadSsoSessionData.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/loadSsoSessionData.js
 var swallowError2, loadSsoSessionData;
 var init_loadSsoSessionData = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/loadSsoSessionData.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/loadSsoSessionData.js"() {
     init_getConfigFilepath();
     init_getSsoSessionData();
     init_parseIni();
@@ -53183,10 +55024,10 @@ var init_loadSsoSessionData = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/mergeConfigFiles.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/mergeConfigFiles.js
 var mergeConfigFiles;
 var init_mergeConfigFiles = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/mergeConfigFiles.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/mergeConfigFiles.js"() {
     mergeConfigFiles = (...files) => {
       const merged = {};
       for (const file of files) {
@@ -53203,10 +55044,10 @@ var init_mergeConfigFiles = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/parseKnownFiles.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/parseKnownFiles.js
 var parseKnownFiles;
 var init_parseKnownFiles = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/parseKnownFiles.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/parseKnownFiles.js"() {
     init_loadSharedConfigFiles();
     init_mergeConfigFiles();
     parseKnownFiles = async (init) => {
@@ -53216,10 +55057,10 @@ var init_parseKnownFiles = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/externalDataInterceptor.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/externalDataInterceptor.js
 var externalDataInterceptor;
 var init_externalDataInterceptor = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/externalDataInterceptor.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/shared-ini-file-loader/externalDataInterceptor.js"() {
     init_getSSOTokenFromFile();
     init_readFile();
     externalDataInterceptor = {
@@ -53239,7 +55080,7 @@ var init_externalDataInterceptor = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/node-config-provider/getSelectorName.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/node-config-provider/getSelectorName.js
 function getSelectorName(functionString) {
   try {
     const constants3 = new Set(Array.from(functionString.match(/([A-Z_]){3,}/g) ?? []));
@@ -53252,14 +55093,14 @@ function getSelectorName(functionString) {
   }
 }
 var init_getSelectorName = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/node-config-provider/getSelectorName.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/node-config-provider/getSelectorName.js"() {
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/node-config-provider/fromEnv.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/node-config-provider/fromEnv.js
 var fromEnv;
 var init_fromEnv = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/node-config-provider/fromEnv.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/node-config-provider/fromEnv.js"() {
     init_CredentialsProviderError();
     init_getSelectorName();
     fromEnv = (envVarSelector, options) => async () => {
@@ -53276,10 +55117,10 @@ var init_fromEnv = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/node-config-provider/fromSharedConfigFiles.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/node-config-provider/fromSharedConfigFiles.js
 var fromSharedConfigFiles;
 var init_fromSharedConfigFiles = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/node-config-provider/fromSharedConfigFiles.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/node-config-provider/fromSharedConfigFiles.js"() {
     init_CredentialsProviderError();
     init_getProfileName();
     init_loadSharedConfigFiles();
@@ -53304,20 +55145,20 @@ var init_fromSharedConfigFiles = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/node-config-provider/fromStatic.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/node-config-provider/fromStatic.js
 var isFunction, fromStatic;
 var init_fromStatic = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/node-config-provider/fromStatic.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/node-config-provider/fromStatic.js"() {
     init_fromValue();
     isFunction = (func) => typeof func === "function";
     fromStatic = (defaultValue) => isFunction(defaultValue) ? async () => await defaultValue() : fromValue(defaultValue);
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/node-config-provider/configLoader.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/node-config-provider/configLoader.js
 var loadConfig;
 var init_configLoader = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/node-config-provider/configLoader.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/node-config-provider/configLoader.js"() {
     init_chain();
     init_memoize();
     init_fromEnv();
@@ -53331,10 +55172,10 @@ var init_configLoader = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/endpointsConfig/NodeUseDualstackEndpointConfigOptions.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/endpointsConfig/NodeUseDualstackEndpointConfigOptions.js
 var ENV_USE_DUALSTACK_ENDPOINT, CONFIG_USE_DUALSTACK_ENDPOINT, DEFAULT_USE_DUALSTACK_ENDPOINT, NODE_USE_DUALSTACK_ENDPOINT_CONFIG_OPTIONS, nodeDualstackConfigSelectors;
 var init_NodeUseDualstackEndpointConfigOptions = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/endpointsConfig/NodeUseDualstackEndpointConfigOptions.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/endpointsConfig/NodeUseDualstackEndpointConfigOptions.js"() {
     init_booleanSelector();
     init_types();
     ENV_USE_DUALSTACK_ENDPOINT = "AWS_USE_DUALSTACK_ENDPOINT";
@@ -53353,10 +55194,10 @@ var init_NodeUseDualstackEndpointConfigOptions = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/endpointsConfig/NodeUseFipsEndpointConfigOptions.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/endpointsConfig/NodeUseFipsEndpointConfigOptions.js
 var ENV_USE_FIPS_ENDPOINT, CONFIG_USE_FIPS_ENDPOINT, DEFAULT_USE_FIPS_ENDPOINT, NODE_USE_FIPS_ENDPOINT_CONFIG_OPTIONS, nodeFipsConfigSelectors;
 var init_NodeUseFipsEndpointConfigOptions = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/endpointsConfig/NodeUseFipsEndpointConfigOptions.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/endpointsConfig/NodeUseFipsEndpointConfigOptions.js"() {
     init_booleanSelector();
     init_types();
     ENV_USE_FIPS_ENDPOINT = "AWS_USE_FIPS_ENDPOINT";
@@ -53375,10 +55216,10 @@ var init_NodeUseFipsEndpointConfigOptions = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/endpointsConfig/resolveCustomEndpointsConfig.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/endpointsConfig/resolveCustomEndpointsConfig.js
 var resolveCustomEndpointsConfig;
 var init_resolveCustomEndpointsConfig = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/endpointsConfig/resolveCustomEndpointsConfig.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/endpointsConfig/resolveCustomEndpointsConfig.js"() {
     init_client2();
     resolveCustomEndpointsConfig = (input) => {
       const { tls, endpoint, urlParser, useDualstackEndpoint } = input;
@@ -53392,10 +55233,10 @@ var init_resolveCustomEndpointsConfig = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/endpointsConfig/utils/getEndpointFromRegion.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/endpointsConfig/utils/getEndpointFromRegion.js
 var getEndpointFromRegion;
 var init_getEndpointFromRegion = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/endpointsConfig/utils/getEndpointFromRegion.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/endpointsConfig/utils/getEndpointFromRegion.js"() {
     getEndpointFromRegion = async (input) => {
       const { tls = true } = input;
       const region = await input.region();
@@ -53414,10 +55255,10 @@ var init_getEndpointFromRegion = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/endpointsConfig/resolveEndpointsConfig.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/endpointsConfig/resolveEndpointsConfig.js
 var resolveEndpointsConfig;
 var init_resolveEndpointsConfig = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/endpointsConfig/resolveEndpointsConfig.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/endpointsConfig/resolveEndpointsConfig.js"() {
     init_client2();
     init_getEndpointFromRegion();
     resolveEndpointsConfig = (input) => {
@@ -53433,10 +55274,10 @@ var init_resolveEndpointsConfig = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/defaults-mode/constants.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/defaults-mode/constants.js
 var AWS_EXECUTION_ENV, AWS_REGION_ENV, AWS_DEFAULT_REGION_ENV, ENV_IMDS_DISABLED, DEFAULTS_MODE_OPTIONS, IMDS_REGION_PATH, IMDS_TOKEN_PATH, X_AWS_EC2_METADATA_TOKEN, X_AWS_EC2_METADATA_TOKEN_TTL;
 var init_constants3 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/defaults-mode/constants.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/defaults-mode/constants.js"() {
     AWS_EXECUTION_ENV = "AWS_EXECUTION_ENV";
     AWS_REGION_ENV = "AWS_REGION";
     AWS_DEFAULT_REGION_ENV = "AWS_DEFAULT_REGION";
@@ -53449,10 +55290,10 @@ var init_constants3 = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionConfig/getInstanceMetadataRegion.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionConfig/getInstanceMetadataRegion.js
 var TIMEOUT_MS, NEG_CACHE_TTL_MS, negativeCacheUntil, getInstanceMetadataRegion, cacheNegativeAndReturnUndefined, resolveImdsEndpoint, imdsRequest;
 var init_getInstanceMetadataRegion = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionConfig/getInstanceMetadataRegion.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionConfig/getInstanceMetadataRegion.js"() {
     init_constants3();
     TIMEOUT_MS = 1e3;
     NEG_CACHE_TTL_MS = 6e4;
@@ -53545,10 +55386,10 @@ var init_getInstanceMetadataRegion = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionConfig/config.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionConfig/config.js
 var REGION_ENV_NAME, REGION_INI_NAME, NODE_REGION_CONFIG_OPTIONS, NODE_REGION_CONFIG_FILE_OPTIONS;
 var init_config = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionConfig/config.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionConfig/config.js"() {
     init_getInstanceMetadataRegion();
     REGION_ENV_NAME = "AWS_REGION";
     REGION_INI_NAME = "region";
@@ -53569,10 +55410,10 @@ var init_config = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionConfig/checkRegion.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionConfig/checkRegion.js
 var validRegions, checkRegion;
 var init_checkRegion = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionConfig/checkRegion.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionConfig/checkRegion.js"() {
     init_transport();
     validRegions = /* @__PURE__ */ new Set();
     checkRegion = (region, check = isValidHostLabel) => {
@@ -53589,27 +55430,27 @@ var init_checkRegion = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionConfig/isFipsRegion.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionConfig/isFipsRegion.js
 var isFipsRegion;
 var init_isFipsRegion = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionConfig/isFipsRegion.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionConfig/isFipsRegion.js"() {
     isFipsRegion = (region) => typeof region === "string" && (region.startsWith("fips-") || region.endsWith("-fips"));
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionConfig/getRealRegion.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionConfig/getRealRegion.js
 var getRealRegion;
 var init_getRealRegion = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionConfig/getRealRegion.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionConfig/getRealRegion.js"() {
     init_isFipsRegion();
     getRealRegion = (region) => isFipsRegion(region) ? ["fips-aws-global", "aws-fips"].includes(region) ? "us-east-1" : region.replace(/fips-(dkr-|prod-)?|-fips/, "") : region;
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionConfig/resolveRegionConfig.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionConfig/resolveRegionConfig.js
 var resolveRegionConfig;
 var init_resolveRegionConfig = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionConfig/resolveRegionConfig.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionConfig/resolveRegionConfig.js"() {
     init_checkRegion();
     init_getRealRegion();
     init_isFipsRegion();
@@ -53637,34 +55478,34 @@ var init_resolveRegionConfig = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionInfo/getHostnameFromVariants.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionInfo/getHostnameFromVariants.js
 var getHostnameFromVariants;
 var init_getHostnameFromVariants = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionInfo/getHostnameFromVariants.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionInfo/getHostnameFromVariants.js"() {
     getHostnameFromVariants = (variants = [], { useFipsEndpoint, useDualstackEndpoint }) => variants.find(({ tags }) => useFipsEndpoint === tags.includes("fips") && useDualstackEndpoint === tags.includes("dualstack"))?.hostname;
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionInfo/getResolvedHostname.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionInfo/getResolvedHostname.js
 var getResolvedHostname;
 var init_getResolvedHostname = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionInfo/getResolvedHostname.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionInfo/getResolvedHostname.js"() {
     getResolvedHostname = (resolvedRegion, { regionHostname, partitionHostname }) => regionHostname ? regionHostname : partitionHostname ? partitionHostname.replace("{region}", resolvedRegion) : void 0;
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionInfo/getResolvedPartition.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionInfo/getResolvedPartition.js
 var getResolvedPartition;
 var init_getResolvedPartition = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionInfo/getResolvedPartition.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionInfo/getResolvedPartition.js"() {
     getResolvedPartition = (region, { partitionHash }) => Object.keys(partitionHash || {}).find((key) => partitionHash[key].regions.includes(region)) ?? "aws";
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionInfo/getResolvedSigningRegion.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionInfo/getResolvedSigningRegion.js
 var getResolvedSigningRegion;
 var init_getResolvedSigningRegion = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionInfo/getResolvedSigningRegion.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionInfo/getResolvedSigningRegion.js"() {
     getResolvedSigningRegion = (hostname, { signingRegion, regionRegex, useFipsEndpoint }) => {
       if (signingRegion) {
         return signingRegion;
@@ -53679,10 +55520,10 @@ var init_getResolvedSigningRegion = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionInfo/getRegionInfo.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionInfo/getRegionInfo.js
 var getRegionInfo;
 var init_getRegionInfo = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionInfo/getRegionInfo.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/config-resolver/regionInfo/getRegionInfo.js"() {
     init_getHostnameFromVariants();
     init_getResolvedHostname();
     init_getResolvedPartition();
@@ -53715,10 +55556,10 @@ var init_getRegionInfo = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/defaults-mode/defaultsModeConfig.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/defaults-mode/defaultsModeConfig.js
 var AWS_DEFAULTS_MODE_ENV, AWS_DEFAULTS_MODE_CONFIG, NODE_DEFAULTS_MODE_CONFIG_OPTIONS;
 var init_defaultsModeConfig = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/defaults-mode/defaultsModeConfig.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/defaults-mode/defaultsModeConfig.js"() {
     AWS_DEFAULTS_MODE_ENV = "AWS_DEFAULTS_MODE";
     AWS_DEFAULTS_MODE_CONFIG = "defaults_mode";
     NODE_DEFAULTS_MODE_CONFIG_OPTIONS = {
@@ -53733,10 +55574,10 @@ var init_defaultsModeConfig = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/defaults-mode/resolveDefaultsModeConfig.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/defaults-mode/resolveDefaultsModeConfig.js
 var resolveDefaultsModeConfig, resolveNodeDefaultsModeAuto, inferPhysicalRegion;
 var init_resolveDefaultsModeConfig = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/defaults-mode/resolveDefaultsModeConfig.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/defaults-mode/resolveDefaultsModeConfig.js"() {
     init_config();
     init_getInstanceMetadataRegion();
     init_configLoader();
@@ -53784,7 +55625,7 @@ var init_resolveDefaultsModeConfig = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/index.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/index.js
 var config_exports = {};
 __export(config_exports, {
   CONFIG_PREFIX_SEPARATOR: () => CONFIG_PREFIX_SEPARATOR,
@@ -53831,7 +55672,7 @@ __export(config_exports, {
   resolveRegionConfig: () => resolveRegionConfig
 });
 var init_config2 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/config/index.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/config/index.js"() {
     init_ProviderError();
     init_CredentialsProviderError();
     init_TokenProviderError();
@@ -53864,10 +55705,10 @@ var init_config2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/adaptors/getEndpointUrlConfig.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/adaptors/getEndpointUrlConfig.js
 var ENV_ENDPOINT_URL, CONFIG_ENDPOINT_URL, getEndpointUrlConfig;
 var init_getEndpointUrlConfig = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/adaptors/getEndpointUrlConfig.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/adaptors/getEndpointUrlConfig.js"() {
     init_config2();
     ENV_ENDPOINT_URL = "AWS_ENDPOINT_URL";
     CONFIG_ENDPOINT_URL = "endpoint_url";
@@ -53875,11 +55716,13 @@ var init_getEndpointUrlConfig = __esm({
       environmentVariableSelector: (env2) => {
         const serviceSuffixParts = serviceId.split(" ").map((w) => w.toUpperCase());
         const serviceEndpointUrl = env2[[ENV_ENDPOINT_URL, ...serviceSuffixParts].join("_")];
-        if (serviceEndpointUrl)
+        if (serviceEndpointUrl) {
           return serviceEndpointUrl;
+        }
         const endpointUrl = env2[ENV_ENDPOINT_URL];
-        if (endpointUrl)
+        if (endpointUrl) {
           return endpointUrl;
+        }
         return void 0;
       },
       configFileSelector: (profile, config) => {
@@ -53891,12 +55734,14 @@ var init_getEndpointUrlConfig = __esm({
           const servicesSection = config[servicesSectionKey];
           const servicePrefixParts = serviceId.split(" ").map((w) => w.toLowerCase());
           const endpointUrl2 = servicesSection[[servicePrefixParts.join("_"), CONFIG_ENDPOINT_URL].join(CONFIG_PREFIX_SEPARATOR)];
-          if (endpointUrl2)
+          if (endpointUrl2) {
             return endpointUrl2;
+          }
         }
         const endpointUrl = profile[CONFIG_ENDPOINT_URL];
-        if (endpointUrl)
+        if (endpointUrl) {
           return endpointUrl;
+        }
         return void 0;
       },
       default: void 0
@@ -53904,10 +55749,10 @@ var init_getEndpointUrlConfig = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/adaptors/getIgnoreConfiguredEndpointUrls.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/adaptors/getIgnoreConfiguredEndpointUrls.js
 var ENV_IGNORE_CONFIGURED_ENDPOINT_URLS, CONFIG_IGNORE_CONFIGURED_ENDPOINT_URLS, ignoreConfiguredEndpointUrlsConfigSelectors;
 var init_getIgnoreConfiguredEndpointUrls = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/adaptors/getIgnoreConfiguredEndpointUrls.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/adaptors/getIgnoreConfiguredEndpointUrls.js"() {
     init_config2();
     ENV_IGNORE_CONFIGURED_ENDPOINT_URLS = "AWS_IGNORE_CONFIGURED_ENDPOINT_URLS";
     CONFIG_IGNORE_CONFIGURED_ENDPOINT_URLS = "ignore_configured_endpoint_urls";
@@ -53919,10 +55764,10 @@ var init_getIgnoreConfiguredEndpointUrls = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/adaptors/getEndpointFromConfig.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/adaptors/getEndpointFromConfig.js
 var getEndpointFromConfig;
 var init_getEndpointFromConfig = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/adaptors/getEndpointFromConfig.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/adaptors/getEndpointFromConfig.js"() {
     init_config2();
     init_getEndpointUrlConfig();
     init_getIgnoreConfiguredEndpointUrls();
@@ -53936,10 +55781,10 @@ var init_getEndpointFromConfig = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/service-customizations/s3.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/service-customizations/s3.js
 var resolveParamsForS3, DOMAIN_PATTERN, IP_ADDRESS_PATTERN, DOTS_PATTERN, isDnsCompatibleBucketName, isArnBucketName;
 var init_s3 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/service-customizations/s3.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/service-customizations/s3.js"() {
     resolveParamsForS3 = async (endpointParams) => {
       const bucket = endpointParams?.Bucket || "";
       if (typeof endpointParams.Bucket === "string") {
@@ -53974,17 +55819,17 @@ var init_s3 = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/service-customizations/index.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/service-customizations/index.js
 var init_service_customizations = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/service-customizations/index.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/service-customizations/index.js"() {
     init_s3();
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/adaptors/createConfigValueProvider.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/adaptors/createConfigValueProvider.js
 var createConfigValueProvider;
 var init_createConfigValueProvider = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/adaptors/createConfigValueProvider.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/adaptors/createConfigValueProvider.js"() {
     createConfigValueProvider = (configKey, canonicalEndpointParamKey, config, isClientContextParam = false) => {
       const configProvider = async () => {
         let configValue;
@@ -54037,14 +55882,14 @@ var init_createConfigValueProvider = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/adaptors/toEndpointV1.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/adaptors/toEndpointV1.js
 var init_toEndpointV12 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/adaptors/toEndpointV1.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/adaptors/toEndpointV1.js"() {
     init_transport();
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/adaptors/getEndpointFromInstructions.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/adaptors/getEndpointFromInstructions.js
 function bindGetEndpointFromInstructions(getEndpointFromConfig2) {
   return async (commandInput, instructionsSupplier, clientConfig, context) => {
     if (!clientConfig.isCustomEndpoint && !clientConfig.ignoreConfiguredEndpointUrls) {
@@ -54079,7 +55924,7 @@ function bindGetEndpointFromInstructions(getEndpointFromConfig2) {
 }
 var resolveParams;
 var init_getEndpointFromInstructions = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/adaptors/getEndpointFromInstructions.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/adaptors/getEndpointFromInstructions.js"() {
     init_service_customizations();
     init_createConfigValueProvider();
     init_toEndpointV12();
@@ -54116,7 +55961,7 @@ var init_getEndpointFromInstructions = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/endpointMiddleware.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/endpointMiddleware.js
 function setFeature(context, feature, value) {
   if (!context.__smithy_context) {
     context.__smithy_context = { features: {} };
@@ -54162,13 +56007,13 @@ function bindEndpointMiddleware(getEndpointFromConfig2) {
   };
 }
 var init_endpointMiddleware = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/endpointMiddleware.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/endpointMiddleware.js"() {
     init_transport();
     init_getEndpointFromInstructions();
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/getEndpointPlugin.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/getEndpointPlugin.js
 function bindGetEndpointPlugin(getEndpointFromConfig2) {
   const endpointMiddleware2 = bindEndpointMiddleware(getEndpointFromConfig2);
   return (config, instructions) => ({
@@ -54182,7 +56027,7 @@ function bindGetEndpointPlugin(getEndpointFromConfig2) {
 }
 var serializerMiddlewareOption2, endpointMiddlewareOptions;
 var init_getEndpointPlugin = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/getEndpointPlugin.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/getEndpointPlugin.js"() {
     init_endpointMiddleware();
     serializerMiddlewareOption2 = {
       name: "serializerMiddleware",
@@ -54201,7 +56046,7 @@ var init_getEndpointPlugin = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/resolveEndpointConfig.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/resolveEndpointConfig.js
 function bindResolveEndpointConfig(getEndpointFromConfig2) {
   return (input) => {
     const tls = input.tls ?? true;
@@ -54227,16 +56072,16 @@ function bindResolveEndpointConfig(getEndpointFromConfig2) {
   };
 }
 var init_resolveEndpointConfig = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/resolveEndpointConfig.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/resolveEndpointConfig.js"() {
     init_transport();
     init_toEndpointV12();
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/bdd/BinaryDecisionDiagram.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/bdd/BinaryDecisionDiagram.js
 var BinaryDecisionDiagram;
 var init_BinaryDecisionDiagram = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/bdd/BinaryDecisionDiagram.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/bdd/BinaryDecisionDiagram.js"() {
     BinaryDecisionDiagram = class _BinaryDecisionDiagram {
       nodes;
       root;
@@ -54255,10 +56100,10 @@ var init_BinaryDecisionDiagram = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/cache/EndpointCache.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/cache/EndpointCache.js
 var EndpointCache;
 var init_EndpointCache = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/cache/EndpointCache.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/cache/EndpointCache.js"() {
     EndpointCache = class {
       capacity;
       data = /* @__PURE__ */ new Map();
@@ -54313,10 +56158,10 @@ var init_EndpointCache = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/types/EndpointError.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/types/EndpointError.js
 var EndpointError;
 var init_EndpointError = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/types/EndpointError.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/types/EndpointError.js"() {
     EndpointError = class extends Error {
       constructor(message) {
         super(message);
@@ -54326,22 +56171,22 @@ var init_EndpointError = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/types/index.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/types/index.js
 var init_types2 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/types/index.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/types/index.js"() {
     init_EndpointError();
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/debug/debugId.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/debug/debugId.js
 var debugId;
 var init_debugId = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/debug/debugId.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/debug/debugId.js"() {
     debugId = "endpoints";
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/debug/toDebugString.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/debug/toDebugString.js
 function toDebugString(input) {
   if (typeof input !== "object" || input == null) {
     return input;
@@ -54355,35 +56200,35 @@ function toDebugString(input) {
   return JSON.stringify(input, null, 2);
 }
 var init_toDebugString = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/debug/toDebugString.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/debug/toDebugString.js"() {
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/debug/index.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/debug/index.js
 var init_debug = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/debug/index.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/debug/index.js"() {
     init_debugId();
     init_toDebugString();
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/customEndpointFunctions.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/customEndpointFunctions.js
 var customEndpointFunctions;
 var init_customEndpointFunctions = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/customEndpointFunctions.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/customEndpointFunctions.js"() {
     customEndpointFunctions = {};
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/booleanEquals.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/booleanEquals.js
 var booleanEquals;
 var init_booleanEquals = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/booleanEquals.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/booleanEquals.js"() {
     booleanEquals = (value1, value2) => value1 === value2;
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/coalesce.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/coalesce.js
 function coalesce(...args) {
   for (const arg of args) {
     if (arg != null) {
@@ -54393,14 +56238,14 @@ function coalesce(...args) {
   return void 0;
 }
 var init_coalesce = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/coalesce.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/coalesce.js"() {
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/getAttrPathList.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/getAttrPathList.js
 var getAttrPathList;
 var init_getAttrPathList = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/getAttrPathList.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/getAttrPathList.js"() {
     init_types2();
     getAttrPathList = (path) => {
       const parts = path.split(".");
@@ -54428,10 +56273,10 @@ var init_getAttrPathList = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/getAttr.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/getAttr.js
 var getAttr;
 var init_getAttr = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/getAttr.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/getAttr.js"() {
     init_types2();
     init_getAttrPathList();
     getAttr = (value, path) => getAttrPathList(path).reduce((acc, index) => {
@@ -54446,44 +56291,44 @@ var init_getAttr = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/isSet.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/isSet.js
 var isSet;
 var init_isSet = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/isSet.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/isSet.js"() {
     isSet = (value) => value != null;
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/ite.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/ite.js
 function ite(condition, trueValue, falseValue) {
   return condition ? trueValue : falseValue;
 }
 var init_ite = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/ite.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/ite.js"() {
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/not.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/not.js
 var not;
 var init_not = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/not.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/not.js"() {
     not = (value) => !value;
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/isIpAddress.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/isIpAddress.js
 var IP_V4_REGEX, isIpAddress;
 var init_isIpAddress = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/isIpAddress.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/isIpAddress.js"() {
     IP_V4_REGEX = new RegExp(`^(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)(?:\\.(?:25[0-5]|2[0-4]\\d|1\\d\\d|[1-9]\\d|\\d)){3}$`);
     isIpAddress = (value) => IP_V4_REGEX.test(value) || value.startsWith("[") && value.endsWith("]");
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/parseURL.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/parseURL.js
 var import_types12, DEFAULT_PORTS, parseURL;
 var init_parseURL = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/parseURL.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/parseURL.js"() {
     import_types12 = __toESM(require_dist_cjs());
     init_isIpAddress();
     DEFAULT_PORTS = {
@@ -54534,7 +56379,7 @@ var init_parseURL = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/split.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/split.js
 function split(value, delimiter, limit) {
   if (limit === 1) {
     return [value];
@@ -54549,22 +56394,22 @@ function split(value, delimiter, limit) {
   return parts.slice(0, limit - 1).concat(parts.slice(1).join(delimiter));
 }
 var init_split = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/split.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/split.js"() {
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/stringEquals.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/stringEquals.js
 var stringEquals;
 var init_stringEquals = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/stringEquals.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/stringEquals.js"() {
     stringEquals = (value1, value2) => value1 === value2;
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/substring.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/substring.js
 var substring;
 var init_substring = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/substring.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/substring.js"() {
     substring = (input, start, stop, reverse) => {
       if (input == null || start >= stop || input.length < stop || /[^\u0000-\u007f]/.test(input)) {
         return null;
@@ -54577,17 +56422,17 @@ var init_substring = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/uriEncode.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/uriEncode.js
 var uriEncode;
 var init_uriEncode = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/uriEncode.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/uriEncode.js"() {
     uriEncode = (value) => encodeURIComponent(value).replace(/[!*'()]/g, (c5) => `%${c5.charCodeAt(0).toString(16).toUpperCase()}`);
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/index.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/index.js
 var init_lib = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/index.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/lib/index.js"() {
     init_booleanEquals();
     init_coalesce();
     init_getAttr();
@@ -54603,10 +56448,10 @@ var init_lib = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/endpointFunctions.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/endpointFunctions.js
 var endpointFunctions;
 var init_endpointFunctions = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/endpointFunctions.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/endpointFunctions.js"() {
     init_lib();
     endpointFunctions = {
       booleanEquals,
@@ -54625,10 +56470,10 @@ var init_endpointFunctions = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/evaluateTemplate.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/evaluateTemplate.js
 var evaluateTemplate;
 var init_evaluateTemplate = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/evaluateTemplate.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/evaluateTemplate.js"() {
     init_lib();
     evaluateTemplate = (template, options) => {
       const evaluatedTemplateArr = [];
@@ -54664,20 +56509,20 @@ var init_evaluateTemplate = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/getReferenceValue.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/getReferenceValue.js
 var getReferenceValue;
 var init_getReferenceValue = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/getReferenceValue.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/getReferenceValue.js"() {
     getReferenceValue = ({ ref }, options) => {
       return options.referenceRecord[ref] ?? options.endpointParams[ref];
     };
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/evaluateExpression.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/evaluateExpression.js
 var evaluateExpression, callFunction, group;
 var init_evaluateExpression = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/evaluateExpression.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/evaluateExpression.js"() {
     init_types2();
     init_customEndpointFunctions();
     init_endpointFunctions();
@@ -54724,17 +56569,17 @@ var init_evaluateExpression = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/callFunction.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/callFunction.js
 var init_callFunction = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/callFunction.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/callFunction.js"() {
     init_evaluateExpression();
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/evaluateCondition.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/evaluateCondition.js
 var evaluateCondition;
 var init_evaluateCondition = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/evaluateCondition.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/evaluateCondition.js"() {
     init_debug();
     init_types2();
     init_callFunction();
@@ -54754,10 +56599,10 @@ var init_evaluateCondition = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/getEndpointHeaders.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/getEndpointHeaders.js
 var getEndpointHeaders;
 var init_getEndpointHeaders = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/getEndpointHeaders.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/getEndpointHeaders.js"() {
     init_types2();
     init_evaluateExpression();
     getEndpointHeaders = (headers, options) => Object.entries(headers ?? {}).reduce((acc, [headerKey, headerVal]) => {
@@ -54773,10 +56618,10 @@ var init_getEndpointHeaders = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/getEndpointProperties.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/getEndpointProperties.js
 var getEndpointProperties, getEndpointProperty, group2;
 var init_getEndpointProperties = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/getEndpointProperties.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/getEndpointProperties.js"() {
     init_types2();
     init_evaluateTemplate();
     getEndpointProperties = (properties, options) => Object.entries(properties).reduce((acc, [propertyKey, propertyVal]) => {
@@ -54808,10 +56653,10 @@ var init_getEndpointProperties = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/getEndpointUrl.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/getEndpointUrl.js
 var getEndpointUrl;
 var init_getEndpointUrl = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/getEndpointUrl.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/getEndpointUrl.js"() {
     init_types2();
     init_evaluateExpression();
     getEndpointUrl = (endpointUrl, options) => {
@@ -54829,10 +56674,10 @@ var init_getEndpointUrl = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/decideEndpoint.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/decideEndpoint.js
 var RESULT, decideEndpoint;
 var init_decideEndpoint = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/decideEndpoint.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/decideEndpoint.js"() {
     init_types2();
     init_evaluateCondition();
     init_evaluateExpression();
@@ -54878,10 +56723,10 @@ var init_decideEndpoint = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/evaluateConditions.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/evaluateConditions.js
 var evaluateConditions;
 var init_evaluateConditions = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/evaluateConditions.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/evaluateConditions.js"() {
     init_debug();
     init_evaluateCondition();
     evaluateConditions = (conditions = [], options) => {
@@ -54911,10 +56756,10 @@ var init_evaluateConditions = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/evaluateEndpointRule.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/evaluateEndpointRule.js
 var evaluateEndpointRule;
 var init_evaluateEndpointRule = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/evaluateEndpointRule.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/evaluateEndpointRule.js"() {
     init_debug();
     init_evaluateConditions();
     init_getEndpointHeaders();
@@ -54944,10 +56789,10 @@ var init_evaluateEndpointRule = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/evaluateErrorRule.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/evaluateErrorRule.js
 var evaluateErrorRule;
 var init_evaluateErrorRule = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/evaluateErrorRule.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/evaluateErrorRule.js"() {
     init_types2();
     init_evaluateConditions();
     init_evaluateExpression();
@@ -54966,10 +56811,10 @@ var init_evaluateErrorRule = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/evaluateRules.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/evaluateRules.js
 var evaluateRules, evaluateTreeRule, group3;
 var init_evaluateRules = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/evaluateRules.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/evaluateRules.js"() {
     init_types2();
     init_evaluateConditions();
     init_evaluateEndpointRule();
@@ -55010,17 +56855,17 @@ var init_evaluateRules = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/index.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/index.js
 var init_utils = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/index.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/utils/index.js"() {
     init_evaluateRules();
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/resolveEndpoint.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/resolveEndpoint.js
 var resolveEndpoint;
 var init_resolveEndpoint = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/resolveEndpoint.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/util-endpoints/resolveEndpoint.js"() {
     init_transport();
     init_debug();
     init_types2();
@@ -55030,8 +56875,9 @@ var init_resolveEndpoint = __esm({
       const { parameters, rules } = ruleSetObject;
       options.logger?.debug?.(`${debugId} Initial EndpointParams: ${toDebugString(endpointParams)}`);
       for (const paramKey in parameters) {
-        if (!hasOwn(parameters, paramKey))
+        if (!hasOwn(parameters, paramKey)) {
           continue;
+        }
         const parameter = parameters[paramKey];
         const endpointParam = endpointParams[paramKey];
         if (endpointParam == null && parameter.default != null) {
@@ -55049,10 +56895,10 @@ var init_resolveEndpoint = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/resolveEndpointRequiredConfig.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/resolveEndpointRequiredConfig.js
 var resolveEndpointRequiredConfig;
 var init_resolveEndpointRequiredConfig = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/resolveEndpointRequiredConfig.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/middleware-endpoint/resolveEndpointRequiredConfig.js"() {
     resolveEndpointRequiredConfig = (input) => {
       const { endpoint } = input;
       if (endpoint === void 0) {
@@ -55065,7 +56911,7 @@ var init_resolveEndpointRequiredConfig = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/index.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/index.js
 var endpoints_exports = {};
 __export(endpoints_exports, {
   BinaryDecisionDiagram: () => BinaryDecisionDiagram,
@@ -55088,7 +56934,7 @@ __export(endpoints_exports, {
 });
 var getEndpointFromInstructions, resolveEndpointConfig, endpointMiddleware, getEndpointPlugin;
 var init_endpoints = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/endpoints/index.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/endpoints/index.js"() {
     init_getEndpointFromConfig();
     init_getEndpointFromInstructions();
     init_endpointMiddleware();
@@ -55114,10 +56960,10 @@ var init_endpoints = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/middleware-serde/serializerMiddleware.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/middleware-serde/serializerMiddleware.js
 var serializerMiddleware;
 var init_serializerMiddleware = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/middleware-serde/serializerMiddleware.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/middleware-serde/serializerMiddleware.js"() {
     init_endpoints();
     serializerMiddleware = (options, serializer) => (next, context) => async (args) => {
       const endpointConfig = options;
@@ -55134,7 +56980,7 @@ var init_serializerMiddleware = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/middleware-serde/serdePlugin.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/middleware-serde/serdePlugin.js
 function getSerdePlugin(config, serializer, deserializer) {
   return {
     applyToStack: (commandStack) => {
@@ -55145,7 +56991,7 @@ function getSerdePlugin(config, serializer, deserializer) {
 }
 var deserializerMiddlewareOption2, serializerMiddlewareOption3;
 var init_serdePlugin = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/middleware-serde/serdePlugin.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/middleware-serde/serdePlugin.js"() {
     init_deserializerMiddleware();
     init_serializerMiddleware();
     deserializerMiddlewareOption2 = {
@@ -55163,7 +57009,7 @@ var init_serdePlugin = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/hash-node/hash-node.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/hash-node/hash-node.js
 function castSourceData(toCast, encoding) {
   if (Buffer.isBuffer(toCast)) {
     return toCast;
@@ -55178,7 +57024,7 @@ function castSourceData(toCast, encoding) {
 }
 var import_node_crypto2, Hash;
 var init_hash_node = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/hash-node/hash-node.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/hash-node/hash-node.js"() {
     import_node_crypto2 = require("node:crypto");
     init_buffer_from();
     init_toUint8Array();
@@ -55204,10 +57050,10 @@ var init_hash_node = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/checksum/ChecksumStream.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/checksum/ChecksumStream.js
 var import_node_stream2, ChecksumStream;
 var init_ChecksumStream = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/checksum/ChecksumStream.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/checksum/ChecksumStream.js"() {
     import_node_stream2 = require("node:stream");
     init_toBase64();
     ChecksumStream = class extends import_node_stream2.Readable {
@@ -55286,10 +57132,10 @@ var init_ChecksumStream = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/stream-type-check.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/stream-type-check.js
 var isReadableStream, isBlob;
 var init_stream_type_check = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/stream-type-check.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/stream-type-check.js"() {
     isReadableStream = (stream) => typeof ReadableStream === "function" && (stream?.constructor?.name === ReadableStream.name || stream instanceof ReadableStream);
     isBlob = (blob) => {
       return typeof Blob === "function" && (blob?.constructor?.name === Blob.name || blob instanceof Blob);
@@ -55297,18 +57143,18 @@ var init_stream_type_check = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-utf8/fromUtf8.browser.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-utf8/fromUtf8.browser.js
 var fromUtf82;
 var init_fromUtf8_browser = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-utf8/fromUtf8.browser.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-utf8/fromUtf8.browser.js"() {
     fromUtf82 = (input) => new TextEncoder().encode(input);
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-base64/constants-for-browser.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-base64/constants-for-browser.js
 var chars, alphabetByEncoding, alphabetByValue, bitsPerLetter, bitsPerByte, maxLetterValue;
 var init_constants_for_browser = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-base64/constants-for-browser.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-base64/constants-for-browser.js"() {
     chars = `ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/`;
     alphabetByEncoding = Object.entries(chars).reduce((acc, [i5, c5]) => {
       acc[c5] = Number(i5);
@@ -55321,7 +57167,7 @@ var init_constants_for_browser = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-base64/toBase64.browser.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-base64/toBase64.browser.js
 function toBase642(_input) {
   let input;
   if (typeof _input === "string") {
@@ -55353,16 +57199,16 @@ function toBase642(_input) {
   return str;
 }
 var init_toBase64_browser = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-base64/toBase64.browser.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-base64/toBase64.browser.js"() {
     init_fromUtf8_browser();
     init_constants_for_browser();
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/checksum/ChecksumStream.browser.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/checksum/ChecksumStream.browser.js
 var ReadableStreamRef, ChecksumStream2;
 var init_ChecksumStream_browser = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/checksum/ChecksumStream.browser.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/checksum/ChecksumStream.browser.js"() {
     ReadableStreamRef = typeof ReadableStream === "function" ? ReadableStream : function() {
     };
     ChecksumStream2 = class extends ReadableStreamRef {
@@ -55370,10 +57216,10 @@ var init_ChecksumStream_browser = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/checksum/createChecksumStream.browser.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/checksum/createChecksumStream.browser.js
 var createChecksumStream;
 var init_createChecksumStream_browser = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/checksum/createChecksumStream.browser.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/checksum/createChecksumStream.browser.js"() {
     init_toBase64_browser();
     init_stream_type_check();
     init_ChecksumStream_browser();
@@ -55411,7 +57257,7 @@ var init_createChecksumStream_browser = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/checksum/createChecksumStream.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/checksum/createChecksumStream.js
 function createChecksumStream2(init) {
   if (typeof ReadableStream === "function" && isReadableStream(init.source)) {
     return createChecksumStream(init);
@@ -55419,17 +57265,17 @@ function createChecksumStream2(init) {
   return new ChecksumStream(init);
 }
 var init_createChecksumStream = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/checksum/createChecksumStream.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/checksum/createChecksumStream.js"() {
     init_stream_type_check();
     init_ChecksumStream();
     init_createChecksumStream_browser();
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/ByteArrayCollector.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/ByteArrayCollector.js
 var ByteArrayCollector;
 var init_ByteArrayCollector = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/ByteArrayCollector.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/ByteArrayCollector.js"() {
     ByteArrayCollector = class {
       allocByteArray;
       byteLength = 0;
@@ -55465,7 +57311,7 @@ var init_ByteArrayCollector = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/createBufferedReadable.browser.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/createBufferedReadable.browser.js
 function createBufferedReadableStream(upstream, size, logger2) {
   const reader = upstream.getReader();
   let streamBufferingLoggedWarning = false;
@@ -55557,12 +57403,12 @@ function modeOf(chunk, allowBuffer = true) {
   return -1;
 }
 var init_createBufferedReadable_browser = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/createBufferedReadable.browser.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/createBufferedReadable.browser.js"() {
     init_ByteArrayCollector();
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/createBufferedReadable.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/createBufferedReadable.js
 function createBufferedReadable(upstream, size, logger2) {
   if (isReadableStream(upstream)) {
     return createBufferedReadableStream(upstream, size, logger2);
@@ -55618,7 +57464,7 @@ function createBufferedReadable(upstream, size, logger2) {
 }
 var import_node_stream3;
 var init_createBufferedReadable = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/createBufferedReadable.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/createBufferedReadable.js"() {
     import_node_stream3 = require("node:stream");
     init_ByteArrayCollector();
     init_createBufferedReadable_browser();
@@ -55626,10 +57472,10 @@ var init_createBufferedReadable = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/getAwsChunkedEncodingStream.browser.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/getAwsChunkedEncodingStream.browser.js
 var getAwsChunkedEncodingStream;
 var init_getAwsChunkedEncodingStream_browser = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/getAwsChunkedEncodingStream.browser.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/getAwsChunkedEncodingStream.browser.js"() {
     getAwsChunkedEncodingStream = (readableStream, options) => {
       const { base64Encoder, bodyLengthChecker, checksumAlgorithmFn, checksumLocationName, streamHasher } = options;
       const checksumRequired = base64Encoder !== void 0 && bodyLengthChecker !== void 0 && checksumAlgorithmFn !== void 0 && checksumLocationName !== void 0 && streamHasher !== void 0;
@@ -55662,7 +57508,7 @@ ${value}\r
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/getAwsChunkedEncodingStream.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/getAwsChunkedEncodingStream.js
 function getAwsChunkedEncodingStream2(stream, options) {
   const readable = stream;
   const readableStream = stream;
@@ -55715,14 +57561,14 @@ function getAwsChunkedEncodingStream2(stream, options) {
 }
 var import_node_stream4;
 var init_getAwsChunkedEncodingStream = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/getAwsChunkedEncodingStream.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/getAwsChunkedEncodingStream.js"() {
     import_node_stream4 = require("node:stream");
     init_getAwsChunkedEncodingStream_browser();
     init_stream_type_check();
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/headStream.browser.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/headStream.browser.js
 async function headStream(stream, bytes) {
   let byteLengthCounter = 0;
   const chunks = [];
@@ -55754,14 +57600,14 @@ async function headStream(stream, bytes) {
   return collected;
 }
 var init_headStream_browser = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/headStream.browser.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/headStream.browser.js"() {
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/headStream.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/headStream.js
 var import_node_stream5, headStream2, Collector;
 var init_headStream = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/headStream.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/headStream.js"() {
     import_node_stream5 = require("node:stream");
     init_concatBytes();
     init_headStream_browser();
@@ -55804,10 +57650,10 @@ var init_headStream = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-utf8/toUtf8.browser.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-utf8/toUtf8.browser.js
 var toUtf82;
 var init_toUtf8_browser = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-utf8/toUtf8.browser.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-utf8/toUtf8.browser.js"() {
     toUtf82 = (input) => {
       if (typeof input === "string") {
         return input;
@@ -55820,7 +57666,7 @@ var init_toUtf8_browser = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/stream-collector.browser.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/stream-collector.browser.js
 async function collectBlob(blob) {
   return blob.arrayBuffer().then((ab) => new Uint8Array(ab));
 }
@@ -55842,7 +57688,7 @@ async function collectReadableStream(stream) {
 }
 var streamCollector;
 var init_stream_collector_browser = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/stream-collector.browser.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/stream-collector.browser.js"() {
     init_concatBytes();
     init_stream_type_check();
     streamCollector = async (stream) => {
@@ -55854,10 +57700,10 @@ var init_stream_collector_browser = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/sdk-stream-mixin.browser.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/sdk-stream-mixin.browser.js
 var ERR_MSG_STREAM_HAS_BEEN_TRANSFORMED, sdkStreamMixin, isBlobInstance;
 var init_sdk_stream_mixin_browser = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/sdk-stream-mixin.browser.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/sdk-stream-mixin.browser.js"() {
     init_toBase64_browser();
     init_hex_encoding();
     init_toUtf8_browser();
@@ -55918,10 +57764,10 @@ var init_sdk_stream_mixin_browser = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/stream-collector.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/stream-collector.js
 var import_node_stream6, streamCollector2, Collector2;
 var init_stream_collector = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/stream-collector.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/stream-collector.js"() {
     import_node_stream6 = require("node:stream");
     init_concatBytes();
     init_stream_collector_browser();
@@ -55958,10 +57804,10 @@ var init_stream_collector = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/sdk-stream-mixin.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/sdk-stream-mixin.js
 var import_node_stream7, ERR_MSG_STREAM_HAS_BEEN_TRANSFORMED2, sdkStreamMixin2;
 var init_sdk_stream_mixin = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/sdk-stream-mixin.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/sdk-stream-mixin.js"() {
     import_node_stream7 = require("node:stream");
     init_buffer_from();
     init_sdk_stream_mixin_browser();
@@ -56013,7 +57859,7 @@ var init_sdk_stream_mixin = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/splitStream.browser.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/splitStream.browser.js
 async function splitStream(stream) {
   if (typeof stream.stream === "function") {
     stream = stream.stream();
@@ -56022,11 +57868,11 @@ async function splitStream(stream) {
   return readableStream.tee();
 }
 var init_splitStream_browser = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/splitStream.browser.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/splitStream.browser.js"() {
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/splitStream.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/splitStream.js
 async function splitStream2(stream) {
   if (isReadableStream(stream) || isBlob(stream)) {
     return splitStream(stream);
@@ -56039,14 +57885,23 @@ async function splitStream2(stream) {
 }
 var import_node_stream8;
 var init_splitStream = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/splitStream.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/util-stream/splitStream.js"() {
     import_node_stream8 = require("node:stream");
     init_splitStream_browser();
     init_stream_type_check();
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/index.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/writeKey.js
+function writeKey(obj) {
+  Object.defineProperty(obj, "__proto__", { value: void 0, writable: true, enumerable: true, configurable: true });
+}
+var init_writeKey = __esm({
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/writeKey.js"() {
+  }
+});
+
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/index.js
 var serde_exports = {};
 __export(serde_exports, {
   ChecksumStream: () => ChecksumStream,
@@ -56121,11 +57976,12 @@ __export(serde_exports, {
   toHex: () => toHex,
   toUint8Array: () => toUint8Array,
   toUtf8: () => toUtf8,
-  v4: () => v4
+  v4: () => v4,
+  writeKey: () => writeKey
 });
 var import_node_crypto3, Uint8ArrayBlobAdapter, _getRandomValues, v4, generateIdempotencyToken;
 var init_serde = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/serde/index.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/serde/index.js"() {
     import_node_crypto3 = require("node:crypto");
     init_fromBase64();
     init_toBase64();
@@ -56162,6 +58018,7 @@ var init_serde = __esm({
     init_stream_type_check();
     init_stream_collector();
     init_transport();
+    init_writeKey();
     Uint8ArrayBlobAdapter = class extends bindUint8ArrayBlobAdapter(toUtf8, fromUtf8, toBase64, fromBase64) {
     };
     _getRandomValues = import_node_crypto3.getRandomValues;
@@ -56170,10 +58027,10 @@ var init_serde = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/collect-stream-body.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/collect-stream-body.js
 var collectBody;
 var init_collect_stream_body = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/collect-stream-body.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/collect-stream-body.js"() {
     init_serde();
     collectBody = async (streamBody = new Uint8Array(), context) => {
       if (streamBody instanceof Uint8Array) {
@@ -56188,21 +58045,21 @@ var init_collect_stream_body = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/extended-encode-uri-component.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/extended-encode-uri-component.js
 function extendedEncodeURIComponent(str) {
   return encodeURIComponent(str).replace(/[!'()*]/g, function(c5) {
     return "%" + c5.charCodeAt(0).toString(16).toUpperCase();
   });
 }
 var init_extended_encode_uri_component = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/extended-encode-uri-component.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/extended-encode-uri-component.js"() {
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/SerdeContext.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/SerdeContext.js
 var SerdeContext;
 var init_SerdeContext = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/SerdeContext.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/SerdeContext.js"() {
     SerdeContext = class {
       serdeContext;
       setSerdeContext(serdeContext) {
@@ -56212,7 +58069,7 @@ var init_SerdeContext = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/checksum/chunked-blob-reader/chunked-blob-reader.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/checksum/chunked-blob-reader/chunked-blob-reader.js
 async function blobReader(blob, onChunk, chunkSize = 1024 * 1024) {
   const size = blob.size;
   let totalBytesRead = 0;
@@ -56223,14 +58080,14 @@ async function blobReader(blob, onChunk, chunkSize = 1024 * 1024) {
   }
 }
 var init_chunked_blob_reader = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/checksum/chunked-blob-reader/chunked-blob-reader.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/checksum/chunked-blob-reader/chunked-blob-reader.js"() {
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/checksum/hash-blob-browser/blobHasher.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/checksum/hash-blob-browser/blobHasher.js
 var blobHasher;
 var init_blobHasher = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/checksum/hash-blob-browser/blobHasher.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/checksum/hash-blob-browser/blobHasher.js"() {
     init_chunked_blob_reader();
     blobHasher = async function blobHasher2(hashCtor, blob) {
       const hash = new hashCtor();
@@ -56242,10 +58099,10 @@ var init_blobHasher = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/checksum/hash-stream-node/HashCalculator.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/checksum/hash-stream-node/HashCalculator.js
 var import_node_stream9, HashCalculator;
 var init_HashCalculator = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/checksum/hash-stream-node/HashCalculator.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/checksum/hash-stream-node/HashCalculator.js"() {
     import_node_stream9 = require("node:stream");
     init_serde();
     HashCalculator = class extends import_node_stream9.Writable {
@@ -56266,10 +58123,10 @@ var init_HashCalculator = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/checksum/hash-stream-node/fileStreamHasher.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/checksum/hash-stream-node/fileStreamHasher.js
 var import_node_fs3, fileStreamHasher, isReadStream;
 var init_fileStreamHasher = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/checksum/hash-stream-node/fileStreamHasher.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/checksum/hash-stream-node/fileStreamHasher.js"() {
     import_node_fs3 = require("node:fs");
     init_HashCalculator();
     fileStreamHasher = (hashCtor, fileStream) => new Promise((resolve, reject) => {
@@ -56297,10 +58154,10 @@ var init_fileStreamHasher = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/checksum/hash-stream-node/readableStreamHasher.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/checksum/hash-stream-node/readableStreamHasher.js
 var readableStreamHasher;
 var init_readableStreamHasher = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/checksum/hash-stream-node/readableStreamHasher.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/checksum/hash-stream-node/readableStreamHasher.js"() {
     init_HashCalculator();
     readableStreamHasher = (hashCtor, readableStream) => {
       if (readableStream.readableFlowing !== null) {
@@ -56323,7 +58180,7 @@ var init_readableStreamHasher = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/checksum/md5/Md5Js.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/checksum/md5/Md5Js.js
 function compress(state2, block) {
   let a5 = state2[0], b5 = state2[1], c5 = state2[2], d5 = state2[3];
   for (let i5 = 0; i5 < 64; ++i5) {
@@ -56357,7 +58214,7 @@ function compress(state2, block) {
 }
 var Md5Js, INIT, M, S, T;
 var init_Md5Js = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/checksum/md5/Md5Js.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/checksum/md5/Md5Js.js"() {
     init_serde();
     Md5Js = class {
       digestLength = 16;
@@ -56419,7 +58276,7 @@ var init_Md5Js = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/checksum/md5/Md5Node.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/checksum/md5/Md5Node.js
 function buildNativeClass() {
   return class Md5Node {
     digestLength = 16;
@@ -56438,7 +58295,7 @@ function buildNativeClass() {
 }
 var import_node_crypto4, hasNativeCrypto, Md5Node;
 var init_Md5Node = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/checksum/md5/Md5Node.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/checksum/md5/Md5Node.js"() {
     import_node_crypto4 = require("node:crypto");
     init_serde();
     init_Md5Js();
@@ -56454,10 +58311,10 @@ var init_Md5Node = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/checksum/crc32/Crc32Js.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/checksum/crc32/Crc32Js.js
 var CRC32_TABLE, ONES, Crc32Js;
 var init_Crc32Js = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/checksum/crc32/Crc32Js.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/checksum/crc32/Crc32Js.js"() {
     CRC32_TABLE = new Uint32Array(256);
     for (let i5 = 0; i5 < 256; ++i5) {
       let c5 = i5;
@@ -56491,7 +58348,7 @@ var init_Crc32Js = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/checksum/crc32/Crc32Node.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/checksum/crc32/Crc32Node.js
 function buildNativeClass2(nativeCrc32) {
   return class Crc32Node {
     digestLength = 4;
@@ -56514,7 +58371,7 @@ function buildNativeClass2(nativeCrc32) {
 }
 var zlib, zlibCrc32, Crc32Node;
 var init_Crc32Node = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/checksum/crc32/Crc32Node.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/checksum/crc32/Crc32Node.js"() {
     zlib = __toESM(require("node:zlib"));
     init_Crc32Js();
     zlibCrc32 = typeof zlib.crc32 === "function" ? zlib.crc32 : void 0;
@@ -56522,10 +58379,10 @@ var init_Crc32Node = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/checksum/sha256/Sha256Js.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/checksum/sha256/Sha256Js.js
 var BLOCK, DIGEST_LENGTH, MAX_HASHABLE_LENGTH, Sha256Js, INIT2, K;
 var init_Sha256Js = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/checksum/sha256/Sha256Js.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/checksum/sha256/Sha256Js.js"() {
     init_serde();
     BLOCK = 64;
     DIGEST_LENGTH = 32;
@@ -56760,7 +58617,7 @@ var init_Sha256Js = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/checksum/sha256/Sha256Node.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/checksum/sha256/Sha256Node.js
 function buildNativeClass3() {
   return class Sha256Node {
     digestLength = 32;
@@ -56809,7 +58666,7 @@ function toBuffer(data) {
 }
 var import_node_crypto5, hasNativeCrypto2, Sha256Node;
 var init_Sha256Node = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/checksum/sha256/Sha256Node.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/checksum/sha256/Sha256Node.js"() {
     import_node_crypto5 = require("node:crypto");
     init_Sha256Js();
     hasNativeCrypto2 = (() => {
@@ -56824,10 +58681,10 @@ var init_Sha256Node = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/checksum/sha256/Sha256WebCrypto.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/checksum/sha256/Sha256WebCrypto.js
 var digest, sign, importKey, subtle, MAX_PENDING_BYTES, Sha256WebCrypto;
 var init_Sha256WebCrypto = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/checksum/sha256/Sha256WebCrypto.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/checksum/sha256/Sha256WebCrypto.js"() {
     init_serde();
     init_Sha256Js();
     ({ digest, sign, importKey } = globalThis?.crypto?.subtle ?? {});
@@ -56900,7 +58757,7 @@ var init_Sha256WebCrypto = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/checksum/index.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/checksum/index.js
 var checksum_exports = {};
 __export(checksum_exports, {
   Crc32: () => Crc32Node,
@@ -56919,7 +58776,7 @@ __export(checksum_exports, {
   readableStreamHasher: () => readableStreamHasher
 });
 var init_checksum2 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/checksum/index.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/checksum/index.js"() {
     init_blobHasher();
     init_fileStreamHasher();
     init_readableStreamHasher();
@@ -56934,20 +58791,21 @@ var init_checksum2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/Int64.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/Int64.js
 function negate(bytes) {
   for (let i5 = 0; i5 < 8; i5++) {
     bytes[i5] ^= 255;
   }
   for (let i5 = 7; i5 > -1; i5--) {
     bytes[i5]++;
-    if (bytes[i5] !== 0)
+    if (bytes[i5] !== 0) {
       break;
+    }
   }
 }
 var Int64;
 var init_Int64 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/Int64.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/Int64.js"() {
     init_serde();
     Int64 = class _Int64 {
       bytes;
@@ -56985,10 +58843,10 @@ var init_Int64 = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/HeaderMarshaller.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/HeaderMarshaller.js
 var HeaderMarshaller, HEADER_VALUE_TYPE, BOOLEAN_TAG, BYTE_TAG, SHORT_TAG, INT_TAG, LONG_TAG, BINARY_TAG, STRING_TAG, TIMESTAMP_TAG, UUID_TAG, UUID_PATTERN, MAX_HEADER_VALUE_BYTES;
 var init_HeaderMarshaller = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/HeaderMarshaller.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/HeaderMarshaller.js"() {
     init_transport();
     init_serde();
     init_Int64();
@@ -57002,8 +58860,9 @@ var init_HeaderMarshaller = __esm({
       format(headers) {
         const chunks = [];
         for (const headerName in headers) {
-          if (!hasOwn(headers, headerName))
+          if (!hasOwn(headers, headerName)) {
             continue;
+          }
           const bytes = this.fromUtf8(headerName);
           if (bytes.byteLength > 255) {
             throw new Error(`@smithy/core/event-streams - header name exceeds 255 bytes: ${bytes.byteLength}`);
@@ -57188,7 +59047,7 @@ var init_HeaderMarshaller = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/splitMessage.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/splitMessage.js
 function splitMessage({ byteLength, byteOffset, buffer }) {
   if (byteLength < MINIMUM_MESSAGE_LENGTH) {
     throw new Error("Provided message too short to accommodate event stream message overhead");
@@ -57217,7 +59076,7 @@ function splitMessage({ byteLength, byteOffset, buffer }) {
 }
 var PRELUDE_MEMBER_LENGTH, PRELUDE_LENGTH, CHECKSUM_LENGTH, MINIMUM_MESSAGE_LENGTH;
 var init_splitMessage = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/splitMessage.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/splitMessage.js"() {
     init_checksum2();
     PRELUDE_MEMBER_LENGTH = 4;
     PRELUDE_LENGTH = PRELUDE_MEMBER_LENGTH * 2;
@@ -57226,10 +59085,10 @@ var init_splitMessage = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/EventStreamCodec.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/EventStreamCodec.js
 var EventStreamCodec;
 var init_EventStreamCodec = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/EventStreamCodec.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/EventStreamCodec.js"() {
     init_checksum2();
     init_HeaderMarshaller();
     init_splitMessage();
@@ -57300,10 +59159,10 @@ var init_EventStreamCodec = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/MessageDecoderStream.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/MessageDecoderStream.js
 var MessageDecoderStream;
 var init_MessageDecoderStream = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/MessageDecoderStream.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/MessageDecoderStream.js"() {
     MessageDecoderStream = class {
       options;
       constructor(options) {
@@ -57322,10 +59181,10 @@ var init_MessageDecoderStream = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/MessageEncoderStream.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/MessageEncoderStream.js
 var MessageEncoderStream;
 var init_MessageEncoderStream = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/MessageEncoderStream.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/MessageEncoderStream.js"() {
     MessageEncoderStream = class {
       options;
       constructor(options) {
@@ -57347,10 +59206,10 @@ var init_MessageEncoderStream = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/SmithyMessageDecoderStream.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/SmithyMessageDecoderStream.js
 var SmithyMessageDecoderStream;
 var init_SmithyMessageDecoderStream = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/SmithyMessageDecoderStream.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/SmithyMessageDecoderStream.js"() {
     SmithyMessageDecoderStream = class {
       options;
       constructor(options) {
@@ -57362,8 +59221,9 @@ var init_SmithyMessageDecoderStream = __esm({
       async *asyncIterator() {
         for await (const message of this.options.messageStream) {
           const deserialized = await this.options.deserializer(message);
-          if (deserialized === void 0)
+          if (deserialized === void 0) {
             continue;
+          }
           yield deserialized;
         }
       }
@@ -57371,10 +59231,10 @@ var init_SmithyMessageDecoderStream = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/SmithyMessageEncoderStream.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/SmithyMessageEncoderStream.js
 var SmithyMessageEncoderStream;
 var init_SmithyMessageEncoderStream = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/SmithyMessageEncoderStream.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-codec/SmithyMessageEncoderStream.js"() {
     SmithyMessageEncoderStream = class {
       options;
       constructor(options) {
@@ -57393,7 +59253,7 @@ var init_SmithyMessageEncoderStream = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-serde-universal/getChunkedStream.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-serde-universal/getChunkedStream.js
 function getChunkedStream(source) {
   let currentMessageTotalLength = 0;
   let currentMessagePendingLength = 0;
@@ -57459,11 +59319,11 @@ function getChunkedStream(source) {
   };
 }
 var init_getChunkedStream = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-serde-universal/getChunkedStream.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-serde-universal/getChunkedStream.js"() {
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-serde-universal/getUnmarshalledStream.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-serde-universal/getUnmarshalledStream.js
 function getUnmarshalledStream(source, options) {
   const messageUnmarshaller = getMessageUnmarshaller(options.deserializer, options.toUtf8);
   return {
@@ -57471,8 +59331,9 @@ function getUnmarshalledStream(source, options) {
       for await (const chunk of source) {
         const message = options.eventStreamCodec.decode(chunk);
         const type = await messageUnmarshaller(message);
-        if (type === void 0)
+        if (type === void 0) {
           continue;
+        }
         yield type;
       }
     }
@@ -57500,8 +59361,9 @@ function getMessageUnmarshaller(deserializer, toUtf83) {
         [message.headers[":event-type"].value]: message
       };
       const deserialized = await deserializer(event);
-      if (deserialized.$unknown)
+      if (deserialized.$unknown) {
         return;
+      }
       return deserialized;
     } else {
       throw Error(`Unrecognizable event type: ${message.headers[":event-type"].value}`);
@@ -57509,14 +59371,14 @@ function getMessageUnmarshaller(deserializer, toUtf83) {
   };
 }
 var init_getUnmarshalledStream = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-serde-universal/getUnmarshalledStream.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-serde-universal/getUnmarshalledStream.js"() {
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-serde-universal/EventStreamMarshaller.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-serde-universal/EventStreamMarshaller.js
 var EventStreamMarshaller, eventStreamSerdeProvider;
 var init_EventStreamMarshaller = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-serde-universal/EventStreamMarshaller.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-serde-universal/EventStreamMarshaller.js"() {
     init_EventStreamCodec();
     init_MessageDecoderStream();
     init_MessageEncoderStream();
@@ -57550,7 +59412,7 @@ var init_EventStreamMarshaller = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-serde/EventStreamMarshaller.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-serde/EventStreamMarshaller.js
 async function* readableToIterable(readStream) {
   let streamEnded = false;
   let generationEnded = false;
@@ -57579,7 +59441,7 @@ async function* readableToIterable(readStream) {
 }
 var import_node_stream10, EventStreamMarshaller2, eventStreamSerdeProvider2;
 var init_EventStreamMarshaller2 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-serde/EventStreamMarshaller.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-serde/EventStreamMarshaller.js"() {
     import_node_stream10 = require("node:stream");
     init_EventStreamMarshaller();
     EventStreamMarshaller2 = class {
@@ -57602,18 +59464,19 @@ var init_EventStreamMarshaller2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-serde/utils.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-serde/utils.js
 var readableStreamToIterable, iterableToReadableStream;
 var init_utils2 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-serde/utils.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-serde/utils.js"() {
     readableStreamToIterable = (readableStream) => ({
       [Symbol.asyncIterator]: async function* () {
         const reader = readableStream.getReader();
         try {
           while (true) {
             const { done, value } = await reader.read();
-            if (done)
+            if (done) {
               return;
+            }
             yield value;
           }
         } finally {
@@ -57636,20 +59499,20 @@ var init_utils2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-serde-config-resolver/EventStreamSerdeConfig.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-serde-config-resolver/EventStreamSerdeConfig.js
 var resolveEventStreamSerdeConfig;
 var init_EventStreamSerdeConfig = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-serde-config-resolver/EventStreamSerdeConfig.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/eventstream-serde-config-resolver/EventStreamSerdeConfig.js"() {
     resolveEventStreamSerdeConfig = (input) => Object.assign(input, {
       eventStreamMarshaller: input.eventStreamSerdeProvider(input)
     });
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/EventStreamSerde.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/EventStreamSerde.js
 var EventStreamSerde;
 var init_EventStreamSerde = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/EventStreamSerde.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/EventStreamSerde.js"() {
     init_transport();
     init_schema();
     init_serde();
@@ -57705,8 +59568,9 @@ var init_EventStreamSerde = __esm({
           }
           let unionMember = "";
           for (const key in event) {
-            if (!hasOwn(event, key))
+            if (!hasOwn(event, key)) {
               continue;
+            }
             if (key !== "__type") {
               unionMember = key;
               break;
@@ -57734,8 +59598,9 @@ var init_EventStreamSerde = __esm({
         const asyncIterable = marshaller.deserialize(response.body, async (event) => {
           let unionMember = "";
           for (const key in event) {
-            if (!hasOwn(event, key))
+            if (!hasOwn(event, key)) {
               continue;
+            }
             if (key !== "__type") {
               unionMember = key;
               break;
@@ -57803,8 +59668,9 @@ var init_EventStreamSerde = __esm({
             throw new Error("@smithy::core/protocols - initial-response event encountered in event stream but no response schema given.");
           }
           for (const key in firstEvent.value) {
-            if (!hasOwn(firstEvent.value, key))
+            if (!hasOwn(firstEvent.value, key)) {
               continue;
+            }
             initialResponseContainer[key] = firstEvent.value[key];
           }
         }
@@ -57922,7 +59788,7 @@ var init_EventStreamSerde = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/index.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/index.js
 var event_streams_exports = {};
 __export(event_streams_exports, {
   EventStreamCodec: () => EventStreamCodec,
@@ -57945,7 +59811,7 @@ __export(event_streams_exports, {
   universalEventStreamSerdeProvider: () => eventStreamSerdeProvider
 });
 var init_event_streams = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/event-streams/index.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/event-streams/index.js"() {
     init_EventStreamCodec();
     init_HeaderMarshaller();
     init_Int64();
@@ -57963,10 +59829,10 @@ var init_event_streams = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/HttpProtocol.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/HttpProtocol.js
 var HttpProtocol;
 var init_HttpProtocol = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/HttpProtocol.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/HttpProtocol.js"() {
     init_transport();
     init_schema();
     init_transport();
@@ -58013,8 +59879,9 @@ var init_HttpProtocol = __esm({
           }
           if (endpoint.headers) {
             for (const name in endpoint.headers) {
-              if (!hasOwn(endpoint.headers, name))
+              if (!hasOwn(endpoint.headers, name)) {
                 continue;
+              }
               request.headers[name] = endpoint.headers[name].join(", ");
             }
           }
@@ -58029,8 +59896,9 @@ var init_HttpProtocol = __esm({
           };
           if (endpoint.headers) {
             for (const name in endpoint.headers) {
-              if (!hasOwn(endpoint.headers, name))
+              if (!hasOwn(endpoint.headers, name)) {
                 continue;
+              }
               request.headers[name] = endpoint.headers[name];
             }
           }
@@ -58166,10 +60034,10 @@ var init_HttpProtocol = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/HttpBindingProtocol.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/HttpBindingProtocol.js
 var HttpBindingProtocol;
 var init_HttpBindingProtocol = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/HttpBindingProtocol.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/HttpBindingProtocol.js"() {
     init_transport();
     init_schema();
     init_serde();
@@ -58259,8 +60127,9 @@ var init_HttpBindingProtocol = __esm({
             headers[memberTraits.httpHeader.toLowerCase()] = String(serializer.flush());
           } else if (typeof memberTraits.httpPrefixHeaders === "string") {
             for (const key in inputMemberValue) {
-              if (!hasOwn(inputMemberValue, key))
+              if (!hasOwn(inputMemberValue, key)) {
                 continue;
+              }
               const val = inputMemberValue[key];
               const amalgam = memberTraits.httpPrefixHeaders + key;
               serializer.write([memberNs.getValueSchema(), { httpHeader: amalgam }], val);
@@ -58304,8 +60173,9 @@ var init_HttpBindingProtocol = __esm({
         const traits = ns.getMergedTraits();
         if (traits.httpQueryParams) {
           for (const key in data) {
-            if (!hasOwn(data, key))
+            if (!hasOwn(data, key)) {
               continue;
+            }
             if (!(key in query)) {
               const val = data[key];
               const valueSchema = ns.getValueSchema();
@@ -58348,8 +60218,9 @@ var init_HttpBindingProtocol = __esm({
           throw new Error("@smithy/core/protocols - HTTP Protocol error handler failed to throw.");
         }
         for (const header in response.headers) {
-          if (!hasOwn(response.headers, header))
+          if (!hasOwn(response.headers, header)) {
             continue;
+          }
           const value = response.headers[header];
           delete response.headers[header];
           response.headers[header.toLowerCase()] = value;
@@ -58428,8 +60299,9 @@ var init_HttpBindingProtocol = __esm({
           } else if (memberTraits.httpPrefixHeaders !== void 0) {
             dataObject[memberName] = {};
             for (const header in response.headers) {
-              if (!hasOwn(response.headers, header))
+              if (!hasOwn(response.headers, header)) {
                 continue;
+              }
               if (header.startsWith(memberTraits.httpPrefixHeaders)) {
                 const value = response.headers[header];
                 const valueSchema = memberSchema.getValueSchema();
@@ -58450,10 +60322,10 @@ var init_HttpBindingProtocol = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/RpcProtocol.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/RpcProtocol.js
 var RpcProtocol;
 var init_RpcProtocol = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/RpcProtocol.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/RpcProtocol.js"() {
     init_transport();
     init_schema();
     init_transport();
@@ -58514,7 +60386,7 @@ var init_RpcProtocol = __esm({
         const deserializer = this.deserializer;
         const ns = NormalizedSchema.of(operationSchema.output);
         const dataObject = {};
-        if (response.statusCode >= 300) {
+        if (this.isErrorResponse(response.statusCode)) {
           const bytes = await collectBody(response.body, context);
           if (bytes.byteLength > 0) {
             Object.assign(dataObject, await deserializer.read(15, bytes));
@@ -58523,8 +60395,9 @@ var init_RpcProtocol = __esm({
           throw new Error("@smithy/core/protocols - RPC Protocol error handler failed to throw.");
         }
         for (const header in response.headers) {
-          if (!hasOwn(response.headers, header))
+          if (!hasOwn(response.headers, header)) {
             continue;
+          }
           const value = response.headers[header];
           delete response.headers[header];
           response.headers[header.toLowerCase()] = value;
@@ -58545,14 +60418,57 @@ var init_RpcProtocol = __esm({
         dataObject.$metadata = this.deserializeMetadata(response);
         return dataObject;
       }
+      isErrorResponse(statusCode) {
+        return statusCode >= 300;
+      }
     };
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/resolve-path.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/AbstractRpcV2Protocol.js
+var AbstractRpcV2Protocol;
+var init_AbstractRpcV2Protocol = __esm({
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/AbstractRpcV2Protocol.js"() {
+    init_schema();
+    init_transport();
+    init_RpcProtocol();
+    AbstractRpcV2Protocol = class extends RpcProtocol {
+      constructor({ defaultNamespace, errorTypeRegistries: errorTypeRegistries5 }) {
+        super({ defaultNamespace, errorTypeRegistries: errorTypeRegistries5 });
+      }
+      async serializeRequest(operationSchema, input, context) {
+        const request = await super.serializeRequest(operationSchema, input, context);
+        Object.assign(request.headers, {
+          "content-type": this.getDefaultContentType(),
+          "smithy-protocol": this.getSmithyProtocolHeaderValue(),
+          accept: this.getDefaultContentType()
+        });
+        if (deref(operationSchema.input) === "unit") {
+          delete request.body;
+          delete request.headers["content-type"];
+        } else {
+          this.applyEmptyBody(request);
+        }
+        const { service, operation: operation2 } = getSmithyContext(context);
+        const path = `/service/${service}/operation/${operation2}`;
+        if (request.path.endsWith("/")) {
+          request.path += path.slice(1);
+        } else {
+          request.path += path;
+        }
+        return request;
+      }
+      isErrorResponse(statusCode) {
+        return statusCode !== 200;
+      }
+    };
+  }
+});
+
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/resolve-path.js
 var resolvedPath;
 var init_resolve_path = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/resolve-path.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/resolve-path.js"() {
     init_extended_encode_uri_component();
     resolvedPath = (resolvedPath2, input, memberName, labelValueProvider, uriLabel, isGreedyLabel) => {
       if (input != null && input[memberName] !== void 0) {
@@ -58569,13 +60485,13 @@ var init_resolve_path = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/requestBuilder.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/requestBuilder.js
 function requestBuilder(input, context) {
   return new RequestBuilder(input, context);
 }
 var RequestBuilder;
 var init_requestBuilder = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/requestBuilder.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/requestBuilder.js"() {
     init_transport();
     init_resolve_path();
     RequestBuilder = class {
@@ -58645,7 +60561,7 @@ var init_requestBuilder = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/serde/determineTimestampFormat.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/serde/determineTimestampFormat.js
 function determineTimestampFormat(ns, settings) {
   if (settings.timestampFormat.useTrait) {
     if (ns.isTimestampSchema() && (ns.getSchema() === 5 || ns.getSchema() === 6 || ns.getSchema() === 7)) {
@@ -58657,14 +60573,14 @@ function determineTimestampFormat(ns, settings) {
   return bindingFormat ?? settings.timestampFormat.default;
 }
 var init_determineTimestampFormat = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/serde/determineTimestampFormat.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/serde/determineTimestampFormat.js"() {
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/serde/FromStringShapeDeserializer.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/serde/FromStringShapeDeserializer.js
 var FromStringShapeDeserializer;
 var init_FromStringShapeDeserializer = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/serde/FromStringShapeDeserializer.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/serde/FromStringShapeDeserializer.js"() {
     init_schema();
     init_serde();
     init_SerdeContext();
@@ -58732,10 +60648,10 @@ var init_FromStringShapeDeserializer = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/serde/HttpInterceptingShapeDeserializer.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/serde/HttpInterceptingShapeDeserializer.js
 var HttpInterceptingShapeDeserializer;
 var init_HttpInterceptingShapeDeserializer = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/serde/HttpInterceptingShapeDeserializer.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/serde/HttpInterceptingShapeDeserializer.js"() {
     init_schema();
     init_serde();
     init_SerdeContext();
@@ -58780,10 +60696,10 @@ var init_HttpInterceptingShapeDeserializer = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/serde/ToStringShapeSerializer.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/serde/ToStringShapeSerializer.js
 var ToStringShapeSerializer;
 var init_ToStringShapeSerializer = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/serde/ToStringShapeSerializer.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/serde/ToStringShapeSerializer.js"() {
     init_schema();
     init_serde();
     init_SerdeContext();
@@ -58876,10 +60792,10 @@ var init_ToStringShapeSerializer = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/serde/HttpInterceptingShapeSerializer.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/serde/HttpInterceptingShapeSerializer.js
 var HttpInterceptingShapeSerializer;
 var init_HttpInterceptingShapeSerializer = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/serde/HttpInterceptingShapeSerializer.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/serde/HttpInterceptingShapeSerializer.js"() {
     init_schema();
     init_ToStringShapeSerializer();
     HttpInterceptingShapeSerializer = class {
@@ -58916,10 +60832,10 @@ var init_HttpInterceptingShapeSerializer = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/protocol-http/Field.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/protocol-http/Field.js
 var import_types23, Field;
 var init_Field = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/protocol-http/Field.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/protocol-http/Field.js"() {
     import_types23 = __toESM(require_dist_cjs());
     Field = class {
       name;
@@ -58949,10 +60865,10 @@ var init_Field = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/protocol-http/Fields.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/protocol-http/Fields.js
 var Fields;
 var init_Fields = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/protocol-http/Fields.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/protocol-http/Fields.js"() {
     Fields = class {
       entries = {};
       encoding;
@@ -58976,13 +60892,16 @@ var init_Fields = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/protocol-http/extensions/httpExtensionConfiguration.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/protocol-http/extensions/httpExtensionConfiguration.js
 var getHttpHandlerExtensionConfiguration, resolveHttpHandlerRuntimeConfig;
 var init_httpExtensionConfiguration = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/protocol-http/extensions/httpExtensionConfiguration.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/protocol-http/extensions/httpExtensionConfiguration.js"() {
     getHttpHandlerExtensionConfiguration = (runtimeConfig) => {
       if (runtimeConfig.logger && runtimeConfig.logger.constructor?.name !== "NoOpLogger") {
         runtimeConfig.requestHandler?.updateHttpClientConfig?.(/* @__PURE__ */ Symbol.for("logger"), runtimeConfig.logger);
+      }
+      if (runtimeConfig.defaultSocketTimeout) {
+        runtimeConfig.requestHandler?.updateHttpClientConfig?.(/* @__PURE__ */ Symbol.for("@smithy/defaultSocketTimeout"), runtimeConfig.defaultSocketTimeout);
       }
       return {
         setHttpHandler(handler) {
@@ -59007,7 +60926,7 @@ var init_httpExtensionConfiguration = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/middleware-content-length/contentLengthMiddleware.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/middleware-content-length/contentLengthMiddleware.js
 function contentLengthMiddleware(bodyLengthChecker) {
   return (next) => async (args) => {
     const request = args.request;
@@ -59034,7 +60953,7 @@ function contentLengthMiddleware(bodyLengthChecker) {
 }
 var CONTENT_LENGTH_HEADER, contentLengthMiddlewareOptions, getContentLengthPlugin;
 var init_contentLengthMiddleware = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/middleware-content-length/contentLengthMiddleware.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/middleware-content-length/contentLengthMiddleware.js"() {
     init_transport();
     CONTENT_LENGTH_HEADER = "content-length";
     contentLengthMiddlewareOptions = {
@@ -59051,25 +60970,25 @@ var init_contentLengthMiddleware = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/util-uri-escape/escape-uri.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/util-uri-escape/escape-uri.js
 var escapeUri, hexEncode;
 var init_escape_uri = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/util-uri-escape/escape-uri.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/util-uri-escape/escape-uri.js"() {
     escapeUri = (uri) => encodeURIComponent(uri).replace(/[!'()*]/g, hexEncode);
     hexEncode = (c5) => `%${c5.charCodeAt(0).toString(16).toUpperCase()}`;
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/util-uri-escape/escape-uri-path.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/util-uri-escape/escape-uri-path.js
 var escapeUriPath;
 var init_escape_uri_path = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/util-uri-escape/escape-uri-path.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/util-uri-escape/escape-uri-path.js"() {
     init_escape_uri();
     escapeUriPath = (uri) => uri.split("/").map(escapeUri).join("/");
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/querystring-builder/buildQueryString.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/querystring-builder/buildQueryString.js
 function buildQueryString(query) {
   const parts = [];
   for (let key of Object.keys(query).sort()) {
@@ -59090,15 +61009,15 @@ function buildQueryString(query) {
   return parts.join("&");
 }
 var init_buildQueryString = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/querystring-builder/buildQueryString.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/querystring-builder/buildQueryString.js"() {
     init_escape_uri();
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/ConfigurableSerdeContext.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/ConfigurableSerdeContext.js
 var SerdeContextConfig;
 var init_ConfigurableSerdeContext = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/ConfigurableSerdeContext.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/ConfigurableSerdeContext.js"() {
     SerdeContextConfig = class {
       serdeContext;
       setSerdeContext(serdeContext) {
@@ -59108,10 +61027,10 @@ var init_ConfigurableSerdeContext = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/UnionSerde.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/UnionSerde.js
 var UnionSerde;
 var init_UnionSerde = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/UnionSerde.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/UnionSerde.js"() {
     UnionSerde = class {
       from;
       to;
@@ -59141,7 +61060,7 @@ var init_UnionSerde = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/json/detectBufferParsing.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/json/detectBufferParsing.js
 function detectBufferParsing() {
   if (canParseBuffer === void 0) {
     try {
@@ -59159,11 +61078,11 @@ function detectBufferParsing() {
 }
 var canParseBuffer;
 var init_detectBufferParsing = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/json/detectBufferParsing.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/json/detectBufferParsing.js"() {
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/json/jsonReviver.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/json/jsonReviver.js
 function jsonReviver(key, value, context) {
   if (context?.source) {
     const numericString = context.source;
@@ -59278,12 +61197,12 @@ function expandExponentToBigInt(s2) {
   return negative ? -result : result;
 }
 var init_jsonReviver = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/json/jsonReviver.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/json/jsonReviver.js"() {
     init_serde();
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/json/needsReviver.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/json/needsReviver.js
 function needsReviver(schema) {
   const ns = NormalizedSchema.of(schema);
   const raw = ns.getSchema();
@@ -59323,23 +61242,23 @@ function _check(ns, seen) {
 }
 var REVIVER_SYMBOL;
 var init_needsReviver = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/json/needsReviver.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/json/needsReviver.js"() {
     init_schema();
     REVIVER_SYMBOL = /* @__PURE__ */ Symbol.for("@aws-sdk/reviver");
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/common.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/common.js
 var collectBodyString;
 var init_common = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/common.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/common.js"() {
     init_collect_stream_body();
     init_serde();
     collectBodyString = (streamBody, context) => collectBody(streamBody, context).then((body) => (context?.utf8Encoder ?? toUtf8)(body));
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/json/parseJsonBody.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/json/parseJsonBody.js
 async function parseJsonBody(streamBody, context, schema) {
   let parsingInput;
   if (detectBufferParsing() && typeof streamBody?.[Symbol.asyncIterator] === "function") {
@@ -59372,7 +61291,7 @@ async function parseJsonBody(streamBody, context, schema) {
 }
 var parseJsonErrorBody, findKey, sanitizeErrorCode, loadRestJsonErrorCode, loadJsonRpcErrorCode, loadSmithyRpcV2JsonErrorCode, loadErrorCode;
 var init_parseJsonBody = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/json/parseJsonBody.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/json/parseJsonBody.js"() {
     init_collect_stream_body();
     init_common();
     init_detectBufferParsing();
@@ -59448,19 +61367,10 @@ var init_parseJsonBody = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/writeKey.js
-function writeKey(obj) {
-  Object.defineProperty(obj, "__proto__", { value: void 0, writable: true, enumerable: true, configurable: true });
-}
-var init_writeKey = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/writeKey.js"() {
-  }
-});
-
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/json/codec-v2/JsonShapeDeserializer2.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/json/codec-v2/JsonShapeDeserializer2.js
 var JsonShapeDeserializer2;
 var init_JsonShapeDeserializer2 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/json/codec-v2/JsonShapeDeserializer2.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/json/codec-v2/JsonShapeDeserializer2.js"() {
     init_determineTimestampFormat();
     init_schema();
     init_serde();
@@ -59470,7 +61380,6 @@ var init_JsonShapeDeserializer2 = __esm({
     init_jsonReviver();
     init_needsReviver();
     init_parseJsonBody();
-    init_writeKey();
     init_transport();
     JsonShapeDeserializer2 = class extends SerdeContextConfig {
       settings;
@@ -59521,8 +61430,9 @@ var init_JsonShapeDeserializer2 = __esm({
             const map3 = value;
             if (this.needsTransform(mapMember)) {
               for (const k5 in map3) {
-                if (!hasOwn(map3, k5))
+                if (!hasOwn(map3, k5)) {
                   continue;
+                }
                 if (k5 === "__proto__") {
                   writeKey(map3);
                 }
@@ -59593,8 +61503,9 @@ var init_JsonShapeDeserializer2 = __esm({
             } else {
               const doc = value;
               for (const k5 in doc) {
-                if (!hasOwn(doc, k5))
+                if (!hasOwn(doc, k5)) {
                   continue;
+                }
                 if (k5 === "__proto__") {
                   writeKey(doc);
                 }
@@ -59640,8 +61551,9 @@ var init_JsonShapeDeserializer2 = __esm({
           unionSerde.writeUnknown();
         } else if (hasType) {
           for (const k5 in record) {
-            if (!hasOwn(record, k5))
+            if (!hasOwn(record, k5)) {
               continue;
+            }
             const v = record[k5];
             const t = jsonName ? nameMap[k5] ?? k5 : k5;
             if (!(t in out)) {
@@ -59667,10 +61579,10 @@ var init_JsonShapeDeserializer2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/json/codec-v2/JsonBytesStringAdapter.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/json/codec-v2/JsonBytesStringAdapter.js
 var JsonBytesStringAdapter, warned;
 var init_JsonBytesStringAdapter = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/json/codec-v2/JsonBytesStringAdapter.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/json/codec-v2/JsonBytesStringAdapter.js"() {
     init_serde();
     JsonBytesStringAdapter = class _JsonBytesStringAdapter extends Uint8Array {
       string = null;
@@ -59776,13 +61688,13 @@ var init_JsonBytesStringAdapter = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/json/codec-v2/JsonShapeSerializer2.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/json/codec-v2/JsonShapeSerializer2.js
 function alloc(size) {
   return JsonBytesStringAdapter.allocUnsafe(size);
 }
 var encoder, OPEN_BRACE, CLOSE_BRACE, OPEN_BRACKET, CLOSE_BRACKET, QUOTE, COLON, COMMA, BACKSLASH, TRUE, FALSE, NULL, ESCAPE_TABLE, INITIAL_BUFFER_SIZE, JsonShapeSerializer2;
 var init_JsonShapeSerializer2 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/json/codec-v2/JsonShapeSerializer2.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/json/codec-v2/JsonShapeSerializer2.js"() {
     init_determineTimestampFormat();
     init_schema();
     init_serde();
@@ -60186,8 +62098,9 @@ var init_JsonShapeSerializer2 = __esm({
               const out = [];
               for (let i5 = 0; i5 < value.length; ++i5) {
                 const v = value[i5];
-                if (v == null && !sparse)
+                if (v == null && !sparse) {
                   continue;
+                }
                 if (Number.isNaN(v) || v === Infinity || v === -Infinity) {
                   out.push(String(v));
                 } else {
@@ -60226,8 +62139,9 @@ var init_JsonShapeSerializer2 = __esm({
           if (valueSchema.isStringSchema() || valueSchema.isNumericSchema() || valueSchema.isBooleanSchema()) {
             let modifications;
             for (const k5 in value) {
-              if (!hasOwn(value, k5))
+              if (!hasOwn(value, k5)) {
                 continue;
+              }
               const v = value[k5];
               if (Number.isNaN(v) || v === Infinity || v === -Infinity) {
                 (modifications ??= {})[k5] = v;
@@ -60250,8 +62164,9 @@ var init_JsonShapeSerializer2 = __esm({
         this.json[this.i++] = OPEN_BRACE;
         let first = true;
         for (const k5 in value) {
-          if (!hasOwn(value, k5))
+          if (!hasOwn(value, k5)) {
             continue;
+          }
           const v = value[k5];
           if (isDocument ? v === void 0 : v == null && !sparse) {
             continue;
@@ -60297,10 +62212,10 @@ var init_JsonShapeSerializer2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/json/codec-v2/JsonCodec2.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/json/codec-v2/JsonCodec2.js
 var JsonCodec2;
 var init_JsonCodec2 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/json/codec-v2/JsonCodec2.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/json/codec-v2/JsonCodec2.js"() {
     init_ConfigurableSerdeContext();
     init_JsonShapeDeserializer2();
     init_JsonShapeSerializer2();
@@ -60324,16 +62239,15 @@ var init_JsonCodec2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/json/SmithyRpcV2JsonProtocol.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/json/SmithyRpcV2JsonProtocol.js
 var SmithyRpcV2JsonProtocol;
 var init_SmithyRpcV2JsonProtocol = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/json/SmithyRpcV2JsonProtocol.js"() {
-    init_RpcProtocol();
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/json/SmithyRpcV2JsonProtocol.js"() {
+    init_AbstractRpcV2Protocol();
     init_schema();
-    init_transport();
     init_JsonCodec2();
     init_parseJsonBody();
-    SmithyRpcV2JsonProtocol = class extends RpcProtocol {
+    SmithyRpcV2JsonProtocol = class extends AbstractRpcV2Protocol {
       codec = new JsonCodec2({
         timestampFormat: {
           useTrait: false,
@@ -60344,39 +62258,19 @@ var init_SmithyRpcV2JsonProtocol = __esm({
       });
       serializer = this.codec.createSerializer();
       deserializer = this.codec.createDeserializer();
-      constructor({ defaultNamespace, errorTypeRegistries: errorTypeRegistries5 }) {
-        super({ defaultNamespace, errorTypeRegistries: errorTypeRegistries5 });
-      }
       getShapeId() {
         return "smithy.protocols#rpcv2Json";
       }
       getPayloadCodec() {
         return this.codec;
       }
-      async serializeRequest(operationSchema, input, context) {
-        const request = await super.serializeRequest(operationSchema, input, context);
-        Object.assign(request.headers, {
-          "content-type": this.getDefaultContentType(),
-          "smithy-protocol": "rpc-v2-json",
-          accept: this.getDefaultContentType()
-        });
-        if (deref(operationSchema.input) === "unit") {
-          delete request.body;
-          delete request.headers["content-type"];
-        } else if (!request.body) {
+      getSmithyProtocolHeaderValue() {
+        return "rpc-v2-json";
+      }
+      applyEmptyBody(request) {
+        if (!request.body) {
           request.body = "{}";
         }
-        const { service, operation: operation2 } = getSmithyContext(context);
-        const path = `/service/${service}/operation/${operation2}`;
-        if (request.path.endsWith("/")) {
-          request.path += path.slice(1);
-        } else {
-          request.path += path;
-        }
-        return request;
-      }
-      async deserializeResponse(operationSchema, context, response) {
-        return super.deserializeResponse(operationSchema, context, response);
       }
       async handleError(operationSchema, context, response, dataObject, metadata) {
         const errorName = loadSmithyRpcV2JsonErrorCode(response, dataObject) ?? "Unknown";
@@ -60430,10 +62324,10 @@ var init_SmithyRpcV2JsonProtocol = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/json/codec-v1/JsonShapeDeserializer.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/json/codec-v1/JsonShapeDeserializer.js
 var JsonShapeDeserializer;
 var init_JsonShapeDeserializer = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/json/codec-v1/JsonShapeDeserializer.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/json/codec-v1/JsonShapeDeserializer.js"() {
     init_determineTimestampFormat();
     init_schema();
     init_serde();
@@ -60444,7 +62338,6 @@ var init_JsonShapeDeserializer = __esm({
     init_jsonReviver();
     init_needsReviver();
     init_parseJsonBody();
-    init_writeKey();
     JsonShapeDeserializer = class extends SerdeContextConfig {
       settings;
       constructor(settings) {
@@ -60492,8 +62385,9 @@ var init_JsonShapeDeserializer = __esm({
               unionSerde.writeUnknown();
             } else if (typeof record.__type === "string") {
               for (const k5 in record) {
-                if (!hasOwn(record, k5))
+                if (!hasOwn(record, k5)) {
                   continue;
+                }
                 const v = record[k5];
                 const t = jsonName ? nameMap[k5] ?? k5 : k5;
                 if (!(t in out)) {
@@ -60515,8 +62409,9 @@ var init_JsonShapeDeserializer = __esm({
             const mapMember = ns.getValueSchema();
             const out = {};
             for (const _k in value) {
-              if (!hasOwn(value, _k))
+              if (!hasOwn(value, _k)) {
                 continue;
+              }
               if (_k === "__proto__") {
                 writeKey(out);
               }
@@ -60578,8 +62473,9 @@ var init_JsonShapeDeserializer = __esm({
           if (isObject) {
             const out = Array.isArray(value) ? [] : {};
             for (const k5 in value) {
-              if (!hasOwn(value, k5))
+              if (!hasOwn(value, k5)) {
                 continue;
+              }
               if (k5 === "__proto__") {
                 writeKey(out);
               }
@@ -60601,10 +62497,10 @@ var init_JsonShapeDeserializer = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/json/jsonReplacer.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/json/jsonReplacer.js
 var NUMERIC_CONTROL_CHAR, JsonReplacer;
 var init_jsonReplacer = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/json/jsonReplacer.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/json/jsonReplacer.js"() {
     init_serde();
     NUMERIC_CONTROL_CHAR = String.fromCharCode(925);
     JsonReplacer = class {
@@ -60654,16 +62550,15 @@ var init_jsonReplacer = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/json/codec-v1/JsonShapeSerializer.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/json/codec-v1/JsonShapeSerializer.js
 var JsonShapeSerializer;
 var init_JsonShapeSerializer = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/json/codec-v1/JsonShapeSerializer.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/json/codec-v1/JsonShapeSerializer.js"() {
     init_determineTimestampFormat();
     init_schema();
     init_serde();
     init_ConfigurableSerdeContext();
     init_jsonReplacer();
-    init_writeKey();
     init_transport();
     JsonShapeSerializer = class extends SerdeContextConfig {
       settings;
@@ -60733,8 +62628,9 @@ var init_JsonShapeSerializer = __esm({
               }
             } else if (typeof record.__type === "string") {
               for (const k5 in record) {
-                if (!hasOwn(record, k5))
+                if (!hasOwn(record, k5)) {
                   continue;
+                }
                 const v = record[k5];
                 const targetKey = jsonName ? nameMap[k5] ?? k5 : k5;
                 if (!(targetKey in out)) {
@@ -60760,8 +62656,9 @@ var init_JsonShapeSerializer = __esm({
             const out = {};
             const sparse = !!ns.getMergedTraits().sparse;
             for (const _k in value) {
-              if (!hasOwn(value, _k))
+              if (!hasOwn(value, _k)) {
                 continue;
+              }
               const _v = value[_k];
               if (sparse || _v != null) {
                 if (_k === "__proto__") {
@@ -60834,8 +62731,9 @@ var init_JsonShapeSerializer = __esm({
             }
             const out = Array.isArray(value) ? [] : {};
             for (const k5 in value) {
-              if (!hasOwn(value, k5))
+              if (!hasOwn(value, k5)) {
                 continue;
+              }
               const v = value[k5];
               if (k5 === "__proto__") {
                 writeKey(out);
@@ -60858,10 +62756,10 @@ var init_JsonShapeSerializer = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/json/codec-v1/JsonCodec.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/json/codec-v1/JsonCodec.js
 var JsonCodec;
 var init_JsonCodec = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/json/codec-v1/JsonCodec.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/json/codec-v1/JsonCodec.js"() {
     init_ConfigurableSerdeContext();
     init_JsonShapeDeserializer();
     init_JsonShapeSerializer();
@@ -60885,9 +62783,10 @@ var init_JsonCodec = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/index.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/index.js
 var protocols_exports = {};
 __export(protocols_exports, {
+  AbstractRpcV2Protocol: () => AbstractRpcV2Protocol,
   Field: () => Field,
   Fields: () => Fields,
   FromStringShapeDeserializer: () => FromStringShapeDeserializer,
@@ -60931,12 +62830,13 @@ __export(protocols_exports, {
   resolvedPath: () => resolvedPath
 });
 var init_protocols = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/protocols/index.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/protocols/index.js"() {
     init_collect_stream_body();
     init_extended_encode_uri_component();
     init_HttpBindingProtocol();
     init_HttpProtocol();
     init_RpcProtocol();
+    init_AbstractRpcV2Protocol();
     init_requestBuilder();
     init_resolve_path();
     init_FromStringShapeDeserializer();
@@ -60968,10 +62868,10 @@ var init_protocols = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/service-error-classification/constants.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/service-error-classification/constants.js
 var CLOCK_SKEW_ERROR_CODES, THROTTLING_ERROR_CODES, TRANSIENT_ERROR_CODES, TRANSIENT_ERROR_STATUS_CODES, NODEJS_TIMEOUT_ERROR_CODES, NODEJS_NETWORK_ERROR_CODES;
 var init_constants4 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/service-error-classification/constants.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/service-error-classification/constants.js"() {
     CLOCK_SKEW_ERROR_CODES = [
       "AccessDeniedException",
       "AuthFailure",
@@ -61004,13 +62904,13 @@ var init_constants4 = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/service-error-classification/service-error-classification.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/service-error-classification/service-error-classification.js
 function isNodeJsHttp2TransientError(error3) {
   return error3.code === "ERR_HTTP2_STREAM_ERROR" && error3.message.includes("NGHTTP2_REFUSED_STREAM");
 }
 var isRetryableByTrait, isClockSkewError, isClockSkewCorrectedError, isBrowserNetworkError, isThrottlingError, isTransientError, isServerError;
 var init_service_error_classification = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/service-error-classification/service-error-classification.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/service-error-classification/service-error-classification.js"() {
     init_constants4();
     isRetryableByTrait = (error3) => error3?.$retryable !== void 0;
     isClockSkewError = (error3) => CLOCK_SKEW_ERROR_CODES.includes(error3.name);
@@ -61044,10 +62944,38 @@ var init_service_error_classification = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/constants.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/race.js
+var race, createAbortError, isAbortError;
+var init_race = __esm({
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/race.js"() {
+    race = (promise, signal) => {
+      if (!signal) {
+        return promise;
+      }
+      let cleanup = () => {
+      };
+      const aborted = new Promise((_, reject) => {
+        const handler = () => reject(createAbortError());
+        if (signal.aborted) {
+          handler();
+        } else if (typeof signal.addEventListener === "function") {
+          signal.addEventListener("abort", handler, { once: true });
+          cleanup = () => signal.removeEventListener("abort", handler);
+        } else {
+          signal.onabort = handler;
+        }
+      });
+      return Promise.race([promise, aborted]).finally(cleanup);
+    };
+    createAbortError = () => Object.assign(new Error("Request aborted"), { name: "AbortError" });
+    isAbortError = (error3) => typeof error3 === "object" && error3 !== null && "name" in error3 && error3.name === "AbortError";
+  }
+});
+
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/constants.js
 var DEFAULT_RETRY_DELAY_BASE, MAXIMUM_RETRY_DELAY, THROTTLING_RETRY_DELAY_BASE, INITIAL_RETRY_TOKENS, RETRY_COST, TIMEOUT_RETRY_COST, NO_RETRY_INCREMENT, INVOCATION_ID_HEADER, REQUEST_HEADER;
 var init_constants5 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/constants.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/constants.js"() {
     DEFAULT_RETRY_DELAY_BASE = 100;
     MAXIMUM_RETRY_DELAY = 20 * 1e3;
     THROTTLING_RETRY_DELAY_BASE = 500;
@@ -61060,14 +62988,15 @@ var init_constants5 = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/parseRetryAfterHeader.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/parseRetryAfterHeader.js
 function parseRetryAfterHeader(response, logger2) {
   if (!HttpResponse.isInstance(response)) {
     return;
   }
   for (const header in response.headers) {
-    if (!hasOwn(response.headers, header))
+    if (!hasOwn(response.headers, header)) {
       continue;
+    }
     const h5 = header.toLowerCase();
     if (h5 === "retry-after") {
       const retryAfter = response.headers[header];
@@ -61106,37 +63035,42 @@ function getRetryAfterHint(response, logger2) {
   return parseRetryAfterHeader(response, logger2);
 }
 var init_parseRetryAfterHeader = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/parseRetryAfterHeader.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/parseRetryAfterHeader.js"() {
     init_transport();
     init_protocols();
     init_serde();
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/util.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/util.js
 var asSdkError;
 var init_util = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/util.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/util.js"() {
     asSdkError = (error3) => {
-      if (error3 instanceof Error)
+      if (error3 instanceof Error) {
         return error3;
-      if (error3 instanceof Object)
+      }
+      if (error3 instanceof Object) {
         return Object.assign(new Error(), error3);
-      if (typeof error3 === "string")
+      }
+      if (typeof error3 === "string") {
         return new Error(error3);
+      }
       return new Error(`AWS SDK error wrapper for ${error3}`);
     };
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/retryMiddleware.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/retryMiddleware.js
 function bindRetryMiddleware(isStreamingPayload2) {
   return (options) => (next, context) => async (args) => {
     let retryStrategy = await options.retryStrategy();
     const maxAttempts = await options.maxAttempts();
+    const abortSignal = context[import_types24.SMITHY_CONTEXT_KEY]?.abortSignal;
     if (isRetryStrategyV2(retryStrategy)) {
       retryStrategy = retryStrategy;
-      let retryToken = await retryStrategy.acquireInitialRetryToken((context["partition_id"] ?? "") + (context.__retryLongPoll ? ":longpoll" : ""));
+      const retryTokenScope = (context["partition_id"] ?? "") + (context.__retryLongPoll ? ":longpoll" : "");
+      let retryToken = await race(retryStrategy.acquireInitialRetryToken(retryTokenScope), abortSignal);
       let lastError = new Error();
       let attempts = 0;
       let totalRetryDelay = 0;
@@ -61163,8 +63097,11 @@ function bindRetryMiddleware(isStreamingPayload2) {
             throw lastError;
           }
           try {
-            retryToken = await retryStrategy.refreshRetryTokenForRetry(retryToken, retryErrorInfo);
-          } catch (ignoredRefreshError) {
+            retryToken = await race(retryStrategy.refreshRetryTokenForRetry(retryToken, retryErrorInfo), abortSignal);
+          } catch (refreshError) {
+            if (abortSignal?.aborted && isAbortError(refreshError)) {
+              throw refreshError;
+            }
             if (!lastError.$metadata) {
               lastError.$metadata = {};
             }
@@ -61176,7 +63113,7 @@ function bindRetryMiddleware(isStreamingPayload2) {
           const delay = retryToken.getRetryDelay();
           totalRetryDelay += (retryToken?.$retryLog?.acquisitionDelay ?? 0) + delay;
           if (delay > 0) {
-            await cooldown(delay);
+            await race(new Promise((resolve) => setTimeout(resolve, delay)), abortSignal);
           }
         }
       }
@@ -61197,17 +63134,18 @@ function bindGetRetryPlugin(isStreamingPayload2) {
     }
   });
 }
-var cooldown, isRetryStrategyV2, getRetryErrorInfo, getRetryErrorType, retryMiddlewareOptions;
+var import_types24, isRetryStrategyV2, getRetryErrorInfo, getRetryErrorType, retryMiddlewareOptions;
 var init_retryMiddleware = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/retryMiddleware.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/retryMiddleware.js"() {
     init_client2();
     init_protocols();
     init_serde();
+    import_types24 = __toESM(require_dist_cjs());
     init_service_error_classification();
+    init_race();
     init_constants5();
     init_parseRetryAfterHeader();
     init_util();
-    cooldown = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
     isRetryStrategyV2 = (retryStrategy) => typeof retryStrategy.acquireInitialRetryToken !== "undefined" && typeof retryStrategy.refreshRetryTokenForRetry !== "undefined" && typeof retryStrategy.recordSuccess !== "undefined";
     getRetryErrorInfo = (error3, logger2) => {
       const errorInfo = {
@@ -61221,12 +63159,15 @@ var init_retryMiddleware = __esm({
       return errorInfo;
     };
     getRetryErrorType = (error3) => {
-      if (isThrottlingError(error3))
+      if (isThrottlingError(error3)) {
         return "THROTTLING";
-      if (isTransientError(error3))
+      }
+      if (isTransientError(error3)) {
         return "TRANSIENT";
-      if (isServerError(error3))
+      }
+      if (isServerError(error3)) {
         return "SERVER_ERROR";
+      }
       return "CLIENT_ERROR";
     };
     retryMiddlewareOptions = {
@@ -61239,10 +63180,10 @@ var init_retryMiddleware = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/DefaultRateLimiter.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/DefaultRateLimiter.js
 var DefaultRateLimiter;
 var init_DefaultRateLimiter = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/DefaultRateLimiter.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/DefaultRateLimiter.js"() {
     init_service_error_classification();
     DefaultRateLimiter = class _DefaultRateLimiter {
       static setTimeoutFn = (fn, delay) => setTimeout(fn, delay);
@@ -61356,10 +63297,10 @@ var init_DefaultRateLimiter = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/retries-2026-config.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/retries-2026-config.js
 var Retry;
 var init_retries_2026_config = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/retries-2026-config.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/retries-2026-config.js"() {
     Retry = class _Retry {
       static v2026 = typeof process !== "undefined" && process.env?.SMITHY_NEW_RETRIES_2026 === "true";
       static delay() {
@@ -61381,10 +63322,10 @@ var init_retries_2026_config = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/DefaultRetryBackoffStrategy.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/DefaultRetryBackoffStrategy.js
 var DefaultRetryBackoffStrategy;
 var init_DefaultRetryBackoffStrategy = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/DefaultRetryBackoffStrategy.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/DefaultRetryBackoffStrategy.js"() {
     init_constants5();
     init_retries_2026_config();
     DefaultRetryBackoffStrategy = class {
@@ -61402,10 +63343,10 @@ var init_DefaultRetryBackoffStrategy = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/DefaultRetryToken.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/DefaultRetryToken.js
 var DefaultRetryToken;
 var init_DefaultRetryToken = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/DefaultRetryToken.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/DefaultRetryToken.js"() {
     init_constants5();
     DefaultRetryToken = class {
       delay;
@@ -61437,10 +63378,10 @@ var init_DefaultRetryToken = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/config.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/config.js
 var RETRY_MODES, DEFAULT_MAX_ATTEMPTS, DEFAULT_RETRY_MODE;
 var init_config3 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/config.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/config.js"() {
     (function(RETRY_MODES2) {
       RETRY_MODES2["STANDARD"] = "standard";
       RETRY_MODES2["ADAPTIVE"] = "adaptive";
@@ -61450,10 +63391,10 @@ var init_config3 = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/StandardRetryStrategy.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/StandardRetryStrategy.js
 var refusal, StandardRetryStrategy;
 var init_StandardRetryStrategy = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/StandardRetryStrategy.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/StandardRetryStrategy.js"() {
     init_DefaultRetryBackoffStrategy();
     init_DefaultRetryToken();
     init_config3();
@@ -61550,10 +63491,10 @@ var init_StandardRetryStrategy = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/AdaptiveRetryStrategy.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/AdaptiveRetryStrategy.js
 var AdaptiveRetryStrategy;
 var init_AdaptiveRetryStrategy = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/AdaptiveRetryStrategy.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/AdaptiveRetryStrategy.js"() {
     init_DefaultRateLimiter();
     init_StandardRetryStrategy();
     init_config3();
@@ -61591,10 +63532,10 @@ var init_AdaptiveRetryStrategy = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/ConfiguredRetryStrategy.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/ConfiguredRetryStrategy.js
 var ConfiguredRetryStrategy;
 var init_ConfiguredRetryStrategy = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/ConfiguredRetryStrategy.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/util-retry/ConfiguredRetryStrategy.js"() {
     init_StandardRetryStrategy();
     init_retries_2026_config();
     ConfiguredRetryStrategy = class extends StandardRetryStrategy {
@@ -61615,10 +63556,10 @@ var init_ConfiguredRetryStrategy = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/retry-pre-sra-deprecated/defaultRetryQuota.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/retry-pre-sra-deprecated/defaultRetryQuota.js
 var getDefaultRetryQuota;
 var init_defaultRetryQuota = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/retry-pre-sra-deprecated/defaultRetryQuota.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/retry-pre-sra-deprecated/defaultRetryQuota.js"() {
     init_constants5();
     getDefaultRetryQuota = (initialRetryTokens, options) => {
       const MAX_CAPACITY = initialRetryTokens;
@@ -61649,19 +63590,19 @@ var init_defaultRetryQuota = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/retry-pre-sra-deprecated/delayDecider.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/retry-pre-sra-deprecated/delayDecider.js
 var defaultDelayDecider;
 var init_delayDecider = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/retry-pre-sra-deprecated/delayDecider.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/retry-pre-sra-deprecated/delayDecider.js"() {
     init_constants5();
     defaultDelayDecider = (delayBase, attempts) => Math.floor(Math.min(MAXIMUM_RETRY_DELAY, Math.random() * 2 ** attempts * delayBase));
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/retry-pre-sra-deprecated/retryDecider.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/retry-pre-sra-deprecated/retryDecider.js
 var defaultRetryDecider;
 var init_retryDecider = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/retry-pre-sra-deprecated/retryDecider.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/retry-pre-sra-deprecated/retryDecider.js"() {
     init_service_error_classification();
     defaultRetryDecider = (error3) => {
       if (!error3) {
@@ -61672,10 +63613,10 @@ var init_retryDecider = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/retry-pre-sra-deprecated/StandardRetryStrategy.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/retry-pre-sra-deprecated/StandardRetryStrategy.js
 var StandardRetryStrategy2, getDelayFromRetryAfterHeader;
 var init_StandardRetryStrategy2 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/retry-pre-sra-deprecated/StandardRetryStrategy.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/retry-pre-sra-deprecated/StandardRetryStrategy.js"() {
     init_protocols();
     init_serde();
     init_service_error_classification();
@@ -61757,25 +63698,28 @@ var init_StandardRetryStrategy2 = __esm({
       }
     };
     getDelayFromRetryAfterHeader = (response) => {
-      if (!HttpResponse.isInstance(response))
+      if (!HttpResponse.isInstance(response)) {
         return;
+      }
       const retryAfterHeaderName = Object.keys(response.headers).find((key) => key.toLowerCase() === "retry-after");
-      if (!retryAfterHeaderName)
+      if (!retryAfterHeaderName) {
         return;
+      }
       const retryAfter = response.headers[retryAfterHeaderName];
       const retryAfterSeconds = Number(retryAfter);
-      if (!Number.isNaN(retryAfterSeconds))
+      if (!Number.isNaN(retryAfterSeconds)) {
         return Math.min(retryAfterSeconds * 1e3, 2e4);
+      }
       const retryAfterDate = new Date(retryAfter);
       return Math.min(retryAfterDate.getTime() - Date.now(), 2e4);
     };
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/retry-pre-sra-deprecated/AdaptiveRetryStrategy.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/retry-pre-sra-deprecated/AdaptiveRetryStrategy.js
 var AdaptiveRetryStrategy2;
 var init_AdaptiveRetryStrategy2 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/retry-pre-sra-deprecated/AdaptiveRetryStrategy.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/retry-pre-sra-deprecated/AdaptiveRetryStrategy.js"() {
     init_DefaultRateLimiter();
     init_config3();
     init_StandardRetryStrategy2();
@@ -61801,10 +63745,10 @@ var init_AdaptiveRetryStrategy2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/configurations.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/configurations.js
 var ENV_MAX_ATTEMPTS, CONFIG_MAX_ATTEMPTS, NODE_MAX_ATTEMPT_CONFIG_OPTIONS, resolveRetryConfig, ENV_RETRY_MODE, CONFIG_RETRY_MODE, NODE_RETRY_MODE_CONFIG_OPTIONS;
 var init_configurations = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/configurations.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/configurations.js"() {
     init_client2();
     init_AdaptiveRetryStrategy();
     init_StandardRetryStrategy();
@@ -61815,8 +63759,9 @@ var init_configurations = __esm({
     NODE_MAX_ATTEMPT_CONFIG_OPTIONS = {
       environmentVariableSelector: (env2) => {
         const value = env2[ENV_MAX_ATTEMPTS];
-        if (!value)
+        if (!value) {
           return void 0;
+        }
         const maxAttempt = parseInt(value);
         if (Number.isNaN(maxAttempt)) {
           throw new Error(`Environment variable ${ENV_MAX_ATTEMPTS} mast be a number, got "${value}"`);
@@ -61825,8 +63770,9 @@ var init_configurations = __esm({
       },
       configFileSelector: (profile) => {
         const value = profile[CONFIG_MAX_ATTEMPTS];
-        if (!value)
+        if (!value) {
           return void 0;
+        }
         const maxAttempt = parseInt(value);
         if (Number.isNaN(maxAttempt)) {
           throw new Error(`Shared config file entry ${CONFIG_MAX_ATTEMPTS} mast be a number, got "${value}"`);
@@ -61869,10 +63815,10 @@ var init_configurations = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/omitRetryHeadersMiddleware.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/omitRetryHeadersMiddleware.js
 var omitRetryHeadersMiddleware, omitRetryHeadersMiddlewareOptions, getOmitRetryHeadersPlugin;
 var init_omitRetryHeadersMiddleware = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/omitRetryHeadersMiddleware.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/middleware-retry/omitRetryHeadersMiddleware.js"() {
     init_protocols();
     init_constants5();
     omitRetryHeadersMiddleware = () => (next) => async (args) => {
@@ -61898,7 +63844,7 @@ var init_omitRetryHeadersMiddleware = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/index.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/index.js
 var retry_exports = {};
 __export(retry_exports, {
   AdaptiveRetryStrategy: () => AdaptiveRetryStrategy,
@@ -61947,7 +63893,7 @@ __export(retry_exports, {
 });
 var retryMiddleware, getRetryPlugin;
 var init_retry2 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/retry/index.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/retry/index.js"() {
     init_isStreamingPayload();
     init_retryMiddleware();
     init_service_error_classification();
@@ -61971,7 +63917,7 @@ var init_retry2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/setFeature.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/setFeature.js
 function setFeature2(context, feature, value) {
   if (!context.__aws_sdk_context) {
     context.__aws_sdk_context = {
@@ -61983,13 +63929,13 @@ function setFeature2(context, feature, value) {
   context.__aws_sdk_context.features[feature] = value;
 }
 var init_setFeature = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/setFeature.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/setFeature.js"() {
     init_retry2();
     Retry.v2026 ||= typeof process === "object" && process.env?.AWS_NEW_RETRIES_2026 === "true";
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/setTokenFeature.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/setTokenFeature.js
 function setTokenFeature(token, feature, value) {
   if (!token.$source) {
     token.$source = {};
@@ -61998,21 +63944,39 @@ function setTokenFeature(token, feature, value) {
   return token;
 }
 var init_setTokenFeature = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/setTokenFeature.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/setTokenFeature.js"() {
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-host-header/hostHeaderMiddleware.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/getDefaultSocketTimeout.js
+var isDefaultSocketTimeoutEnabled, getDefaultSocketTimeout;
+var init_getDefaultSocketTimeout = __esm({
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/getDefaultSocketTimeout.js"() {
+    isDefaultSocketTimeoutEnabled = () => typeof process === "object" && process?.env?.AWS_ENABLE_DEFAULT_SOCKET_TIMEOUT_2026 === "true";
+    getDefaultSocketTimeout = (requestHandler, timeoutMs) => {
+      if (!isDefaultSocketTimeoutEnabled()) {
+        return void 0;
+      }
+      if (typeof requestHandler?.handle === "function") {
+        return void 0;
+      }
+      return timeoutMs;
+    };
+  }
+});
+
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-host-header/hostHeaderMiddleware.js
 function resolveHostHeaderConfig(input) {
   return input;
 }
 var hostHeaderMiddleware, hostHeaderMiddlewareOptions, getHostHeaderPlugin;
 var init_hostHeaderMiddleware = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-host-header/hostHeaderMiddleware.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-host-header/hostHeaderMiddleware.js"() {
     init_protocols();
     hostHeaderMiddleware = (options) => (next) => async (args) => {
-      if (!HttpRequest.isInstance(args.request))
+      if (!HttpRequest.isInstance(args.request)) {
         return next(args);
+      }
       const { request } = args;
       const { handlerProtocol = "" } = options.requestHandler.metadata || {};
       if (handlerProtocol.indexOf("h2") >= 0 && !request.headers[":authority"]) {
@@ -62020,8 +63984,9 @@ var init_hostHeaderMiddleware = __esm({
         request.headers[":authority"] = request.hostname + (request.port ? ":" + request.port : "");
       } else if (!request.headers["host"]) {
         let host = request.hostname;
-        if (request.port != null)
+        if (request.port != null) {
           host += `:${request.port}`;
+        }
         request.headers["host"] = host;
       }
       return next(args);
@@ -62041,10 +64006,10 @@ var init_hostHeaderMiddleware = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-logger/loggerMiddleware.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-logger/loggerMiddleware.js
 var loggerMiddleware, loggerMiddlewareOptions, getLoggerPlugin;
 var init_loggerMiddleware = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-logger/loggerMiddleware.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-logger/loggerMiddleware.js"() {
     loggerMiddleware = () => (next, context) => async (args) => {
       try {
         const response = await next(args);
@@ -62089,10 +64054,10 @@ var init_loggerMiddleware = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-recursion-detection/configuration.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-recursion-detection/configuration.js
 var recursionDetectionMiddlewareOptions;
 var init_configuration = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-recursion-detection/configuration.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-recursion-detection/configuration.js"() {
     recursionDetectionMiddlewareOptions = {
       step: "build",
       tags: ["RECURSION_DETECTION", "TRACE_CONTEXT_PROPAGATION"],
@@ -62230,7 +64195,7 @@ var init_invoke_store = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-recursion-detection/recursionDetectionMiddleware.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-recursion-detection/recursionDetectionMiddleware.js
 function sanitizeTraceHeaders(headers) {
   for (const header of Object.keys(headers)) {
     const lower = header.toLowerCase();
@@ -62242,7 +64207,7 @@ function sanitizeTraceHeaders(headers) {
 }
 var AWS_LAMBDA_FUNCTION_NAME, _X_AMZN_TRACE_ID, X_AMZN_TRACE_ID, TRACEPARENT, TRACESTATE, BAGGAGE, recursionDetectionMiddleware;
 var init_recursionDetectionMiddleware = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-recursion-detection/recursionDetectionMiddleware.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-recursion-detection/recursionDetectionMiddleware.js"() {
     init_invoke_store();
     init_protocols();
     AWS_LAMBDA_FUNCTION_NAME = "AWS_LAMBDA_FUNCTION_NAME";
@@ -62294,10 +64259,10 @@ var init_recursionDetectionMiddleware = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-recursion-detection/getRecursionDetectionPlugin.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-recursion-detection/getRecursionDetectionPlugin.js
 var getRecursionDetectionPlugin;
 var init_getRecursionDetectionPlugin = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-recursion-detection/getRecursionDetectionPlugin.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-recursion-detection/getRecursionDetectionPlugin.js"() {
     init_configuration();
     init_recursionDetectionMiddleware();
     getRecursionDetectionPlugin = (options) => ({
@@ -62308,10 +64273,10 @@ var init_getRecursionDetectionPlugin = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-auth-scheme/resolveAuthOptions.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-auth-scheme/resolveAuthOptions.js
 var resolveAuthOptions;
 var init_resolveAuthOptions = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-auth-scheme/resolveAuthOptions.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-auth-scheme/resolveAuthOptions.js"() {
     resolveAuthOptions = (candidateAuthOptions, authSchemePreference) => {
       if (!authSchemePreference || authSchemePreference.length === 0) {
         return candidateAuthOptions;
@@ -62335,7 +64300,7 @@ var init_resolveAuthOptions = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-auth-scheme/httpAuthSchemeMiddleware.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-auth-scheme/httpAuthSchemeMiddleware.js
 function convertHttpAuthSchemesToMap(httpAuthSchemes) {
   const map3 = /* @__PURE__ */ new Map();
   for (const scheme of httpAuthSchemes) {
@@ -62345,7 +64310,7 @@ function convertHttpAuthSchemesToMap(httpAuthSchemes) {
 }
 var httpAuthSchemeMiddleware;
 var init_httpAuthSchemeMiddleware = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-auth-scheme/httpAuthSchemeMiddleware.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-auth-scheme/httpAuthSchemeMiddleware.js"() {
     init_transport();
     init_resolveAuthOptions();
     httpAuthSchemeMiddleware = (config, mwOptions) => (next, context) => async (args) => {
@@ -62384,10 +64349,10 @@ var init_httpAuthSchemeMiddleware = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-auth-scheme/getHttpAuthSchemeEndpointRuleSetPlugin.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-auth-scheme/getHttpAuthSchemeEndpointRuleSetPlugin.js
 var httpAuthSchemeEndpointRuleSetMiddlewareOptions, getHttpAuthSchemeEndpointRuleSetPlugin;
 var init_getHttpAuthSchemeEndpointRuleSetPlugin = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-auth-scheme/getHttpAuthSchemeEndpointRuleSetPlugin.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-auth-scheme/getHttpAuthSchemeEndpointRuleSetPlugin.js"() {
     init_httpAuthSchemeMiddleware();
     httpAuthSchemeEndpointRuleSetMiddlewareOptions = {
       step: "serialize",
@@ -62408,10 +64373,10 @@ var init_getHttpAuthSchemeEndpointRuleSetPlugin = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-auth-scheme/getHttpAuthSchemePlugin.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-auth-scheme/getHttpAuthSchemePlugin.js
 var httpAuthSchemeMiddlewareOptions, getHttpAuthSchemePlugin;
 var init_getHttpAuthSchemePlugin = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-auth-scheme/getHttpAuthSchemePlugin.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-auth-scheme/getHttpAuthSchemePlugin.js"() {
     init_httpAuthSchemeMiddleware();
     httpAuthSchemeMiddlewareOptions = {
       step: "serialize",
@@ -62432,19 +64397,19 @@ var init_getHttpAuthSchemePlugin = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-auth-scheme/index.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-auth-scheme/index.js
 var init_middleware_http_auth_scheme = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-auth-scheme/index.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-auth-scheme/index.js"() {
     init_httpAuthSchemeMiddleware();
     init_getHttpAuthSchemeEndpointRuleSetPlugin();
     init_getHttpAuthSchemePlugin();
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-signing/httpSigningMiddleware.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-signing/httpSigningMiddleware.js
 var defaultErrorHandler, defaultSuccessHandler, httpSigningMiddleware;
 var init_httpSigningMiddleware = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-signing/httpSigningMiddleware.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-signing/httpSigningMiddleware.js"() {
     init_protocols();
     init_transport();
     defaultErrorHandler = (signingProperties) => (error3) => {
@@ -62472,10 +64437,10 @@ var init_httpSigningMiddleware = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-signing/getHttpSigningMiddleware.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-signing/getHttpSigningMiddleware.js
 var httpSigningMiddlewareOptions, getHttpSigningPlugin;
 var init_getHttpSigningMiddleware = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-signing/getHttpSigningMiddleware.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-signing/getHttpSigningMiddleware.js"() {
     init_httpSigningMiddleware();
     httpSigningMiddlewareOptions = {
       step: "finalizeRequest",
@@ -62494,28 +64459,29 @@ var init_getHttpSigningMiddleware = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-signing/index.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-signing/index.js
 var init_middleware_http_signing = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-signing/index.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/middleware-http-signing/index.js"() {
     init_httpSigningMiddleware();
     init_getHttpSigningMiddleware();
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/normalizeProvider.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/normalizeProvider.js
 var normalizeProvider2;
 var init_normalizeProvider2 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/normalizeProvider.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/normalizeProvider.js"() {
     normalizeProvider2 = (input) => {
-      if (typeof input === "function")
+      if (typeof input === "function") {
         return input;
+      }
       const promisified = Promise.resolve(input);
       return () => promisified;
     };
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/pagination/createPaginator.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/pagination/createPaginator.js
 function createPaginator(ClientCtor, CommandCtor, inputTokenName, outputTokenName, pageSizeTokenName) {
   return async function* paginateOperation(config, input, ...additionalArguments) {
     const _input = input;
@@ -62542,7 +64508,7 @@ function createPaginator(ClientCtor, CommandCtor, inputTokenName, outputTokenNam
 }
 var makePagedClientRequest, get;
 var init_createPaginator = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/pagination/createPaginator.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/pagination/createPaginator.js"() {
     makePagedClientRequest = async (CommandCtor, client, input, withCommand = (_) => _, ...args) => {
       let command5 = new CommandCtor(input);
       command5 = withCommand(command5) ?? command5;
@@ -62562,7 +64528,7 @@ var init_createPaginator = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/setFeature.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/setFeature.js
 function setFeature3(context, feature, value) {
   if (!context.__smithy_context) {
     context.__smithy_context = {
@@ -62574,21 +64540,22 @@ function setFeature3(context, feature, value) {
   context.__smithy_context.features[feature] = value;
 }
 var init_setFeature2 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/setFeature.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/setFeature.js"() {
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/util-identity-and-auth/DefaultIdentityProviderConfig.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/util-identity-and-auth/DefaultIdentityProviderConfig.js
 var DefaultIdentityProviderConfig;
 var init_DefaultIdentityProviderConfig = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/util-identity-and-auth/DefaultIdentityProviderConfig.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/util-identity-and-auth/DefaultIdentityProviderConfig.js"() {
     init_transport();
     DefaultIdentityProviderConfig = class {
       authSchemes = /* @__PURE__ */ new Map();
       constructor(config) {
         for (const key in config) {
-          if (!hasOwn(config, key))
+          if (!hasOwn(config, key)) {
             continue;
+          }
           const value = config[key];
           if (value !== void 0) {
             this.authSchemes.set(key, value);
@@ -62602,12 +64569,12 @@ var init_DefaultIdentityProviderConfig = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/util-identity-and-auth/httpAuthSchemes/httpApiKeyAuth.js
-var import_types24, HttpApiKeyAuthSigner;
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/util-identity-and-auth/httpAuthSchemes/httpApiKeyAuth.js
+var import_types25, HttpApiKeyAuthSigner;
 var init_httpApiKeyAuth = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/util-identity-and-auth/httpAuthSchemes/httpApiKeyAuth.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/util-identity-and-auth/httpAuthSchemes/httpApiKeyAuth.js"() {
     init_protocols();
-    import_types24 = __toESM(require_dist_cjs());
+    import_types25 = __toESM(require_dist_cjs());
     HttpApiKeyAuthSigner = class {
       async sign(httpRequest, identity, signingProperties) {
         if (!signingProperties) {
@@ -62623,9 +64590,9 @@ var init_httpApiKeyAuth = __esm({
           throw new Error("request could not be signed with `apiKey` since the `apiKey` is not defined");
         }
         const clonedRequest = HttpRequest.clone(httpRequest);
-        if (signingProperties.in === import_types24.HttpApiKeyAuthLocation.QUERY) {
+        if (signingProperties.in === import_types25.HttpApiKeyAuthLocation.QUERY) {
           clonedRequest.query[signingProperties.name] = identity.apiKey;
-        } else if (signingProperties.in === import_types24.HttpApiKeyAuthLocation.HEADER) {
+        } else if (signingProperties.in === import_types25.HttpApiKeyAuthLocation.HEADER) {
           clonedRequest.headers[signingProperties.name] = signingProperties.scheme ? `${signingProperties.scheme} ${identity.apiKey}` : identity.apiKey;
         } else {
           throw new Error("request can only be signed with `apiKey` locations `query` or `header`, but found: `" + signingProperties.in + "`");
@@ -62636,10 +64603,10 @@ var init_httpApiKeyAuth = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/util-identity-and-auth/httpAuthSchemes/httpBearerAuth.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/util-identity-and-auth/httpAuthSchemes/httpBearerAuth.js
 var HttpBearerAuthSigner;
 var init_httpBearerAuth = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/util-identity-and-auth/httpAuthSchemes/httpBearerAuth.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/util-identity-and-auth/httpAuthSchemes/httpBearerAuth.js"() {
     init_protocols();
     HttpBearerAuthSigner = class {
       async sign(httpRequest, identity, signingProperties) {
@@ -62654,10 +64621,10 @@ var init_httpBearerAuth = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/util-identity-and-auth/httpAuthSchemes/noAuth.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/util-identity-and-auth/httpAuthSchemes/noAuth.js
 var NoAuthSigner;
 var init_noAuth = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/util-identity-and-auth/httpAuthSchemes/noAuth.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/util-identity-and-auth/httpAuthSchemes/noAuth.js"() {
     NoAuthSigner = class {
       async sign(httpRequest, identity, signingProperties) {
         return httpRequest;
@@ -62666,19 +64633,19 @@ var init_noAuth = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/util-identity-and-auth/httpAuthSchemes/index.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/util-identity-and-auth/httpAuthSchemes/index.js
 var init_httpAuthSchemes = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/util-identity-and-auth/httpAuthSchemes/index.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/util-identity-and-auth/httpAuthSchemes/index.js"() {
     init_httpApiKeyAuth();
     init_httpBearerAuth();
     init_noAuth();
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/util-identity-and-auth/memoizeIdentityProvider.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/util-identity-and-auth/memoizeIdentityProvider.js
 var createIsIdentityExpiredFunction, EXPIRATION_MS, isIdentityExpired, doesIdentityRequireRefresh, memoizeIdentityProvider;
 var init_memoizeIdentityProvider = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/util-identity-and-auth/memoizeIdentityProvider.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/util-identity-and-auth/memoizeIdentityProvider.js"() {
     createIsIdentityExpiredFunction = (expirationMs) => function isIdentityExpired2(identity) {
       return doesIdentityRequireRefresh(identity) && identity.expiration.getTime() - Date.now() < expirationMs;
     };
@@ -62736,16 +64703,16 @@ var init_memoizeIdentityProvider = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/util-identity-and-auth/index.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/util-identity-and-auth/index.js
 var init_util_identity_and_auth = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/legacy-root-exports/util-identity-and-auth/index.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/legacy-root-exports/util-identity-and-auth/index.js"() {
     init_DefaultIdentityProviderConfig();
     init_httpAuthSchemes();
     init_memoizeIdentityProvider();
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/index.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/index.js
 var dist_es_exports = {};
 __export(dist_es_exports, {
   DefaultIdentityProviderConfig: () => DefaultIdentityProviderConfig,
@@ -62772,7 +64739,7 @@ __export(dist_es_exports, {
   setFeature: () => setFeature3
 });
 var init_dist_es = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/index.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/index.js"() {
     init_transport();
     init_middleware_http_auth_scheme();
     init_middleware_http_signing();
@@ -62784,7 +64751,7 @@ var init_dist_es = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-user-agent/configurations.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-user-agent/configurations.js
 function isValidUserAgentAppId(appId) {
   if (appId === void 0) {
     return true;
@@ -62812,16 +64779,16 @@ function resolveUserAgentConfig(input) {
 }
 var DEFAULT_UA_APP_ID;
 var init_configurations2 = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-user-agent/configurations.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-user-agent/configurations.js"() {
     init_dist_es();
     DEFAULT_UA_APP_ID = void 0;
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/lib/aws/partitions.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/lib/aws/partitions.js
 var partitionsInfo;
 var init_partitions = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/lib/aws/partitions.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/lib/aws/partitions.js"() {
     partitionsInfo = {
       "partitions": [
         {
@@ -63101,10 +65068,10 @@ var init_partitions = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/lib/aws/partition.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/lib/aws/partition.js
 var selectedPartitionsInfo, selectedUserAgentPrefix, partition, setPartitionInfo, useDefaultPartitionInfo, getUserAgentPrefix;
 var init_partition = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/lib/aws/partition.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/lib/aws/partition.js"() {
     init_partitions();
     selectedPartitionsInfo = partitionsInfo;
     selectedUserAgentPrefix = "";
@@ -63148,7 +65115,7 @@ var init_partition = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-user-agent/check-features.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-user-agent/check-features.js
 async function checkFeatures(context, config, args) {
   const request = args.request;
   if (request?.headers?.["smithy-protocol"] === "rpc-v2-cbor") {
@@ -63197,17 +65164,17 @@ async function checkFeatures(context, config, args) {
 }
 var ACCOUNT_ID_ENDPOINT_REGEX;
 var init_check_features = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-user-agent/check-features.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-user-agent/check-features.js"() {
     init_retry2();
     init_setFeature();
     ACCOUNT_ID_ENDPOINT_REGEX = /\d{12}\.ddb/;
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-user-agent/constants.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-user-agent/constants.js
 var USER_AGENT, X_AMZ_USER_AGENT, SPACE, UA_NAME_SEPARATOR, UA_NAME_ESCAPE_REGEX, UA_VALUE_ESCAPE_REGEX, UA_ESCAPE_CHAR;
 var init_constants6 = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-user-agent/constants.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-user-agent/constants.js"() {
     USER_AGENT = "user-agent";
     X_AMZ_USER_AGENT = "x-amz-user-agent";
     SPACE = " ";
@@ -63218,7 +65185,7 @@ var init_constants6 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-user-agent/encode-features.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-user-agent/encode-features.js
 function encodeFeatures(features) {
   let buffer = "";
   for (const key in features) {
@@ -63237,15 +65204,15 @@ function encodeFeatures(features) {
 }
 var BYTE_LIMIT;
 var init_encode_features = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-user-agent/encode-features.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-user-agent/encode-features.js"() {
     BYTE_LIMIT = 1024;
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-user-agent/user-agent-middleware.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-user-agent/user-agent-middleware.js
 var userAgentMiddleware, escapeUserAgent, getUserAgentMiddlewareOptions, getUserAgentPlugin;
 var init_user_agent_middleware = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-user-agent/user-agent-middleware.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/middleware-user-agent/user-agent-middleware.js"() {
     init_protocols();
     init_partition();
     init_check_features();
@@ -63321,10 +65288,10 @@ var init_user_agent_middleware = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-user-agent-node/getRuntimeUserAgentPair.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-user-agent-node/getRuntimeUserAgentPair.js
 var import_node_process, getRuntimeUserAgentPair;
 var init_getRuntimeUserAgentPair = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-user-agent-node/getRuntimeUserAgentPair.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-user-agent-node/getRuntimeUserAgentPair.js"() {
     import_node_process = require("node:process");
     getRuntimeUserAgentPair = () => {
       const runtimesToCheck = ["deno", "bun", "llrt"];
@@ -63338,20 +65305,20 @@ var init_getRuntimeUserAgentPair = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-user-agent-node/crt-availability.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-user-agent-node/crt-availability.js
 var crtAvailability;
 var init_crt_availability = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-user-agent-node/crt-availability.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-user-agent-node/crt-availability.js"() {
     crtAvailability = {
       isCrtAvailable: false
     };
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-user-agent-node/is-crt-available.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-user-agent-node/is-crt-available.js
 var isCrtAvailable;
 var init_is_crt_available = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-user-agent-node/is-crt-available.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-user-agent-node/is-crt-available.js"() {
     init_crt_availability();
     isCrtAvailable = () => {
       if (crtAvailability.isCrtAvailable) {
@@ -63362,10 +65329,10 @@ var init_is_crt_available = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-user-agent-node/defaultUserAgent.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-user-agent-node/defaultUserAgent.js
 var import_node_os2, import_node_process2, createDefaultUserAgentProvider, defaultUserAgent;
 var init_defaultUserAgent = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-user-agent-node/defaultUserAgent.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-user-agent-node/defaultUserAgent.js"() {
     import_node_os2 = require("node:os");
     import_node_process2 = require("node:process");
     init_getRuntimeUserAgentPair();
@@ -63400,10 +65367,10 @@ var init_defaultUserAgent = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-user-agent-node/nodeAppIdConfigOptions.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-user-agent-node/nodeAppIdConfigOptions.js
 var UA_APP_ID_ENV_NAME, UA_APP_ID_INI_NAME, UA_APP_ID_INI_NAME_DEPRECATED, NODE_APP_ID_CONFIG_OPTIONS;
 var init_nodeAppIdConfigOptions = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-user-agent-node/nodeAppIdConfigOptions.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-user-agent-node/nodeAppIdConfigOptions.js"() {
     init_configurations2();
     UA_APP_ID_ENV_NAME = "AWS_SDK_UA_APP_ID";
     UA_APP_ID_INI_NAME = "sdk_ua_app_id";
@@ -63416,830 +65383,2103 @@ var init_nodeAppIdConfigOptions = __esm({
   }
 });
 
-// node_modules/.pnpm/bowser@2.14.1/node_modules/bowser/es5.js
-var require_es5 = __commonJS({
-  "node_modules/.pnpm/bowser@2.14.1/node_modules/bowser/es5.js"(exports2, module2) {
-    !(function(e5, t) {
-      "object" == typeof exports2 && "object" == typeof module2 ? module2.exports = t() : "function" == typeof define && define.amd ? define([], t) : "object" == typeof exports2 ? exports2.bowser = t() : e5.bowser = t();
-    })(exports2, (function() {
-      return (function(e5) {
-        var t = {};
-        function r5(i5) {
-          if (t[i5]) return t[i5].exports;
-          var n3 = t[i5] = { i: i5, l: false, exports: {} };
-          return e5[i5].call(n3.exports, n3, n3.exports, r5), n3.l = true, n3.exports;
+// node_modules/.pnpm/bowser@2.15.0/node_modules/bowser/bowser.mjs
+var bowser_exports = {};
+__export(bowser_exports, {
+  BROWSER_MAP: () => BROWSER_MAP,
+  ENGINE_MAP: () => ENGINE_MAP,
+  OS_MAP: () => OS_MAP,
+  PLATFORMS_MAP: () => PLATFORMS_MAP,
+  default: () => Bowser,
+  getParser: () => getParser,
+  parse: () => parse
+});
+function _defineProperties(e5, r5) {
+  for (var t = 0; t < r5.length; t++) {
+    var o3 = r5[t];
+    o3.enumerable = o3.enumerable || false, o3.configurable = true, "value" in o3 && (o3.writable = true), Object.defineProperty(e5, _toPropertyKey(o3.key), o3);
+  }
+}
+function _createClass(e5, r5, t) {
+  return r5 && _defineProperties(e5.prototype, r5), t && _defineProperties(e5, t), Object.defineProperty(e5, "prototype", {
+    writable: false
+  }), e5;
+}
+function _toPropertyKey(t) {
+  var i5 = _toPrimitive(t, "string");
+  return "symbol" == typeof i5 ? i5 : i5 + "";
+}
+function _toPrimitive(t, r5) {
+  if ("object" != typeof t || !t) return t;
+  var e5 = t[Symbol.toPrimitive];
+  if (void 0 !== e5) {
+    var i5 = e5.call(t, r5 || "default");
+    if ("object" != typeof i5) return i5;
+    throw new TypeError("@@toPrimitive must return a primitive value.");
+  }
+  return ("string" === r5 ? String : Number)(t);
+}
+var BROWSER_ALIASES_MAP, BROWSER_MAP, PLATFORMS_MAP, OS_MAP, ENGINE_MAP, Utils, commonVersionIdentifier, browsersList, parser_os_default, parser_platforms_default, parser_engines_default, Parser, Bowser, parse, getParser;
+var init_bowser = __esm({
+  "node_modules/.pnpm/bowser@2.15.0/node_modules/bowser/bowser.mjs"() {
+    BROWSER_ALIASES_MAP = {
+      AmazonBot: "amazonbot",
+      "Amazon Silk": "amazon_silk",
+      "Android Browser": "android",
+      BaiduSpider: "baiduspider",
+      Bada: "bada",
+      BingCrawler: "bingcrawler",
+      Brave: "brave",
+      BlackBerry: "blackberry",
+      "ChatGPT-User": "chatgpt_user",
+      Chrome: "chrome",
+      ClaudeBot: "claudebot",
+      Chromium: "chromium",
+      Diffbot: "diffbot",
+      DuckDuckBot: "duckduckbot",
+      DuckDuckGo: "duckduckgo",
+      Electron: "electron",
+      Epiphany: "epiphany",
+      FacebookExternalHit: "facebookexternalhit",
+      Firefox: "firefox",
+      Focus: "focus",
+      Generic: "generic",
+      "Google Search": "google_search",
+      Googlebot: "googlebot",
+      GPTBot: "gptbot",
+      "HeyTap Browser": "heytap",
+      "Internet Explorer": "ie",
+      InternetArchiveCrawler: "internetarchivecrawler",
+      "K-Meleon": "k_meleon",
+      Ladybird: "ladybird",
+      LibreWolf: "librewolf",
+      Linespider: "linespider",
+      Maxthon: "maxthon",
+      "Meta-ExternalAds": "meta_externalads",
+      "Meta-ExternalAgent": "meta_externalagent",
+      "Meta-ExternalFetcher": "meta_externalfetcher",
+      "Meta-WebIndexer": "meta_webindexer",
+      "Microsoft Edge": "edge",
+      "MZ Browser": "mz",
+      "NAVER Whale Browser": "naver",
+      "OAI-SearchBot": "oai_searchbot",
+      Omgilibot: "omgilibot",
+      Opera: "opera",
+      "Opera Coast": "opera_coast",
+      "Pale Moon": "pale_moon",
+      PerplexityBot: "perplexitybot",
+      "Perplexity-User": "perplexity_user",
+      PhantomJS: "phantomjs",
+      PingdomBot: "pingdombot",
+      Puffin: "puffin",
+      QQ: "qq",
+      QQLite: "qqlite",
+      QupZilla: "qupzilla",
+      Roku: "roku",
+      Safari: "safari",
+      Sailfish: "sailfish",
+      "Samsung Internet for Android": "samsung_internet",
+      SlackBot: "slackbot",
+      SeaMonkey: "seamonkey",
+      Sleipnir: "sleipnir",
+      "Sogou Browser": "sogou",
+      Swing: "swing",
+      Tizen: "tizen",
+      "UC Browser": "uc",
+      "Vivo Browser": "vivo",
+      Vivaldi: "vivaldi",
+      "WebOS Browser": "webos",
+      WeChat: "wechat",
+      YahooSlurp: "yahooslurp",
+      "Yandex Browser": "yandex",
+      YandexBot: "yandexbot",
+      YouBot: "youbot"
+    };
+    BROWSER_MAP = {
+      amazonbot: "AmazonBot",
+      amazon_silk: "Amazon Silk",
+      android: "Android Browser",
+      baiduspider: "BaiduSpider",
+      bada: "Bada",
+      bingcrawler: "BingCrawler",
+      blackberry: "BlackBerry",
+      brave: "Brave",
+      chatgpt_user: "ChatGPT-User",
+      chrome: "Chrome",
+      claudebot: "ClaudeBot",
+      chromium: "Chromium",
+      diffbot: "Diffbot",
+      duckduckbot: "DuckDuckBot",
+      duckduckgo: "DuckDuckGo",
+      edge: "Microsoft Edge",
+      electron: "Electron",
+      epiphany: "Epiphany",
+      facebookexternalhit: "FacebookExternalHit",
+      firefox: "Firefox",
+      focus: "Focus",
+      generic: "Generic",
+      google_search: "Google Search",
+      googlebot: "Googlebot",
+      gptbot: "GPTBot",
+      heytap: "HeyTap Browser",
+      ie: "Internet Explorer",
+      internetarchivecrawler: "InternetArchiveCrawler",
+      k_meleon: "K-Meleon",
+      ladybird: "Ladybird",
+      librewolf: "LibreWolf",
+      linespider: "Linespider",
+      maxthon: "Maxthon",
+      meta_externalads: "Meta-ExternalAds",
+      meta_externalagent: "Meta-ExternalAgent",
+      meta_externalfetcher: "Meta-ExternalFetcher",
+      meta_webindexer: "Meta-WebIndexer",
+      mz: "MZ Browser",
+      naver: "NAVER Whale Browser",
+      oai_searchbot: "OAI-SearchBot",
+      omgilibot: "Omgilibot",
+      opera: "Opera",
+      opera_coast: "Opera Coast",
+      pale_moon: "Pale Moon",
+      perplexitybot: "PerplexityBot",
+      perplexity_user: "Perplexity-User",
+      phantomjs: "PhantomJS",
+      pingdombot: "PingdomBot",
+      puffin: "Puffin",
+      qq: "QQ Browser",
+      qqlite: "QQ Browser Lite",
+      qupzilla: "QupZilla",
+      roku: "Roku",
+      safari: "Safari",
+      sailfish: "Sailfish",
+      samsung_internet: "Samsung Internet for Android",
+      seamonkey: "SeaMonkey",
+      slackbot: "SlackBot",
+      sleipnir: "Sleipnir",
+      sogou: "Sogou Browser",
+      swing: "Swing",
+      tizen: "Tizen",
+      uc: "UC Browser",
+      vivo: "Vivo Browser",
+      vivaldi: "Vivaldi",
+      webos: "WebOS Browser",
+      wechat: "WeChat",
+      yahooslurp: "YahooSlurp",
+      yandex: "Yandex Browser",
+      yandexbot: "YandexBot",
+      youbot: "YouBot"
+    };
+    PLATFORMS_MAP = {
+      bot: "bot",
+      desktop: "desktop",
+      mobile: "mobile",
+      tablet: "tablet",
+      tv: "tv"
+    };
+    OS_MAP = {
+      Android: "Android",
+      Bada: "Bada",
+      BlackBerry: "BlackBerry",
+      ChromeOS: "Chrome OS",
+      HarmonyOS: "HarmonyOS",
+      iOS: "iOS",
+      Linux: "Linux",
+      MacOS: "macOS",
+      PlayStation4: "PlayStation 4",
+      Roku: "Roku",
+      Tizen: "Tizen",
+      WebOS: "WebOS",
+      Windows: "Windows",
+      WindowsPhone: "Windows Phone"
+    };
+    ENGINE_MAP = {
+      Blink: "Blink",
+      EdgeHTML: "EdgeHTML",
+      Gecko: "Gecko",
+      LibWeb: "LibWeb",
+      Presto: "Presto",
+      Trident: "Trident",
+      WebKit: "WebKit"
+    };
+    Utils = /* @__PURE__ */ (function() {
+      function Utils2() {
+      }
+      Utils2.getFirstMatch = function getFirstMatch(regexp, ua) {
+        var match = ua.match(regexp);
+        return match && match.length > 0 && match[1] || "";
+      };
+      Utils2.getSecondMatch = function getSecondMatch(regexp, ua) {
+        var match = ua.match(regexp);
+        return match && match.length > 1 && match[2] || "";
+      };
+      Utils2.matchAndReturnConst = function matchAndReturnConst(regexp, ua, _const) {
+        if (regexp.test(ua)) return _const;
+      };
+      Utils2.isFirefoxOnIpad = function isFirefoxOnIpad(ua) {
+        var macIndex = ua.indexOf("Macintosh");
+        if (macIndex === -1) return false;
+        var fxiosIndex = ua.indexOf(" FxiOS", macIndex + 9);
+        return fxiosIndex !== -1 && ua.indexOf("/", fxiosIndex + 6) !== -1;
+      };
+      Utils2.getWindowsVersionName = function getWindowsVersionName(version) {
+        switch (version) {
+          case "NT":
+            return "NT";
+          case "XP":
+            return "XP";
+          case "NT 5.0":
+            return "2000";
+          case "NT 5.1":
+            return "XP";
+          case "NT 5.2":
+            return "2003";
+          case "NT 6.0":
+            return "Vista";
+          case "NT 6.1":
+            return "7";
+          case "NT 6.2":
+            return "8";
+          case "NT 6.3":
+            return "8.1";
+          case "NT 10.0":
+            return "10";
+          default:
+            return;
         }
-        return r5.m = e5, r5.c = t, r5.d = function(e6, t2, i5) {
-          r5.o(e6, t2) || Object.defineProperty(e6, t2, { enumerable: true, get: i5 });
-        }, r5.r = function(e6) {
-          "undefined" != typeof Symbol && Symbol.toStringTag && Object.defineProperty(e6, Symbol.toStringTag, { value: "Module" }), Object.defineProperty(e6, "__esModule", { value: true });
-        }, r5.t = function(e6, t2) {
-          if (1 & t2 && (e6 = r5(e6)), 8 & t2) return e6;
-          if (4 & t2 && "object" == typeof e6 && e6 && e6.__esModule) return e6;
-          var i5 = /* @__PURE__ */ Object.create(null);
-          if (r5.r(i5), Object.defineProperty(i5, "default", { enumerable: true, value: e6 }), 2 & t2 && "string" != typeof e6) for (var n3 in e6) r5.d(i5, n3, function(t3) {
-            return e6[t3];
-          }.bind(null, n3));
-          return i5;
-        }, r5.n = function(e6) {
-          var t2 = e6 && e6.__esModule ? function() {
-            return e6.default;
-          } : function() {
-            return e6;
-          };
-          return r5.d(t2, "a", t2), t2;
-        }, r5.o = function(e6, t2) {
-          return Object.prototype.hasOwnProperty.call(e6, t2);
-        }, r5.p = "", r5(r5.s = 90);
-      })({ 17: function(e5, t, r5) {
-        "use strict";
-        t.__esModule = true, t.default = void 0;
-        var i5 = r5(18), n3 = (function() {
-          function e6() {
-          }
-          return e6.getFirstMatch = function(e7, t2) {
-            var r6 = t2.match(e7);
-            return r6 && r6.length > 0 && r6[1] || "";
-          }, e6.getSecondMatch = function(e7, t2) {
-            var r6 = t2.match(e7);
-            return r6 && r6.length > 1 && r6[2] || "";
-          }, e6.matchAndReturnConst = function(e7, t2, r6) {
-            if (e7.test(t2)) return r6;
-          }, e6.getWindowsVersionName = function(e7) {
-            switch (e7) {
-              case "NT":
-                return "NT";
-              case "XP":
-                return "XP";
-              case "NT 5.0":
-                return "2000";
-              case "NT 5.1":
-                return "XP";
-              case "NT 5.2":
-                return "2003";
-              case "NT 6.0":
-                return "Vista";
-              case "NT 6.1":
-                return "7";
-              case "NT 6.2":
-                return "8";
-              case "NT 6.3":
-                return "8.1";
-              case "NT 10.0":
-                return "10";
-              default:
-                return;
-            }
-          }, e6.getMacOSVersionName = function(e7) {
-            var t2 = e7.split(".").splice(0, 2).map((function(e8) {
-              return parseInt(e8, 10) || 0;
-            }));
-            t2.push(0);
-            var r6 = t2[0], i6 = t2[1];
-            if (10 === r6) switch (i6) {
-              case 5:
-                return "Leopard";
-              case 6:
-                return "Snow Leopard";
-              case 7:
-                return "Lion";
-              case 8:
-                return "Mountain Lion";
-              case 9:
-                return "Mavericks";
-              case 10:
-                return "Yosemite";
-              case 11:
-                return "El Capitan";
-              case 12:
-                return "Sierra";
-              case 13:
-                return "High Sierra";
-              case 14:
-                return "Mojave";
-              case 15:
-                return "Catalina";
-              default:
-                return;
-            }
-            switch (r6) {
-              case 11:
-                return "Big Sur";
-              case 12:
-                return "Monterey";
-              case 13:
-                return "Ventura";
-              case 14:
-                return "Sonoma";
-              case 15:
-                return "Sequoia";
-              default:
-                return;
-            }
-          }, e6.getAndroidVersionName = function(e7) {
-            var t2 = e7.split(".").splice(0, 2).map((function(e8) {
-              return parseInt(e8, 10) || 0;
-            }));
-            if (t2.push(0), !(1 === t2[0] && t2[1] < 5)) return 1 === t2[0] && t2[1] < 6 ? "Cupcake" : 1 === t2[0] && t2[1] >= 6 ? "Donut" : 2 === t2[0] && t2[1] < 2 ? "Eclair" : 2 === t2[0] && 2 === t2[1] ? "Froyo" : 2 === t2[0] && t2[1] > 2 ? "Gingerbread" : 3 === t2[0] ? "Honeycomb" : 4 === t2[0] && t2[1] < 1 ? "Ice Cream Sandwich" : 4 === t2[0] && t2[1] < 4 ? "Jelly Bean" : 4 === t2[0] && t2[1] >= 4 ? "KitKat" : 5 === t2[0] ? "Lollipop" : 6 === t2[0] ? "Marshmallow" : 7 === t2[0] ? "Nougat" : 8 === t2[0] ? "Oreo" : 9 === t2[0] ? "Pie" : void 0;
-          }, e6.getVersionPrecision = function(e7) {
-            return e7.split(".").length;
-          }, e6.compareVersions = function(t2, r6, i6) {
-            void 0 === i6 && (i6 = false);
-            var n4 = e6.getVersionPrecision(t2), a5 = e6.getVersionPrecision(r6), o3 = Math.max(n4, a5), s2 = 0, u = e6.map([t2, r6], (function(t3) {
-              var r7 = o3 - e6.getVersionPrecision(t3), i7 = t3 + new Array(r7 + 1).join(".0");
-              return e6.map(i7.split("."), (function(e7) {
-                return new Array(20 - e7.length).join("0") + e7;
-              })).reverse();
-            }));
-            for (i6 && (s2 = o3 - Math.min(n4, a5)), o3 -= 1; o3 >= s2; ) {
-              if (u[0][o3] > u[1][o3]) return 1;
-              if (u[0][o3] === u[1][o3]) {
-                if (o3 === s2) return 0;
-                o3 -= 1;
-              } else if (u[0][o3] < u[1][o3]) return -1;
-            }
-          }, e6.map = function(e7, t2) {
-            var r6, i6 = [];
-            if (Array.prototype.map) return Array.prototype.map.call(e7, t2);
-            for (r6 = 0; r6 < e7.length; r6 += 1) i6.push(t2(e7[r6]));
-            return i6;
-          }, e6.find = function(e7, t2) {
-            var r6, i6;
-            if (Array.prototype.find) return Array.prototype.find.call(e7, t2);
-            for (r6 = 0, i6 = e7.length; r6 < i6; r6 += 1) {
-              var n4 = e7[r6];
-              if (t2(n4, r6)) return n4;
-            }
-          }, e6.assign = function(e7) {
-            for (var t2, r6, i6 = e7, n4 = arguments.length, a5 = new Array(n4 > 1 ? n4 - 1 : 0), o3 = 1; o3 < n4; o3++) a5[o3 - 1] = arguments[o3];
-            if (Object.assign) return Object.assign.apply(Object, [e7].concat(a5));
-            var s2 = function() {
-              var e8 = a5[t2];
-              "object" == typeof e8 && null !== e8 && Object.keys(e8).forEach((function(t3) {
-                i6[t3] = e8[t3];
-              }));
-            };
-            for (t2 = 0, r6 = a5.length; t2 < r6; t2 += 1) s2();
-            return e7;
-          }, e6.getBrowserAlias = function(e7) {
-            return i5.BROWSER_ALIASES_MAP[e7];
-          }, e6.getBrowserTypeByAlias = function(e7) {
-            return i5.BROWSER_MAP[e7] || "";
-          }, e6;
-        })();
-        t.default = n3, e5.exports = t.default;
-      }, 18: function(e5, t, r5) {
-        "use strict";
-        t.__esModule = true, t.ENGINE_MAP = t.OS_MAP = t.PLATFORMS_MAP = t.BROWSER_MAP = t.BROWSER_ALIASES_MAP = void 0;
-        t.BROWSER_ALIASES_MAP = { AmazonBot: "amazonbot", "Amazon Silk": "amazon_silk", "Android Browser": "android", BaiduSpider: "baiduspider", Bada: "bada", BingCrawler: "bingcrawler", Brave: "brave", BlackBerry: "blackberry", "ChatGPT-User": "chatgpt_user", Chrome: "chrome", ClaudeBot: "claudebot", Chromium: "chromium", Diffbot: "diffbot", DuckDuckBot: "duckduckbot", DuckDuckGo: "duckduckgo", Electron: "electron", Epiphany: "epiphany", FacebookExternalHit: "facebookexternalhit", Firefox: "firefox", Focus: "focus", Generic: "generic", "Google Search": "google_search", Googlebot: "googlebot", GPTBot: "gptbot", "Internet Explorer": "ie", InternetArchiveCrawler: "internetarchivecrawler", "K-Meleon": "k_meleon", LibreWolf: "librewolf", Linespider: "linespider", Maxthon: "maxthon", "Meta-ExternalAds": "meta_externalads", "Meta-ExternalAgent": "meta_externalagent", "Meta-ExternalFetcher": "meta_externalfetcher", "Meta-WebIndexer": "meta_webindexer", "Microsoft Edge": "edge", "MZ Browser": "mz", "NAVER Whale Browser": "naver", "OAI-SearchBot": "oai_searchbot", Omgilibot: "omgilibot", Opera: "opera", "Opera Coast": "opera_coast", "Pale Moon": "pale_moon", PerplexityBot: "perplexitybot", "Perplexity-User": "perplexity_user", PhantomJS: "phantomjs", PingdomBot: "pingdombot", Puffin: "puffin", QQ: "qq", QQLite: "qqlite", QupZilla: "qupzilla", Roku: "roku", Safari: "safari", Sailfish: "sailfish", "Samsung Internet for Android": "samsung_internet", SlackBot: "slackbot", SeaMonkey: "seamonkey", Sleipnir: "sleipnir", "Sogou Browser": "sogou", Swing: "swing", Tizen: "tizen", "UC Browser": "uc", Vivaldi: "vivaldi", "WebOS Browser": "webos", WeChat: "wechat", YahooSlurp: "yahooslurp", "Yandex Browser": "yandex", YandexBot: "yandexbot", YouBot: "youbot" };
-        t.BROWSER_MAP = { amazonbot: "AmazonBot", amazon_silk: "Amazon Silk", android: "Android Browser", baiduspider: "BaiduSpider", bada: "Bada", bingcrawler: "BingCrawler", blackberry: "BlackBerry", brave: "Brave", chatgpt_user: "ChatGPT-User", chrome: "Chrome", claudebot: "ClaudeBot", chromium: "Chromium", diffbot: "Diffbot", duckduckbot: "DuckDuckBot", duckduckgo: "DuckDuckGo", edge: "Microsoft Edge", electron: "Electron", epiphany: "Epiphany", facebookexternalhit: "FacebookExternalHit", firefox: "Firefox", focus: "Focus", generic: "Generic", google_search: "Google Search", googlebot: "Googlebot", gptbot: "GPTBot", ie: "Internet Explorer", internetarchivecrawler: "InternetArchiveCrawler", k_meleon: "K-Meleon", librewolf: "LibreWolf", linespider: "Linespider", maxthon: "Maxthon", meta_externalads: "Meta-ExternalAds", meta_externalagent: "Meta-ExternalAgent", meta_externalfetcher: "Meta-ExternalFetcher", meta_webindexer: "Meta-WebIndexer", mz: "MZ Browser", naver: "NAVER Whale Browser", oai_searchbot: "OAI-SearchBot", omgilibot: "Omgilibot", opera: "Opera", opera_coast: "Opera Coast", pale_moon: "Pale Moon", perplexitybot: "PerplexityBot", perplexity_user: "Perplexity-User", phantomjs: "PhantomJS", pingdombot: "PingdomBot", puffin: "Puffin", qq: "QQ Browser", qqlite: "QQ Browser Lite", qupzilla: "QupZilla", roku: "Roku", safari: "Safari", sailfish: "Sailfish", samsung_internet: "Samsung Internet for Android", seamonkey: "SeaMonkey", slackbot: "SlackBot", sleipnir: "Sleipnir", sogou: "Sogou Browser", swing: "Swing", tizen: "Tizen", uc: "UC Browser", vivaldi: "Vivaldi", webos: "WebOS Browser", wechat: "WeChat", yahooslurp: "YahooSlurp", yandex: "Yandex Browser", yandexbot: "YandexBot", youbot: "YouBot" };
-        t.PLATFORMS_MAP = { bot: "bot", desktop: "desktop", mobile: "mobile", tablet: "tablet", tv: "tv" };
-        t.OS_MAP = { Android: "Android", Bada: "Bada", BlackBerry: "BlackBerry", ChromeOS: "Chrome OS", HarmonyOS: "HarmonyOS", iOS: "iOS", Linux: "Linux", MacOS: "macOS", PlayStation4: "PlayStation 4", Roku: "Roku", Tizen: "Tizen", WebOS: "WebOS", Windows: "Windows", WindowsPhone: "Windows Phone" };
-        t.ENGINE_MAP = { Blink: "Blink", EdgeHTML: "EdgeHTML", Gecko: "Gecko", Presto: "Presto", Trident: "Trident", WebKit: "WebKit" };
-      }, 90: function(e5, t, r5) {
-        "use strict";
-        t.__esModule = true, t.default = void 0;
-        var i5, n3 = (i5 = r5(91)) && i5.__esModule ? i5 : { default: i5 }, a5 = r5(18);
-        function o3(e6, t2) {
-          for (var r6 = 0; r6 < t2.length; r6++) {
-            var i6 = t2[r6];
-            i6.enumerable = i6.enumerable || false, i6.configurable = true, "value" in i6 && (i6.writable = true), Object.defineProperty(e6, i6.key, i6);
+      };
+      Utils2.getMacOSVersionName = function getMacOSVersionName(version) {
+        var v = version.split(".").splice(0, 2).map(function(s2) {
+          return parseInt(s2, 10) || 0;
+        });
+        v.push(0);
+        var major = v[0];
+        var minor = v[1];
+        if (major === 10) switch (minor) {
+          case 5:
+            return "Leopard";
+          case 6:
+            return "Snow Leopard";
+          case 7:
+            return "Lion";
+          case 8:
+            return "Mountain Lion";
+          case 9:
+            return "Mavericks";
+          case 10:
+            return "Yosemite";
+          case 11:
+            return "El Capitan";
+          case 12:
+            return "Sierra";
+          case 13:
+            return "High Sierra";
+          case 14:
+            return "Mojave";
+          case 15:
+            return "Catalina";
+          default:
+            return;
+        }
+        switch (major) {
+          case 11:
+            return "Big Sur";
+          case 12:
+            return "Monterey";
+          case 13:
+            return "Ventura";
+          case 14:
+            return "Sonoma";
+          case 15:
+            return "Sequoia";
+          default:
+            return;
+        }
+      };
+      Utils2.getAndroidVersionName = function getAndroidVersionName(version) {
+        var v = version.split(".").splice(0, 2).map(function(s2) {
+          return parseInt(s2, 10) || 0;
+        });
+        v.push(0);
+        if (v[0] === 1 && v[1] < 5) return void 0;
+        if (v[0] === 1 && v[1] < 6) return "Cupcake";
+        if (v[0] === 1 && v[1] >= 6) return "Donut";
+        if (v[0] === 2 && v[1] < 2) return "Eclair";
+        if (v[0] === 2 && v[1] === 2) return "Froyo";
+        if (v[0] === 2 && v[1] > 2) return "Gingerbread";
+        if (v[0] === 3) return "Honeycomb";
+        if (v[0] === 4 && v[1] < 1) return "Ice Cream Sandwich";
+        if (v[0] === 4 && v[1] < 4) return "Jelly Bean";
+        if (v[0] === 4 && v[1] >= 4) return "KitKat";
+        if (v[0] === 5) return "Lollipop";
+        if (v[0] === 6) return "Marshmallow";
+        if (v[0] === 7) return "Nougat";
+        if (v[0] === 8) return "Oreo";
+        if (v[0] === 9) return "Pie";
+      };
+      Utils2.getVersionPrecision = function getVersionPrecision(version) {
+        return version.split(".").length;
+      };
+      Utils2.compareVersions = function compareVersions(versionA, versionB, isLoose) {
+        if (isLoose === void 0) isLoose = false;
+        var versionAPrecision = Utils2.getVersionPrecision(versionA);
+        var versionBPrecision = Utils2.getVersionPrecision(versionB);
+        var precision = Math.max(versionAPrecision, versionBPrecision);
+        var lastPrecision = 0;
+        var chunks = Utils2.map([versionA, versionB], function(version) {
+          var delta = precision - Utils2.getVersionPrecision(version);
+          var _version = version + new Array(delta + 1).join(".0");
+          return Utils2.map(_version.split("."), function(chunk) {
+            return new Array(20 - chunk.length).join("0") + chunk;
+          }).reverse();
+        });
+        if (isLoose) lastPrecision = precision - Math.min(versionAPrecision, versionBPrecision);
+        precision -= 1;
+        while (precision >= lastPrecision) {
+          if (chunks[0][precision] > chunks[1][precision]) return 1;
+          if (chunks[0][precision] === chunks[1][precision]) {
+            if (precision === lastPrecision) return 0;
+            precision -= 1;
+          } else if (chunks[0][precision] < chunks[1][precision]) return -1;
+        }
+      };
+      Utils2.map = function map3(arr, iterator) {
+        var result = [];
+        var i5;
+        if (Array.prototype.map) return Array.prototype.map.call(arr, iterator);
+        for (i5 = 0; i5 < arr.length; i5 += 1) result.push(iterator(arr[i5]));
+        return result;
+      };
+      Utils2.find = function find(arr, predicate) {
+        var i5;
+        var l3;
+        if (Array.prototype.find) return Array.prototype.find.call(arr, predicate);
+        for (i5 = 0, l3 = arr.length; i5 < l3; i5 += 1) {
+          var value = arr[i5];
+          if (predicate(value, i5)) return value;
+        }
+      };
+      Utils2.assign = function assign(obj) {
+        var result = obj;
+        var i5;
+        var l3;
+        for (var _len = arguments.length, assigners = new Array(_len > 1 ? _len - 1 : 0), _key = 1; _key < _len; _key++) assigners[_key - 1] = arguments[_key];
+        if (Object.assign) return Object.assign.apply(Object, [obj].concat(assigners));
+        var _loop = function _loop2() {
+          var assigner = assigners[i5];
+          if (typeof assigner === "object" && assigner !== null) Object.keys(assigner).forEach(function(key) {
+            result[key] = assigner[key];
+          });
+        };
+        for (i5 = 0, l3 = assigners.length; i5 < l3; i5 += 1) _loop();
+        return obj;
+      };
+      Utils2.getBrowserAlias = function getBrowserAlias(browserName) {
+        return BROWSER_ALIASES_MAP[browserName];
+      };
+      Utils2.getBrowserTypeByAlias = function getBrowserTypeByAlias(browserAlias) {
+        return BROWSER_MAP[browserAlias] || "";
+      };
+      return Utils2;
+    })();
+    commonVersionIdentifier = /version\/(\d+(\.?_?\d+)+)/i;
+    browsersList = [{
+      test: [/gptbot/i],
+      describe: function describe(ua) {
+        var browser = {
+          name: "GPTBot"
+        };
+        var version = Utils.getFirstMatch(/gptbot\/(\d+(\.\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/chatgpt-user/i],
+      describe: function describe2(ua) {
+        var browser = {
+          name: "ChatGPT-User"
+        };
+        var version = Utils.getFirstMatch(/chatgpt-user\/(\d+(\.\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/oai-searchbot/i],
+      describe: function describe3(ua) {
+        var browser = {
+          name: "OAI-SearchBot"
+        };
+        var version = Utils.getFirstMatch(/oai-searchbot\/(\d+(\.\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/claudebot/i, /claude-web/i, /claude-user/i, /claude-searchbot/i],
+      describe: function describe4(ua) {
+        var browser = {
+          name: "ClaudeBot"
+        };
+        var version = Utils.getFirstMatch(/(?:claudebot|claude-web|claude-user|claude-searchbot)\/(\d+(\.\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/omgilibot/i, /webzio-extended/i],
+      describe: function describe5(ua) {
+        var browser = {
+          name: "Omgilibot"
+        };
+        var version = Utils.getFirstMatch(/(?:omgilibot|webzio-extended)\/(\d+(\.\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/diffbot/i],
+      describe: function describe6(ua) {
+        var browser = {
+          name: "Diffbot"
+        };
+        var version = Utils.getFirstMatch(/diffbot\/(\d+(\.\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/perplexitybot/i],
+      describe: function describe7(ua) {
+        var browser = {
+          name: "PerplexityBot"
+        };
+        var version = Utils.getFirstMatch(/perplexitybot\/(\d+(\.\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/perplexity-user/i],
+      describe: function describe8(ua) {
+        var browser = {
+          name: "Perplexity-User"
+        };
+        var version = Utils.getFirstMatch(/perplexity-user\/(\d+(\.\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/youbot/i],
+      describe: function describe9(ua) {
+        var browser = {
+          name: "YouBot"
+        };
+        var version = Utils.getFirstMatch(/youbot\/(\d+(\.\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/meta-webindexer/i],
+      describe: function describe10(ua) {
+        var browser = {
+          name: "Meta-WebIndexer"
+        };
+        var version = Utils.getFirstMatch(/meta-webindexer\/(\d+(\.\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/meta-externalads/i],
+      describe: function describe11(ua) {
+        var browser = {
+          name: "Meta-ExternalAds"
+        };
+        var version = Utils.getFirstMatch(/meta-externalads\/(\d+(\.\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/meta-externalagent/i],
+      describe: function describe12(ua) {
+        var browser = {
+          name: "Meta-ExternalAgent"
+        };
+        var version = Utils.getFirstMatch(/meta-externalagent\/(\d+(\.\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/meta-externalfetcher/i],
+      describe: function describe13(ua) {
+        var browser = {
+          name: "Meta-ExternalFetcher"
+        };
+        var version = Utils.getFirstMatch(/meta-externalfetcher\/(\d+(\.\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/googlebot/i],
+      describe: function describe14(ua) {
+        var browser = {
+          name: "Googlebot"
+        };
+        var version = Utils.getFirstMatch(/googlebot\/(\d+(\.\d+))/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/linespider/i],
+      describe: function describe15(ua) {
+        var browser = {
+          name: "Linespider"
+        };
+        var version = Utils.getFirstMatch(/(?:linespider)(?:-[-\w]{1,64})?[\s/](\d+(\.\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/amazonbot/i],
+      describe: function describe16(ua) {
+        var browser = {
+          name: "AmazonBot"
+        };
+        var version = Utils.getFirstMatch(/amazonbot\/(\d+(\.\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/bingbot/i],
+      describe: function describe17(ua) {
+        var browser = {
+          name: "BingCrawler"
+        };
+        var version = Utils.getFirstMatch(/bingbot\/(\d+(\.\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/baiduspider/i],
+      describe: function describe18(ua) {
+        var browser = {
+          name: "BaiduSpider"
+        };
+        var version = Utils.getFirstMatch(/baiduspider\/(\d+(\.\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/duckduckbot/i],
+      describe: function describe19(ua) {
+        var browser = {
+          name: "DuckDuckBot"
+        };
+        var version = Utils.getFirstMatch(/duckduckbot\/(\d+(\.\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/ia_archiver/i],
+      describe: function describe20(ua) {
+        var browser = {
+          name: "InternetArchiveCrawler"
+        };
+        var version = Utils.getFirstMatch(/ia_archiver\/(\d+(\.\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/facebookexternalhit/i, /facebookcatalog/i],
+      describe: function describe21() {
+        return {
+          name: "FacebookExternalHit"
+        };
+      }
+    }, {
+      test: [/slackbot/i, /slack-imgProxy/i],
+      describe: function describe22(ua) {
+        var browser = {
+          name: "SlackBot"
+        };
+        var version = Utils.getFirstMatch(/(?:slackbot|slack-imgproxy)(?:-[-\w]{1,64})?[\s/](\d+(\.\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/yahoo!?[\s/]*slurp/i],
+      describe: function describe23() {
+        return {
+          name: "YahooSlurp"
+        };
+      }
+    }, {
+      test: [/yandexbot/i, /yandexmobilebot/i],
+      describe: function describe24() {
+        return {
+          name: "YandexBot"
+        };
+      }
+    }, {
+      test: [/pingdom/i],
+      describe: function describe25() {
+        return {
+          name: "PingdomBot"
+        };
+      }
+    }, {
+      test: [/opera/i],
+      describe: function describe26(ua) {
+        var browser = {
+          name: "Opera"
+        };
+        var version = Utils.getFirstMatch(commonVersionIdentifier, ua) || Utils.getFirstMatch(/(?:opera)[\s/](\d+(\.?_?\d+)+)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/opr\/|opios/i],
+      describe: function describe27(ua) {
+        var browser = {
+          name: "Opera"
+        };
+        var version = Utils.getFirstMatch(/(?:opr|opios)[\s/](\S+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/SamsungBrowser/i],
+      describe: function describe28(ua) {
+        var browser = {
+          name: "Samsung Internet for Android"
+        };
+        var version = Utils.getFirstMatch(commonVersionIdentifier, ua) || Utils.getFirstMatch(/(?:SamsungBrowser)[\s/](\d+(\.?_?\d+)+)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/Whale/i],
+      describe: function describe29(ua) {
+        var browser = {
+          name: "NAVER Whale Browser"
+        };
+        var version = Utils.getFirstMatch(commonVersionIdentifier, ua) || Utils.getFirstMatch(/(?:whale)[\s/](\d+(?:\.\d+)+)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/PaleMoon/i],
+      describe: function describe30(ua) {
+        var browser = {
+          name: "Pale Moon"
+        };
+        var version = Utils.getFirstMatch(commonVersionIdentifier, ua) || Utils.getFirstMatch(/(?:PaleMoon)[\s/](\d+(?:\.\d+)+)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/HeyTapBrowser/i],
+      describe: function describe31(ua) {
+        var browser = {
+          name: "HeyTap Browser"
+        };
+        var version = Utils.getFirstMatch(/(?:HeyTapBrowser)[\s/](\d+(?:\.\d+)*)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/VivoBrowser/i],
+      describe: function describe32(ua) {
+        var browser = {
+          name: "Vivo Browser"
+        };
+        var version = Utils.getFirstMatch(/(?:VivoBrowser)[\s/](\d+(?:\.\d+)*)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/MZBrowser/i],
+      describe: function describe33(ua) {
+        var browser = {
+          name: "MZ Browser"
+        };
+        var version = Utils.getFirstMatch(/(?:MZBrowser)[\s/](\d+(?:\.\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/focus/i],
+      describe: function describe34(ua) {
+        var browser = {
+          name: "Focus"
+        };
+        var version = Utils.getFirstMatch(/(?:focus)[\s/](\d+(?:\.\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/swing/i],
+      describe: function describe35(ua) {
+        var browser = {
+          name: "Swing"
+        };
+        var version = Utils.getFirstMatch(/(?:swing)[\s/](\d+(?:\.\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/coast/i],
+      describe: function describe36(ua) {
+        var browser = {
+          name: "Opera Coast"
+        };
+        var version = Utils.getFirstMatch(commonVersionIdentifier, ua) || Utils.getFirstMatch(/(?:coast)[\s/](\d+(\.?_?\d+)+)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/opt\/\d+(?:.?_?\d+)+/i],
+      describe: function describe37(ua) {
+        var browser = {
+          name: "Opera Touch"
+        };
+        var version = Utils.getFirstMatch(/(?:opt)[\s/](\d+(\.?_?\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/yabrowser/i],
+      describe: function describe38(ua) {
+        var browser = {
+          name: "Yandex Browser"
+        };
+        var version = Utils.getFirstMatch(/(?:yabrowser)[\s/](\d+(\.?_?\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/ucbrowser/i],
+      describe: function describe39(ua) {
+        var browser = {
+          name: "UC Browser"
+        };
+        var version = Utils.getFirstMatch(commonVersionIdentifier, ua) || Utils.getFirstMatch(/(?:ucbrowser)[\s/](\d+(\.?_?\d+)+)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/Maxthon|mxios/i],
+      describe: function describe40(ua) {
+        var browser = {
+          name: "Maxthon"
+        };
+        var version = Utils.getFirstMatch(commonVersionIdentifier, ua) || Utils.getFirstMatch(/(?:Maxthon|mxios)[\s/](\d+(\.?_?\d+)+)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/epiphany/i],
+      describe: function describe41(ua) {
+        var browser = {
+          name: "Epiphany"
+        };
+        var version = Utils.getFirstMatch(commonVersionIdentifier, ua) || Utils.getFirstMatch(/(?:epiphany)[\s/](\d+(\.?_?\d+)+)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/puffin/i],
+      describe: function describe42(ua) {
+        var browser = {
+          name: "Puffin"
+        };
+        var version = Utils.getFirstMatch(commonVersionIdentifier, ua) || Utils.getFirstMatch(/(?:puffin)[\s/](\d+(\.?_?\d+)+)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/sleipnir/i],
+      describe: function describe43(ua) {
+        var browser = {
+          name: "Sleipnir"
+        };
+        var version = Utils.getFirstMatch(commonVersionIdentifier, ua) || Utils.getFirstMatch(/(?:sleipnir)[\s/](\d+(\.?_?\d+)+)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/k-meleon/i],
+      describe: function describe44(ua) {
+        var browser = {
+          name: "K-Meleon"
+        };
+        var version = Utils.getFirstMatch(commonVersionIdentifier, ua) || Utils.getFirstMatch(/(?:k-meleon)[\s/](\d+(\.?_?\d+)+)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/micromessenger/i],
+      describe: function describe45(ua) {
+        var browser = {
+          name: "WeChat"
+        };
+        var version = Utils.getFirstMatch(/(?:micromessenger)[\s/](\d+(\.?_?\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/qqbrowser/i],
+      describe: function describe46(ua) {
+        var browser = {
+          name: /qqbrowserlite/i.test(ua) ? "QQ Browser Lite" : "QQ Browser"
+        };
+        var version = Utils.getFirstMatch(/(?:qqbrowserlite|qqbrowser)[/](\d+(\.?_?\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/msie|trident/i],
+      describe: function describe47(ua) {
+        var browser = {
+          name: "Internet Explorer"
+        };
+        var version = Utils.getFirstMatch(/(?:msie |rv:)(\d+(\.?_?\d+)+)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/\sedg\//i],
+      describe: function describe48(ua) {
+        var browser = {
+          name: "Microsoft Edge"
+        };
+        var version = Utils.getFirstMatch(/\sedg\/(\d+(\.?_?\d+)+)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/edg([ea]|ios)\//i],
+      describe: function describe49(ua) {
+        var browser = {
+          name: "Microsoft Edge"
+        };
+        var version = Utils.getSecondMatch(/edg([ea]|ios)\/(\d+(\.?_?\d+)+)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: function test(parser) {
+        if (parser.hasBrand("Vivaldi")) return true;
+        return parser.test(/vivaldi/i);
+      },
+      describe: function describe50(ua, parser) {
+        var browser = {
+          name: "Vivaldi"
+        };
+        if (parser) {
+          var hintsVersion = parser.getBrandVersion("Vivaldi");
+          if (hintsVersion) {
+            browser.version = hintsVersion;
+            return browser;
           }
         }
-        var s2 = (function() {
-          function e6() {
+        var version = Utils.getFirstMatch(/vivaldi\/(\d+(\.?_?\d+)+)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/seamonkey/i],
+      describe: function describe51(ua) {
+        var browser = {
+          name: "SeaMonkey"
+        };
+        var version = Utils.getFirstMatch(/seamonkey\/(\d+(\.?_?\d+)+)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/sailfish/i],
+      describe: function describe52(ua) {
+        var browser = {
+          name: "Sailfish"
+        };
+        var version = Utils.getFirstMatch(/sailfish\s?browser\/(\d+(\.\d+)?)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/silk/i],
+      describe: function describe53(ua) {
+        var browser = {
+          name: "Amazon Silk"
+        };
+        var version = Utils.getFirstMatch(/silk\/(\d+(\.?_?\d+)+)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/phantom/i],
+      describe: function describe54(ua) {
+        var browser = {
+          name: "PhantomJS"
+        };
+        var version = Utils.getFirstMatch(/phantomjs\/(\d+(\.?_?\d+)+)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/slimerjs/i],
+      describe: function describe55(ua) {
+        var browser = {
+          name: "SlimerJS"
+        };
+        var version = Utils.getFirstMatch(/slimerjs\/(\d+(\.?_?\d+)+)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/blackberry|\bbb\d+/i, /rim\stablet/i],
+      describe: function describe56(ua) {
+        var browser = {
+          name: "BlackBerry"
+        };
+        var version = Utils.getFirstMatch(commonVersionIdentifier, ua) || Utils.getFirstMatch(/blackberry[\d]+\/(\d+(\.?_?\d+)+)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/(web|hpw)[o0]s/i],
+      describe: function describe57(ua) {
+        var browser = {
+          name: "WebOS Browser"
+        };
+        var version = Utils.getFirstMatch(commonVersionIdentifier, ua) || Utils.getFirstMatch(/w(?:eb)?[o0]sbrowser\/(\d+(\.?_?\d+)+)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/bada/i],
+      describe: function describe58(ua) {
+        var browser = {
+          name: "Bada"
+        };
+        var version = Utils.getFirstMatch(/dolfin\/(\d+(\.?_?\d+)+)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/tizen/i],
+      describe: function describe59(ua) {
+        var browser = {
+          name: "Tizen"
+        };
+        var version = Utils.getFirstMatch(/(?:tizen\s?)?browser\/(\d+(\.?_?\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/qupzilla/i],
+      describe: function describe60(ua) {
+        var browser = {
+          name: "QupZilla"
+        };
+        var version = Utils.getFirstMatch(/(?:qupzilla)[\s/](\d+(\.?_?\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/librewolf/i],
+      describe: function describe61(ua) {
+        var browser = {
+          name: "LibreWolf"
+        };
+        var version = Utils.getFirstMatch(/(?:librewolf)[\s/](\d+(\.?_?\d+)+)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/firefox|iceweasel|fxios/i],
+      describe: function describe62(ua) {
+        var browser = {
+          name: "Firefox"
+        };
+        var version = Utils.getFirstMatch(/(?:firefox|iceweasel|fxios)[\s/](\d+(\.?_?\d+)+)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/electron/i],
+      describe: function describe63(ua) {
+        var browser = {
+          name: "Electron"
+        };
+        var version = Utils.getFirstMatch(/(?:electron)\/(\d+(\.?_?\d+)+)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/sogoumobilebrowser/i, /metasr/i, /se 2\.[x]/i],
+      describe: function describe64(ua) {
+        var browser = {
+          name: "Sogou Browser"
+        };
+        var sogouMobileVersion = Utils.getFirstMatch(/(?:sogoumobilebrowser)[\s/](\d+(\.?_?\d+)+)/i, ua);
+        var chromiumVersion = Utils.getFirstMatch(/(?:chrome|crios|crmo)\/(\d+(\.?_?\d+)+)/i, ua);
+        var seVersion = Utils.getFirstMatch(/se ([\d.]+)x/i, ua);
+        var version = sogouMobileVersion || chromiumVersion || seVersion;
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/MiuiBrowser/i],
+      describe: function describe65(ua) {
+        var browser = {
+          name: "Miui"
+        };
+        var version = Utils.getFirstMatch(/(?:MiuiBrowser)[\s/](\d+(\.?_?\d+)+)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: function test2(parser) {
+        if (parser.hasBrand("DuckDuckGo")) return true;
+        return parser.test(/\sDdg\/[\d.]+$/i);
+      },
+      describe: function describe66(ua, parser) {
+        var browser = {
+          name: "DuckDuckGo"
+        };
+        if (parser) {
+          var hintsVersion = parser.getBrandVersion("DuckDuckGo");
+          if (hintsVersion) {
+            browser.version = hintsVersion;
+            return browser;
           }
-          var t2, r6, i6;
-          return e6.getParser = function(e7, t3, r7) {
-            if (void 0 === t3 && (t3 = false), void 0 === r7 && (r7 = null), "string" != typeof e7) throw new Error("UserAgent should be a string");
-            return new n3.default(e7, t3, r7);
-          }, e6.parse = function(e7, t3) {
-            return void 0 === t3 && (t3 = null), new n3.default(e7, t3).getResult();
-          }, t2 = e6, i6 = [{ key: "BROWSER_MAP", get: function() {
-            return a5.BROWSER_MAP;
-          } }, { key: "ENGINE_MAP", get: function() {
-            return a5.ENGINE_MAP;
-          } }, { key: "OS_MAP", get: function() {
-            return a5.OS_MAP;
-          } }, { key: "PLATFORMS_MAP", get: function() {
-            return a5.PLATFORMS_MAP;
-          } }], (r6 = null) && o3(t2.prototype, r6), i6 && o3(t2, i6), e6;
-        })();
-        t.default = s2, e5.exports = t.default;
-      }, 91: function(e5, t, r5) {
-        "use strict";
-        t.__esModule = true, t.default = void 0;
-        var i5 = u(r5(92)), n3 = u(r5(93)), a5 = u(r5(94)), o3 = u(r5(95)), s2 = u(r5(17));
-        function u(e6) {
-          return e6 && e6.__esModule ? e6 : { default: e6 };
         }
-        var d5 = (function() {
-          function e6(e7, t3, r6) {
-            if (void 0 === t3 && (t3 = false), void 0 === r6 && (r6 = null), null == e7 || "" === e7) throw new Error("UserAgent parameter can't be empty");
-            this._ua = e7;
-            var i6 = false;
-            "boolean" == typeof t3 ? (i6 = t3, this._hints = r6) : this._hints = null != t3 && "object" == typeof t3 ? t3 : null, this.parsedResult = {}, true !== i6 && this.parse();
+        var uaVersion = Utils.getFirstMatch(/\sDdg\/([\d.]+)$/i, ua);
+        if (uaVersion) browser.version = uaVersion;
+        return browser;
+      }
+    }, {
+      test: function test3(parser) {
+        return parser.hasBrand("Brave");
+      },
+      describe: function describe67(ua, parser) {
+        var browser = {
+          name: "Brave"
+        };
+        if (parser) {
+          var hintsVersion = parser.getBrandVersion("Brave");
+          if (hintsVersion) {
+            browser.version = hintsVersion;
+            return browser;
           }
-          var t2 = e6.prototype;
-          return t2.getHints = function() {
-            return this._hints;
-          }, t2.hasBrand = function(e7) {
-            if (!this._hints || !Array.isArray(this._hints.brands)) return false;
-            var t3 = e7.toLowerCase();
-            return this._hints.brands.some((function(e8) {
-              return e8.brand && e8.brand.toLowerCase() === t3;
-            }));
-          }, t2.getBrandVersion = function(e7) {
-            if (this._hints && Array.isArray(this._hints.brands)) {
-              var t3 = e7.toLowerCase(), r6 = this._hints.brands.find((function(e8) {
-                return e8.brand && e8.brand.toLowerCase() === t3;
-              }));
-              return r6 ? r6.version : void 0;
-            }
-          }, t2.getUA = function() {
-            return this._ua;
-          }, t2.test = function(e7) {
-            return e7.test(this._ua);
-          }, t2.parseBrowser = function() {
-            var e7 = this;
-            this.parsedResult.browser = {};
-            var t3 = s2.default.find(i5.default, (function(t4) {
-              if ("function" == typeof t4.test) return t4.test(e7);
-              if (Array.isArray(t4.test)) return t4.test.some((function(t5) {
-                return e7.test(t5);
-              }));
-              throw new Error("Browser's test function is not valid");
-            }));
-            return t3 && (this.parsedResult.browser = t3.describe(this.getUA(), this)), this.parsedResult.browser;
-          }, t2.getBrowser = function() {
-            return this.parsedResult.browser ? this.parsedResult.browser : this.parseBrowser();
-          }, t2.getBrowserName = function(e7) {
-            return e7 ? String(this.getBrowser().name).toLowerCase() || "" : this.getBrowser().name || "";
-          }, t2.getBrowserVersion = function() {
-            return this.getBrowser().version;
-          }, t2.getOS = function() {
-            return this.parsedResult.os ? this.parsedResult.os : this.parseOS();
-          }, t2.parseOS = function() {
-            var e7 = this;
-            this.parsedResult.os = {};
-            var t3 = s2.default.find(n3.default, (function(t4) {
-              if ("function" == typeof t4.test) return t4.test(e7);
-              if (Array.isArray(t4.test)) return t4.test.some((function(t5) {
-                return e7.test(t5);
-              }));
-              throw new Error("Browser's test function is not valid");
-            }));
-            return t3 && (this.parsedResult.os = t3.describe(this.getUA())), this.parsedResult.os;
-          }, t2.getOSName = function(e7) {
-            var t3 = this.getOS().name;
-            return e7 ? String(t3).toLowerCase() || "" : t3 || "";
-          }, t2.getOSVersion = function() {
-            return this.getOS().version;
-          }, t2.getPlatform = function() {
-            return this.parsedResult.platform ? this.parsedResult.platform : this.parsePlatform();
-          }, t2.getPlatformType = function(e7) {
-            void 0 === e7 && (e7 = false);
-            var t3 = this.getPlatform().type;
-            return e7 ? String(t3).toLowerCase() || "" : t3 || "";
-          }, t2.parsePlatform = function() {
-            var e7 = this;
-            this.parsedResult.platform = {};
-            var t3 = s2.default.find(a5.default, (function(t4) {
-              if ("function" == typeof t4.test) return t4.test(e7);
-              if (Array.isArray(t4.test)) return t4.test.some((function(t5) {
-                return e7.test(t5);
-              }));
-              throw new Error("Browser's test function is not valid");
-            }));
-            return t3 && (this.parsedResult.platform = t3.describe(this.getUA())), this.parsedResult.platform;
-          }, t2.getEngine = function() {
-            return this.parsedResult.engine ? this.parsedResult.engine : this.parseEngine();
-          }, t2.getEngineName = function(e7) {
-            return e7 ? String(this.getEngine().name).toLowerCase() || "" : this.getEngine().name || "";
-          }, t2.parseEngine = function() {
-            var e7 = this;
-            this.parsedResult.engine = {};
-            var t3 = s2.default.find(o3.default, (function(t4) {
-              if ("function" == typeof t4.test) return t4.test(e7);
-              if (Array.isArray(t4.test)) return t4.test.some((function(t5) {
-                return e7.test(t5);
-              }));
-              throw new Error("Browser's test function is not valid");
-            }));
-            return t3 && (this.parsedResult.engine = t3.describe(this.getUA())), this.parsedResult.engine;
-          }, t2.parse = function() {
-            return this.parseBrowser(), this.parseOS(), this.parsePlatform(), this.parseEngine(), this;
-          }, t2.getResult = function() {
-            return s2.default.assign({}, this.parsedResult);
-          }, t2.satisfies = function(e7) {
-            var t3 = this, r6 = {}, i6 = 0, n4 = {}, a6 = 0;
-            if (Object.keys(e7).forEach((function(t4) {
-              var o5 = e7[t4];
-              "string" == typeof o5 ? (n4[t4] = o5, a6 += 1) : "object" == typeof o5 && (r6[t4] = o5, i6 += 1);
-            })), i6 > 0) {
-              var o4 = Object.keys(r6), u2 = s2.default.find(o4, (function(e8) {
-                return t3.isOS(e8);
-              }));
-              if (u2) {
-                var d6 = this.satisfies(r6[u2]);
-                if (void 0 !== d6) return d6;
-              }
-              var c5 = s2.default.find(o4, (function(e8) {
-                return t3.isPlatform(e8);
-              }));
-              if (c5) {
-                var f5 = this.satisfies(r6[c5]);
-                if (void 0 !== f5) return f5;
-              }
-            }
-            if (a6 > 0) {
-              var l3 = Object.keys(n4), b5 = s2.default.find(l3, (function(e8) {
-                return t3.isBrowser(e8, true);
-              }));
-              if (void 0 !== b5) return this.compareVersion(n4[b5]);
-            }
-          }, t2.isBrowser = function(e7, t3) {
-            void 0 === t3 && (t3 = false);
-            var r6 = this.getBrowserName().toLowerCase(), i6 = e7.toLowerCase(), n4 = s2.default.getBrowserTypeByAlias(i6);
-            return t3 && n4 && (i6 = n4.toLowerCase()), i6 === r6;
-          }, t2.compareVersion = function(e7) {
-            var t3 = [0], r6 = e7, i6 = false, n4 = this.getBrowserVersion();
-            if ("string" == typeof n4) return ">" === e7[0] || "<" === e7[0] ? (r6 = e7.substr(1), "=" === e7[1] ? (i6 = true, r6 = e7.substr(2)) : t3 = [], ">" === e7[0] ? t3.push(1) : t3.push(-1)) : "=" === e7[0] ? r6 = e7.substr(1) : "~" === e7[0] && (i6 = true, r6 = e7.substr(1)), t3.indexOf(s2.default.compareVersions(n4, r6, i6)) > -1;
-          }, t2.isOS = function(e7) {
-            return this.getOSName(true) === String(e7).toLowerCase();
-          }, t2.isPlatform = function(e7) {
-            return this.getPlatformType(true) === String(e7).toLowerCase();
-          }, t2.isEngine = function(e7) {
-            return this.getEngineName(true) === String(e7).toLowerCase();
-          }, t2.is = function(e7, t3) {
-            return void 0 === t3 && (t3 = false), this.isBrowser(e7, t3) || this.isOS(e7) || this.isPlatform(e7);
-          }, t2.some = function(e7) {
-            var t3 = this;
-            return void 0 === e7 && (e7 = []), e7.some((function(e8) {
-              return t3.is(e8);
-            }));
-          }, e6;
-        })();
-        t.default = d5, e5.exports = t.default;
-      }, 92: function(e5, t, r5) {
-        "use strict";
-        t.__esModule = true, t.default = void 0;
-        var i5, n3 = (i5 = r5(17)) && i5.__esModule ? i5 : { default: i5 };
-        var a5 = /version\/(\d+(\.?_?\d+)+)/i, o3 = [{ test: [/gptbot/i], describe: function(e6) {
-          var t2 = { name: "GPTBot" }, r6 = n3.default.getFirstMatch(/gptbot\/(\d+(\.\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/chatgpt-user/i], describe: function(e6) {
-          var t2 = { name: "ChatGPT-User" }, r6 = n3.default.getFirstMatch(/chatgpt-user\/(\d+(\.\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/oai-searchbot/i], describe: function(e6) {
-          var t2 = { name: "OAI-SearchBot" }, r6 = n3.default.getFirstMatch(/oai-searchbot\/(\d+(\.\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/claudebot/i, /claude-web/i, /claude-user/i, /claude-searchbot/i], describe: function(e6) {
-          var t2 = { name: "ClaudeBot" }, r6 = n3.default.getFirstMatch(/(?:claudebot|claude-web|claude-user|claude-searchbot)\/(\d+(\.\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/omgilibot/i, /webzio-extended/i], describe: function(e6) {
-          var t2 = { name: "Omgilibot" }, r6 = n3.default.getFirstMatch(/(?:omgilibot|webzio-extended)\/(\d+(\.\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/diffbot/i], describe: function(e6) {
-          var t2 = { name: "Diffbot" }, r6 = n3.default.getFirstMatch(/diffbot\/(\d+(\.\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/perplexitybot/i], describe: function(e6) {
-          var t2 = { name: "PerplexityBot" }, r6 = n3.default.getFirstMatch(/perplexitybot\/(\d+(\.\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/perplexity-user/i], describe: function(e6) {
-          var t2 = { name: "Perplexity-User" }, r6 = n3.default.getFirstMatch(/perplexity-user\/(\d+(\.\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/youbot/i], describe: function(e6) {
-          var t2 = { name: "YouBot" }, r6 = n3.default.getFirstMatch(/youbot\/(\d+(\.\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/meta-webindexer/i], describe: function(e6) {
-          var t2 = { name: "Meta-WebIndexer" }, r6 = n3.default.getFirstMatch(/meta-webindexer\/(\d+(\.\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/meta-externalads/i], describe: function(e6) {
-          var t2 = { name: "Meta-ExternalAds" }, r6 = n3.default.getFirstMatch(/meta-externalads\/(\d+(\.\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/meta-externalagent/i], describe: function(e6) {
-          var t2 = { name: "Meta-ExternalAgent" }, r6 = n3.default.getFirstMatch(/meta-externalagent\/(\d+(\.\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/meta-externalfetcher/i], describe: function(e6) {
-          var t2 = { name: "Meta-ExternalFetcher" }, r6 = n3.default.getFirstMatch(/meta-externalfetcher\/(\d+(\.\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/googlebot/i], describe: function(e6) {
-          var t2 = { name: "Googlebot" }, r6 = n3.default.getFirstMatch(/googlebot\/(\d+(\.\d+))/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/linespider/i], describe: function(e6) {
-          var t2 = { name: "Linespider" }, r6 = n3.default.getFirstMatch(/(?:linespider)(?:-[-\w]+)?[\s/](\d+(\.\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/amazonbot/i], describe: function(e6) {
-          var t2 = { name: "AmazonBot" }, r6 = n3.default.getFirstMatch(/amazonbot\/(\d+(\.\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/bingbot/i], describe: function(e6) {
-          var t2 = { name: "BingCrawler" }, r6 = n3.default.getFirstMatch(/bingbot\/(\d+(\.\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/baiduspider/i], describe: function(e6) {
-          var t2 = { name: "BaiduSpider" }, r6 = n3.default.getFirstMatch(/baiduspider\/(\d+(\.\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/duckduckbot/i], describe: function(e6) {
-          var t2 = { name: "DuckDuckBot" }, r6 = n3.default.getFirstMatch(/duckduckbot\/(\d+(\.\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/ia_archiver/i], describe: function(e6) {
-          var t2 = { name: "InternetArchiveCrawler" }, r6 = n3.default.getFirstMatch(/ia_archiver\/(\d+(\.\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/facebookexternalhit/i, /facebookcatalog/i], describe: function() {
-          return { name: "FacebookExternalHit" };
-        } }, { test: [/slackbot/i, /slack-imgProxy/i], describe: function(e6) {
-          var t2 = { name: "SlackBot" }, r6 = n3.default.getFirstMatch(/(?:slackbot|slack-imgproxy)(?:-[-\w]+)?[\s/](\d+(\.\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/yahoo!?[\s/]*slurp/i], describe: function() {
-          return { name: "YahooSlurp" };
-        } }, { test: [/yandexbot/i, /yandexmobilebot/i], describe: function() {
-          return { name: "YandexBot" };
-        } }, { test: [/pingdom/i], describe: function() {
-          return { name: "PingdomBot" };
-        } }, { test: [/opera/i], describe: function(e6) {
-          var t2 = { name: "Opera" }, r6 = n3.default.getFirstMatch(a5, e6) || n3.default.getFirstMatch(/(?:opera)[\s/](\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/opr\/|opios/i], describe: function(e6) {
-          var t2 = { name: "Opera" }, r6 = n3.default.getFirstMatch(/(?:opr|opios)[\s/](\S+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/SamsungBrowser/i], describe: function(e6) {
-          var t2 = { name: "Samsung Internet for Android" }, r6 = n3.default.getFirstMatch(a5, e6) || n3.default.getFirstMatch(/(?:SamsungBrowser)[\s/](\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/Whale/i], describe: function(e6) {
-          var t2 = { name: "NAVER Whale Browser" }, r6 = n3.default.getFirstMatch(a5, e6) || n3.default.getFirstMatch(/(?:whale)[\s/](\d+(?:\.\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/PaleMoon/i], describe: function(e6) {
-          var t2 = { name: "Pale Moon" }, r6 = n3.default.getFirstMatch(a5, e6) || n3.default.getFirstMatch(/(?:PaleMoon)[\s/](\d+(?:\.\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/MZBrowser/i], describe: function(e6) {
-          var t2 = { name: "MZ Browser" }, r6 = n3.default.getFirstMatch(/(?:MZBrowser)[\s/](\d+(?:\.\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/focus/i], describe: function(e6) {
-          var t2 = { name: "Focus" }, r6 = n3.default.getFirstMatch(/(?:focus)[\s/](\d+(?:\.\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/swing/i], describe: function(e6) {
-          var t2 = { name: "Swing" }, r6 = n3.default.getFirstMatch(/(?:swing)[\s/](\d+(?:\.\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/coast/i], describe: function(e6) {
-          var t2 = { name: "Opera Coast" }, r6 = n3.default.getFirstMatch(a5, e6) || n3.default.getFirstMatch(/(?:coast)[\s/](\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/opt\/\d+(?:.?_?\d+)+/i], describe: function(e6) {
-          var t2 = { name: "Opera Touch" }, r6 = n3.default.getFirstMatch(/(?:opt)[\s/](\d+(\.?_?\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/yabrowser/i], describe: function(e6) {
-          var t2 = { name: "Yandex Browser" }, r6 = n3.default.getFirstMatch(/(?:yabrowser)[\s/](\d+(\.?_?\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/ucbrowser/i], describe: function(e6) {
-          var t2 = { name: "UC Browser" }, r6 = n3.default.getFirstMatch(a5, e6) || n3.default.getFirstMatch(/(?:ucbrowser)[\s/](\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/Maxthon|mxios/i], describe: function(e6) {
-          var t2 = { name: "Maxthon" }, r6 = n3.default.getFirstMatch(a5, e6) || n3.default.getFirstMatch(/(?:Maxthon|mxios)[\s/](\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/epiphany/i], describe: function(e6) {
-          var t2 = { name: "Epiphany" }, r6 = n3.default.getFirstMatch(a5, e6) || n3.default.getFirstMatch(/(?:epiphany)[\s/](\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/puffin/i], describe: function(e6) {
-          var t2 = { name: "Puffin" }, r6 = n3.default.getFirstMatch(a5, e6) || n3.default.getFirstMatch(/(?:puffin)[\s/](\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/sleipnir/i], describe: function(e6) {
-          var t2 = { name: "Sleipnir" }, r6 = n3.default.getFirstMatch(a5, e6) || n3.default.getFirstMatch(/(?:sleipnir)[\s/](\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/k-meleon/i], describe: function(e6) {
-          var t2 = { name: "K-Meleon" }, r6 = n3.default.getFirstMatch(a5, e6) || n3.default.getFirstMatch(/(?:k-meleon)[\s/](\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/micromessenger/i], describe: function(e6) {
-          var t2 = { name: "WeChat" }, r6 = n3.default.getFirstMatch(/(?:micromessenger)[\s/](\d+(\.?_?\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/qqbrowser/i], describe: function(e6) {
-          var t2 = { name: /qqbrowserlite/i.test(e6) ? "QQ Browser Lite" : "QQ Browser" }, r6 = n3.default.getFirstMatch(/(?:qqbrowserlite|qqbrowser)[/](\d+(\.?_?\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/msie|trident/i], describe: function(e6) {
-          var t2 = { name: "Internet Explorer" }, r6 = n3.default.getFirstMatch(/(?:msie |rv:)(\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/\sedg\//i], describe: function(e6) {
-          var t2 = { name: "Microsoft Edge" }, r6 = n3.default.getFirstMatch(/\sedg\/(\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/edg([ea]|ios)/i], describe: function(e6) {
-          var t2 = { name: "Microsoft Edge" }, r6 = n3.default.getSecondMatch(/edg([ea]|ios)\/(\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/vivaldi/i], describe: function(e6) {
-          var t2 = { name: "Vivaldi" }, r6 = n3.default.getFirstMatch(/vivaldi\/(\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/seamonkey/i], describe: function(e6) {
-          var t2 = { name: "SeaMonkey" }, r6 = n3.default.getFirstMatch(/seamonkey\/(\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/sailfish/i], describe: function(e6) {
-          var t2 = { name: "Sailfish" }, r6 = n3.default.getFirstMatch(/sailfish\s?browser\/(\d+(\.\d+)?)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/silk/i], describe: function(e6) {
-          var t2 = { name: "Amazon Silk" }, r6 = n3.default.getFirstMatch(/silk\/(\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/phantom/i], describe: function(e6) {
-          var t2 = { name: "PhantomJS" }, r6 = n3.default.getFirstMatch(/phantomjs\/(\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/slimerjs/i], describe: function(e6) {
-          var t2 = { name: "SlimerJS" }, r6 = n3.default.getFirstMatch(/slimerjs\/(\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/blackberry|\bbb\d+/i, /rim\stablet/i], describe: function(e6) {
-          var t2 = { name: "BlackBerry" }, r6 = n3.default.getFirstMatch(a5, e6) || n3.default.getFirstMatch(/blackberry[\d]+\/(\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/(web|hpw)[o0]s/i], describe: function(e6) {
-          var t2 = { name: "WebOS Browser" }, r6 = n3.default.getFirstMatch(a5, e6) || n3.default.getFirstMatch(/w(?:eb)?[o0]sbrowser\/(\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/bada/i], describe: function(e6) {
-          var t2 = { name: "Bada" }, r6 = n3.default.getFirstMatch(/dolfin\/(\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/tizen/i], describe: function(e6) {
-          var t2 = { name: "Tizen" }, r6 = n3.default.getFirstMatch(/(?:tizen\s?)?browser\/(\d+(\.?_?\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/qupzilla/i], describe: function(e6) {
-          var t2 = { name: "QupZilla" }, r6 = n3.default.getFirstMatch(/(?:qupzilla)[\s/](\d+(\.?_?\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/librewolf/i], describe: function(e6) {
-          var t2 = { name: "LibreWolf" }, r6 = n3.default.getFirstMatch(/(?:librewolf)[\s/](\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/firefox|iceweasel|fxios/i], describe: function(e6) {
-          var t2 = { name: "Firefox" }, r6 = n3.default.getFirstMatch(/(?:firefox|iceweasel|fxios)[\s/](\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/electron/i], describe: function(e6) {
-          var t2 = { name: "Electron" }, r6 = n3.default.getFirstMatch(/(?:electron)\/(\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/sogoumobilebrowser/i, /metasr/i, /se 2\.[x]/i], describe: function(e6) {
-          var t2 = { name: "Sogou Browser" }, r6 = n3.default.getFirstMatch(/(?:sogoumobilebrowser)[\s/](\d+(\.?_?\d+)+)/i, e6), i6 = n3.default.getFirstMatch(/(?:chrome|crios|crmo)\/(\d+(\.?_?\d+)+)/i, e6), a6 = n3.default.getFirstMatch(/se ([\d.]+)x/i, e6), o4 = r6 || i6 || a6;
-          return o4 && (t2.version = o4), t2;
-        } }, { test: [/MiuiBrowser/i], describe: function(e6) {
-          var t2 = { name: "Miui" }, r6 = n3.default.getFirstMatch(/(?:MiuiBrowser)[\s/](\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: function(e6) {
-          return !!e6.hasBrand("DuckDuckGo") || e6.test(/\sDdg\/[\d.]+$/i);
-        }, describe: function(e6, t2) {
-          var r6 = { name: "DuckDuckGo" };
-          if (t2) {
-            var i6 = t2.getBrandVersion("DuckDuckGo");
-            if (i6) return r6.version = i6, r6;
+        }
+        return browser;
+      }
+    }, {
+      test: [/chromium/i],
+      describe: function describe68(ua) {
+        var browser = {
+          name: "Chromium"
+        };
+        var version = Utils.getFirstMatch(/(?:chromium)[\s/](\d+(\.?_?\d+)+)/i, ua) || Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/ladybird/i],
+      describe: function describe69(ua) {
+        var browser = {
+          name: "Ladybird"
+        };
+        var version = Utils.getFirstMatch(/ladybird\/(\d+(\.?_?\d+)+)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/chrome|crios|crmo/i],
+      describe: function describe70(ua) {
+        var browser = {
+          name: "Chrome"
+        };
+        var version = Utils.getFirstMatch(/(?:chrome|crios|crmo)\/(\d+(\.?_?\d+)+)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/GSA/i],
+      describe: function describe71(ua) {
+        var browser = {
+          name: "Google Search"
+        };
+        var version = Utils.getFirstMatch(/(?:GSA)\/(\d+(\.?_?\d+)+)/i, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: function test4(parser) {
+        var notLikeAndroid = !parser.test(/like android/i);
+        var butAndroid = parser.test(/android/i);
+        return notLikeAndroid && butAndroid;
+      },
+      describe: function describe72(ua) {
+        var browser = {
+          name: "Android Browser"
+        };
+        var version = Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/playstation 4/i],
+      describe: function describe73(ua) {
+        var browser = {
+          name: "PlayStation 4"
+        };
+        var version = Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/safari|applewebkit/i],
+      describe: function describe74(ua) {
+        var browser = {
+          name: "Safari"
+        };
+        var version = Utils.getFirstMatch(commonVersionIdentifier, ua);
+        if (version) browser.version = version;
+        return browser;
+      }
+    }, {
+      test: [/.*/i],
+      describe: function describe75(ua) {
+        var regexp = ua.search("\\(") !== -1 ? /^(.*)\/([^/]*)[ \t]\((.*)/ : /^(.*)\/([^/]*) /;
+        return {
+          name: Utils.getFirstMatch(regexp, ua),
+          version: Utils.getSecondMatch(regexp, ua)
+        };
+      }
+    }];
+    parser_os_default = [{
+      test: [/Roku\/DVP/],
+      describe: function describe76(ua) {
+        var version = Utils.getFirstMatch(/Roku\/DVP-(\d+\.\d+)/i, ua);
+        return {
+          name: OS_MAP.Roku,
+          version
+        };
+      }
+    }, {
+      test: [/windows phone/i],
+      describe: function describe77(ua) {
+        var version = Utils.getFirstMatch(/windows phone (?:os)?\s?(\d+(\.\d+)*)/i, ua);
+        return {
+          name: OS_MAP.WindowsPhone,
+          version
+        };
+      }
+    }, {
+      test: [/windows /i],
+      describe: function describe78(ua) {
+        var version = Utils.getFirstMatch(/Windows ((NT|XP)( \d\d?.\d)?)/i, ua);
+        var versionName = Utils.getWindowsVersionName(version);
+        return {
+          name: OS_MAP.Windows,
+          version,
+          versionName
+        };
+      }
+    }, {
+      test: function test5(parser) {
+        return Utils.isFirefoxOnIpad(parser.getUA());
+      },
+      describe: function describe79(ua) {
+        var result = {
+          name: OS_MAP.iOS
+        };
+        var version = Utils.getSecondMatch(/(Version\/)(\d[\d.]+)/, ua);
+        if (version) result.version = version;
+        return result;
+      }
+    }, {
+      test: [/macintosh/i],
+      describe: function describe80(ua) {
+        var version = Utils.getFirstMatch(/mac os x (\d+(\.?_?\d+)+)/i, ua).replace(/[_\s]/g, ".");
+        var versionName = Utils.getMacOSVersionName(version);
+        var os5 = {
+          name: OS_MAP.MacOS,
+          version
+        };
+        if (versionName) os5.versionName = versionName;
+        return os5;
+      }
+    }, {
+      test: [/(ipod|iphone|ipad)/i],
+      describe: function describe81(ua) {
+        var version = Utils.getFirstMatch(/os (\d+([_\s]\d+)*) like mac os x/i, ua).replace(/[_\s]/g, ".");
+        return {
+          name: OS_MAP.iOS,
+          version
+        };
+      }
+    }, {
+      test: [/OpenHarmony/i],
+      describe: function describe82(ua) {
+        var version = Utils.getFirstMatch(/OpenHarmony\s+(\d+(\.\d+)*)/i, ua);
+        return {
+          name: OS_MAP.HarmonyOS,
+          version
+        };
+      }
+    }, {
+      test: function test6(parser) {
+        var notLikeAndroid = !parser.test(/like android/i);
+        var butAndroid = parser.test(/android/i);
+        return notLikeAndroid && butAndroid;
+      },
+      describe: function describe83(ua) {
+        var version = Utils.getFirstMatch(/android[\s/-](\d+(\.\d+)*)/i, ua);
+        var versionName = Utils.getAndroidVersionName(version);
+        var os5 = {
+          name: OS_MAP.Android,
+          version
+        };
+        if (versionName) os5.versionName = versionName;
+        return os5;
+      }
+    }, {
+      test: [/(web|hpw)[o0]s/i],
+      describe: function describe84(ua) {
+        var version = Utils.getFirstMatch(/(?:web|hpw)[o0]s\/(\d+(\.\d+)*)/i, ua);
+        var os5 = {
+          name: OS_MAP.WebOS
+        };
+        if (version && version.length) os5.version = version;
+        return os5;
+      }
+    }, {
+      test: [/blackberry|\bbb\d+/i, /rim\stablet/i],
+      describe: function describe85(ua) {
+        var version = Utils.getFirstMatch(/rim\stablet\sos\s(\d+(\.\d+)*)/i, ua) || Utils.getFirstMatch(/blackberry\d+\/(\d+([_\s]\d+)*)/i, ua) || Utils.getFirstMatch(/\bbb(\d+)/i, ua);
+        return {
+          name: OS_MAP.BlackBerry,
+          version
+        };
+      }
+    }, {
+      test: [/bada/i],
+      describe: function describe86(ua) {
+        var version = Utils.getFirstMatch(/bada\/(\d+(\.\d+)*)/i, ua);
+        return {
+          name: OS_MAP.Bada,
+          version
+        };
+      }
+    }, {
+      test: [/tizen/i],
+      describe: function describe87(ua) {
+        var version = Utils.getFirstMatch(/tizen[/\s](\d+(\.\d+)*)/i, ua);
+        return {
+          name: OS_MAP.Tizen,
+          version
+        };
+      }
+    }, {
+      test: [/linux/i],
+      describe: function describe88() {
+        return {
+          name: OS_MAP.Linux
+        };
+      }
+    }, {
+      test: [/CrOS/],
+      describe: function describe89() {
+        return {
+          name: OS_MAP.ChromeOS
+        };
+      }
+    }, {
+      test: [/PlayStation 4/],
+      describe: function describe90(ua) {
+        var version = Utils.getFirstMatch(/PlayStation 4[/\s](\d+(\.\d+)*)/i, ua);
+        return {
+          name: OS_MAP.PlayStation4,
+          version
+        };
+      }
+    }];
+    parser_platforms_default = [{
+      test: [/googlebot/i],
+      describe: function describe91() {
+        return {
+          type: PLATFORMS_MAP.bot,
+          vendor: "Google"
+        };
+      }
+    }, {
+      test: [/linespider/i],
+      describe: function describe92() {
+        return {
+          type: PLATFORMS_MAP.bot,
+          vendor: "Line"
+        };
+      }
+    }, {
+      test: [/amazonbot/i],
+      describe: function describe93() {
+        return {
+          type: PLATFORMS_MAP.bot,
+          vendor: "Amazon"
+        };
+      }
+    }, {
+      test: [/gptbot/i],
+      describe: function describe94() {
+        return {
+          type: PLATFORMS_MAP.bot,
+          vendor: "OpenAI"
+        };
+      }
+    }, {
+      test: [/chatgpt-user/i],
+      describe: function describe95() {
+        return {
+          type: PLATFORMS_MAP.bot,
+          vendor: "OpenAI"
+        };
+      }
+    }, {
+      test: [/oai-searchbot/i],
+      describe: function describe96() {
+        return {
+          type: PLATFORMS_MAP.bot,
+          vendor: "OpenAI"
+        };
+      }
+    }, {
+      test: [/baiduspider/i],
+      describe: function describe97() {
+        return {
+          type: PLATFORMS_MAP.bot,
+          vendor: "Baidu"
+        };
+      }
+    }, {
+      test: [/bingbot/i],
+      describe: function describe98() {
+        return {
+          type: PLATFORMS_MAP.bot,
+          vendor: "Bing"
+        };
+      }
+    }, {
+      test: [/duckduckbot/i],
+      describe: function describe99() {
+        return {
+          type: PLATFORMS_MAP.bot,
+          vendor: "DuckDuckGo"
+        };
+      }
+    }, {
+      test: [/claudebot/i, /claude-web/i, /claude-user/i, /claude-searchbot/i],
+      describe: function describe100() {
+        return {
+          type: PLATFORMS_MAP.bot,
+          vendor: "Anthropic"
+        };
+      }
+    }, {
+      test: [/omgilibot/i, /webzio-extended/i],
+      describe: function describe101() {
+        return {
+          type: PLATFORMS_MAP.bot,
+          vendor: "Webz.io"
+        };
+      }
+    }, {
+      test: [/diffbot/i],
+      describe: function describe102() {
+        return {
+          type: PLATFORMS_MAP.bot,
+          vendor: "Diffbot"
+        };
+      }
+    }, {
+      test: [/perplexitybot/i],
+      describe: function describe103() {
+        return {
+          type: PLATFORMS_MAP.bot,
+          vendor: "Perplexity AI"
+        };
+      }
+    }, {
+      test: [/perplexity-user/i],
+      describe: function describe104() {
+        return {
+          type: PLATFORMS_MAP.bot,
+          vendor: "Perplexity AI"
+        };
+      }
+    }, {
+      test: [/youbot/i],
+      describe: function describe105() {
+        return {
+          type: PLATFORMS_MAP.bot,
+          vendor: "You.com"
+        };
+      }
+    }, {
+      test: [/ia_archiver/i],
+      describe: function describe106() {
+        return {
+          type: PLATFORMS_MAP.bot,
+          vendor: "Internet Archive"
+        };
+      }
+    }, {
+      test: [/meta-webindexer/i],
+      describe: function describe107() {
+        return {
+          type: PLATFORMS_MAP.bot,
+          vendor: "Meta"
+        };
+      }
+    }, {
+      test: [/meta-externalads/i],
+      describe: function describe108() {
+        return {
+          type: PLATFORMS_MAP.bot,
+          vendor: "Meta"
+        };
+      }
+    }, {
+      test: [/meta-externalagent/i],
+      describe: function describe109() {
+        return {
+          type: PLATFORMS_MAP.bot,
+          vendor: "Meta"
+        };
+      }
+    }, {
+      test: [/meta-externalfetcher/i],
+      describe: function describe110() {
+        return {
+          type: PLATFORMS_MAP.bot,
+          vendor: "Meta"
+        };
+      }
+    }, {
+      test: [/facebookexternalhit/i, /facebookcatalog/i],
+      describe: function describe111() {
+        return {
+          type: PLATFORMS_MAP.bot,
+          vendor: "Meta"
+        };
+      }
+    }, {
+      test: [/slackbot/i, /slack-imgProxy/i],
+      describe: function describe112() {
+        return {
+          type: PLATFORMS_MAP.bot,
+          vendor: "Slack"
+        };
+      }
+    }, {
+      test: [/yahoo/i],
+      describe: function describe113() {
+        return {
+          type: PLATFORMS_MAP.bot,
+          vendor: "Yahoo"
+        };
+      }
+    }, {
+      test: [/yandexbot/i, /yandexmobilebot/i],
+      describe: function describe114() {
+        return {
+          type: PLATFORMS_MAP.bot,
+          vendor: "Yandex"
+        };
+      }
+    }, {
+      test: [/pingdom/i],
+      describe: function describe115() {
+        return {
+          type: PLATFORMS_MAP.bot,
+          vendor: "Pingdom"
+        };
+      }
+    }, {
+      test: [/huawei/i],
+      describe: function describe116(ua) {
+        var model = Utils.getFirstMatch(/(can-l01)/i, ua) && "Nova";
+        var platform3 = {
+          type: PLATFORMS_MAP.mobile,
+          vendor: "Huawei"
+        };
+        if (model) platform3.model = model;
+        return platform3;
+      }
+    }, {
+      test: [/nexus\s*(?:7|8|9|10).*/i],
+      describe: function describe117() {
+        return {
+          type: PLATFORMS_MAP.tablet,
+          vendor: "Nexus"
+        };
+      }
+    }, {
+      test: [/ipad/i],
+      describe: function describe118() {
+        return {
+          type: PLATFORMS_MAP.tablet,
+          vendor: "Apple",
+          model: "iPad"
+        };
+      }
+    }, {
+      test: function test7(parser) {
+        return Utils.isFirefoxOnIpad(parser.getUA());
+      },
+      describe: function describe119() {
+        return {
+          type: PLATFORMS_MAP.tablet,
+          vendor: "Apple",
+          model: "iPad"
+        };
+      }
+    }, {
+      test: [/kftt build/i],
+      describe: function describe120() {
+        return {
+          type: PLATFORMS_MAP.tablet,
+          vendor: "Amazon",
+          model: "Kindle Fire HD 7"
+        };
+      }
+    }, {
+      test: [/silk/i],
+      describe: function describe121() {
+        return {
+          type: PLATFORMS_MAP.tablet,
+          vendor: "Amazon"
+        };
+      }
+    }, {
+      test: [/tablet(?! pc)/i],
+      describe: function describe122() {
+        return {
+          type: PLATFORMS_MAP.tablet
+        };
+      }
+    }, {
+      test: function test8(parser) {
+        var iDevice = parser.test(/ipod|iphone/i);
+        var likeIDevice = parser.test(/like (ipod|iphone)/i);
+        return iDevice && !likeIDevice;
+      },
+      describe: function describe123(ua) {
+        var model = Utils.getFirstMatch(/(ipod|iphone)/i, ua);
+        return {
+          type: PLATFORMS_MAP.mobile,
+          vendor: "Apple",
+          model
+        };
+      }
+    }, {
+      test: [/nexus\s*[0-6].*/i, /galaxy nexus/i],
+      describe: function describe124() {
+        return {
+          type: PLATFORMS_MAP.mobile,
+          vendor: "Nexus"
+        };
+      }
+    }, {
+      test: [/Nokia/i],
+      describe: function describe125(ua) {
+        var model = Utils.getFirstMatch(/Nokia\s+([0-9]+(\.[0-9]+)?)/i, ua);
+        var platform3 = {
+          type: PLATFORMS_MAP.mobile,
+          vendor: "Nokia"
+        };
+        if (model) platform3.model = model;
+        return platform3;
+      }
+    }, {
+      test: [/[^-]mobi/i],
+      describe: function describe126() {
+        return {
+          type: PLATFORMS_MAP.mobile
+        };
+      }
+    }, {
+      test: function test9(parser) {
+        return parser.getBrowserName(true) === "blackberry";
+      },
+      describe: function describe127() {
+        return {
+          type: PLATFORMS_MAP.mobile,
+          vendor: "BlackBerry"
+        };
+      }
+    }, {
+      test: function test10(parser) {
+        return parser.getBrowserName(true) === "bada";
+      },
+      describe: function describe128() {
+        return {
+          type: PLATFORMS_MAP.mobile
+        };
+      }
+    }, {
+      test: function test11(parser) {
+        return parser.getBrowserName() === "windows phone";
+      },
+      describe: function describe129() {
+        return {
+          type: PLATFORMS_MAP.mobile,
+          vendor: "Microsoft"
+        };
+      }
+    }, {
+      test: function test12(parser) {
+        var osMajorVersion = Number(String(parser.getOSVersion()).split(".")[0]);
+        return parser.getOSName(true) === "android" && osMajorVersion >= 3;
+      },
+      describe: function describe130() {
+        return {
+          type: PLATFORMS_MAP.tablet
+        };
+      }
+    }, {
+      test: function test13(parser) {
+        return parser.getOSName(true) === "android";
+      },
+      describe: function describe131() {
+        return {
+          type: PLATFORMS_MAP.mobile
+        };
+      }
+    }, {
+      test: [/smart-?tv|smarttv/i],
+      describe: function describe132() {
+        return {
+          type: PLATFORMS_MAP.tv
+        };
+      }
+    }, {
+      test: [/netcast/i],
+      describe: function describe133() {
+        return {
+          type: PLATFORMS_MAP.tv
+        };
+      }
+    }, {
+      test: function test14(parser) {
+        return parser.getOSName(true) === "macos";
+      },
+      describe: function describe134() {
+        return {
+          type: PLATFORMS_MAP.desktop,
+          vendor: "Apple"
+        };
+      }
+    }, {
+      test: function test15(parser) {
+        return parser.getOSName(true) === "windows";
+      },
+      describe: function describe135() {
+        return {
+          type: PLATFORMS_MAP.desktop
+        };
+      }
+    }, {
+      test: function test16(parser) {
+        return parser.getOSName(true) === "linux";
+      },
+      describe: function describe136() {
+        return {
+          type: PLATFORMS_MAP.desktop
+        };
+      }
+    }, {
+      test: function test17(parser) {
+        return parser.getOSName(true) === "playstation 4";
+      },
+      describe: function describe137() {
+        return {
+          type: PLATFORMS_MAP.tv
+        };
+      }
+    }, {
+      test: function test18(parser) {
+        return parser.getOSName(true) === "roku";
+      },
+      describe: function describe138() {
+        return {
+          type: PLATFORMS_MAP.tv
+        };
+      }
+    }];
+    parser_engines_default = [{
+      test: function test19(parser) {
+        return parser.getBrowserName(true) === "microsoft edge";
+      },
+      describe: function describe139(ua) {
+        if (/\sedg\//i.test(ua)) return {
+          name: ENGINE_MAP.Blink
+        };
+        var version = Utils.getFirstMatch(/edge\/(\d+(\.?_?\d+)+)/i, ua);
+        return {
+          name: ENGINE_MAP.EdgeHTML,
+          version
+        };
+      }
+    }, {
+      test: function test20(parser) {
+        return parser.getBrowserName(true) === "ladybird";
+      },
+      describe: function describe140() {
+        return {
+          name: ENGINE_MAP.LibWeb
+        };
+      }
+    }, {
+      test: [/trident/i],
+      describe: function describe141(ua) {
+        var engine = {
+          name: ENGINE_MAP.Trident
+        };
+        var version = Utils.getFirstMatch(/trident\/(\d+(\.?_?\d+)+)/i, ua);
+        if (version) engine.version = version;
+        return engine;
+      }
+    }, {
+      test: function test21(parser) {
+        return parser.test(/presto/i);
+      },
+      describe: function describe142(ua) {
+        var engine = {
+          name: ENGINE_MAP.Presto
+        };
+        var version = Utils.getFirstMatch(/presto\/(\d+(\.?_?\d+)+)/i, ua);
+        if (version) engine.version = version;
+        return engine;
+      }
+    }, {
+      test: function test22(parser) {
+        var isGecko = parser.test(/gecko/i);
+        var likeGecko = parser.test(/like gecko/i);
+        return isGecko && !likeGecko;
+      },
+      describe: function describe143(ua) {
+        var engine = {
+          name: ENGINE_MAP.Gecko
+        };
+        var version = Utils.getFirstMatch(/gecko\/(\d+(\.?_?\d+)+)/i, ua);
+        if (version) engine.version = version;
+        return engine;
+      }
+    }, {
+      test: [/(apple)?webkit\/537\.36/i],
+      describe: function describe144() {
+        return {
+          name: ENGINE_MAP.Blink
+        };
+      }
+    }, {
+      test: [/(apple)?webkit/i],
+      describe: function describe145(ua) {
+        var engine = {
+          name: ENGINE_MAP.WebKit
+        };
+        var version = Utils.getFirstMatch(/webkit\/(\d+(\.?_?\d+)+)/i, ua);
+        if (version) engine.version = version;
+        return engine;
+      }
+    }];
+    Parser = /* @__PURE__ */ (function() {
+      function Parser2(UA, skipParsingOrHints, clientHints) {
+        if (skipParsingOrHints === void 0) skipParsingOrHints = false;
+        if (clientHints === void 0) clientHints = null;
+        if (UA === void 0 || UA === null || UA === "") throw new Error("UserAgent parameter can't be empty");
+        this._ua = UA;
+        var skipParsing = false;
+        if (typeof skipParsingOrHints === "boolean") {
+          skipParsing = skipParsingOrHints;
+          this._hints = clientHints;
+        } else if (skipParsingOrHints != null && typeof skipParsingOrHints === "object") this._hints = skipParsingOrHints;
+        else this._hints = null;
+        this.parsedResult = {};
+        if (skipParsing !== true) this.parse();
+      }
+      var _proto = Parser2.prototype;
+      _proto.getHints = function getHints() {
+        return this._hints;
+      };
+      _proto.hasBrand = function hasBrand(brandName) {
+        if (!this._hints || !Array.isArray(this._hints.brands)) return false;
+        var brandLower = brandName.toLowerCase();
+        return this._hints.brands.some(function(b5) {
+          return b5.brand && b5.brand.toLowerCase() === brandLower;
+        });
+      };
+      _proto.getBrandVersion = function getBrandVersion(brandName) {
+        if (!this._hints || !Array.isArray(this._hints.brands)) return;
+        var brandLower = brandName.toLowerCase();
+        var brand = Utils.find(this._hints.brands, function(b5) {
+          return b5.brand && b5.brand.toLowerCase() === brandLower;
+        });
+        return brand ? brand.version : void 0;
+      };
+      _proto.getUA = function getUA() {
+        return this._ua;
+      };
+      _proto.test = function test23(regex) {
+        return regex.test(this._ua);
+      };
+      _proto.parseBrowser = function parseBrowser() {
+        var _this = this;
+        this.parsedResult.browser = {};
+        var browserDescriptor = Utils.find(browsersList, function(_browser) {
+          if (typeof _browser.test === "function") return _browser.test(_this);
+          if (Array.isArray(_browser.test)) return _browser.test.some(function(condition) {
+            return _this.test(condition);
+          });
+          throw new Error("Browser's test function is not valid");
+        });
+        if (browserDescriptor) this.parsedResult.browser = browserDescriptor.describe(this.getUA(), this);
+        return this.parsedResult.browser;
+      };
+      _proto.getBrowser = function getBrowser() {
+        if (this.parsedResult.browser) return this.parsedResult.browser;
+        return this.parseBrowser();
+      };
+      _proto.getBrowserName = function getBrowserName(toLowerCase) {
+        if (toLowerCase) return String(this.getBrowser().name).toLowerCase() || "";
+        return this.getBrowser().name || "";
+      };
+      _proto.getBrowserVersion = function getBrowserVersion() {
+        return this.getBrowser().version;
+      };
+      _proto.getOS = function getOS() {
+        if (this.parsedResult.os) return this.parsedResult.os;
+        return this.parseOS();
+      };
+      _proto.parseOS = function parseOS() {
+        var _this2 = this;
+        this.parsedResult.os = {};
+        var os5 = Utils.find(parser_os_default, function(_os) {
+          if (typeof _os.test === "function") return _os.test(_this2);
+          if (Array.isArray(_os.test)) return _os.test.some(function(condition) {
+            return _this2.test(condition);
+          });
+          throw new Error("Browser's test function is not valid");
+        });
+        if (os5) this.parsedResult.os = os5.describe(this.getUA());
+        return this.parsedResult.os;
+      };
+      _proto.getOSName = function getOSName(toLowerCase) {
+        var name = this.getOS().name;
+        if (toLowerCase) return String(name).toLowerCase() || "";
+        return name || "";
+      };
+      _proto.getOSVersion = function getOSVersion() {
+        return this.getOS().version;
+      };
+      _proto.getPlatform = function getPlatform() {
+        if (this.parsedResult.platform) return this.parsedResult.platform;
+        return this.parsePlatform();
+      };
+      _proto.getPlatformType = function getPlatformType(toLowerCase) {
+        if (toLowerCase === void 0) toLowerCase = false;
+        var type = this.getPlatform().type;
+        if (toLowerCase) return String(type).toLowerCase() || "";
+        return type || "";
+      };
+      _proto.parsePlatform = function parsePlatform() {
+        var _this3 = this;
+        this.parsedResult.platform = {};
+        var platform3 = Utils.find(parser_platforms_default, function(_platform) {
+          if (typeof _platform.test === "function") return _platform.test(_this3);
+          if (Array.isArray(_platform.test)) return _platform.test.some(function(condition) {
+            return _this3.test(condition);
+          });
+          throw new Error("Browser's test function is not valid");
+        });
+        if (platform3) this.parsedResult.platform = platform3.describe(this.getUA());
+        return this.parsedResult.platform;
+      };
+      _proto.getEngine = function getEngine() {
+        if (this.parsedResult.engine) return this.parsedResult.engine;
+        return this.parseEngine();
+      };
+      _proto.getEngineName = function getEngineName(toLowerCase) {
+        if (toLowerCase) return String(this.getEngine().name).toLowerCase() || "";
+        return this.getEngine().name || "";
+      };
+      _proto.parseEngine = function parseEngine() {
+        var _this4 = this;
+        this.parsedResult.engine = {};
+        var engine = Utils.find(parser_engines_default, function(_engine) {
+          if (typeof _engine.test === "function") return _engine.test(_this4);
+          if (Array.isArray(_engine.test)) return _engine.test.some(function(condition) {
+            return _this4.test(condition);
+          });
+          throw new Error("Browser's test function is not valid");
+        });
+        if (engine) this.parsedResult.engine = engine.describe(this.getUA());
+        return this.parsedResult.engine;
+      };
+      _proto.parse = function parse2() {
+        this.parseBrowser();
+        this.parseOS();
+        this.parsePlatform();
+        this.parseEngine();
+        return this;
+      };
+      _proto.getResult = function getResult() {
+        return Utils.assign({}, this.parsedResult);
+      };
+      _proto.satisfies = function satisfies(checkTree) {
+        var _this5 = this;
+        var platformsAndOSes = {};
+        var platformsAndOSCounter = 0;
+        var browsers = {};
+        var browsersCounter = 0;
+        Object.keys(checkTree).forEach(function(key) {
+          var currentDefinition = checkTree[key];
+          if (typeof currentDefinition === "string" || Array.isArray(currentDefinition)) {
+            browsers[key] = currentDefinition;
+            browsersCounter += 1;
+          } else if (typeof currentDefinition === "object") {
+            platformsAndOSes[key] = currentDefinition;
+            platformsAndOSCounter += 1;
           }
-          var a6 = n3.default.getFirstMatch(/\sDdg\/([\d.]+)$/i, e6);
-          return a6 && (r6.version = a6), r6;
-        } }, { test: function(e6) {
-          return e6.hasBrand("Brave");
-        }, describe: function(e6, t2) {
-          var r6 = { name: "Brave" };
-          if (t2) {
-            var i6 = t2.getBrandVersion("Brave");
-            if (i6) return r6.version = i6, r6;
+        });
+        if (platformsAndOSCounter > 0) {
+          var platformsAndOSNames = Object.keys(platformsAndOSes);
+          var OSMatchingDefinition = Utils.find(platformsAndOSNames, function(name) {
+            return _this5.isOS(name);
+          });
+          if (OSMatchingDefinition) {
+            var osResult = this.satisfies(platformsAndOSes[OSMatchingDefinition]);
+            if (osResult !== void 0) return osResult;
           }
-          return r6;
-        } }, { test: [/chromium/i], describe: function(e6) {
-          var t2 = { name: "Chromium" }, r6 = n3.default.getFirstMatch(/(?:chromium)[\s/](\d+(\.?_?\d+)+)/i, e6) || n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/chrome|crios|crmo/i], describe: function(e6) {
-          var t2 = { name: "Chrome" }, r6 = n3.default.getFirstMatch(/(?:chrome|crios|crmo)\/(\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/GSA/i], describe: function(e6) {
-          var t2 = { name: "Google Search" }, r6 = n3.default.getFirstMatch(/(?:GSA)\/(\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: function(e6) {
-          var t2 = !e6.test(/like android/i), r6 = e6.test(/android/i);
-          return t2 && r6;
-        }, describe: function(e6) {
-          var t2 = { name: "Android Browser" }, r6 = n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/playstation 4/i], describe: function(e6) {
-          var t2 = { name: "PlayStation 4" }, r6 = n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/safari|applewebkit/i], describe: function(e6) {
-          var t2 = { name: "Safari" }, r6 = n3.default.getFirstMatch(a5, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/.*/i], describe: function(e6) {
-          var t2 = -1 !== e6.search("\\(") ? /^(.*)\/(.*)[ \t]\((.*)/ : /^(.*)\/(.*) /;
-          return { name: n3.default.getFirstMatch(t2, e6), version: n3.default.getSecondMatch(t2, e6) };
-        } }];
-        t.default = o3, e5.exports = t.default;
-      }, 93: function(e5, t, r5) {
-        "use strict";
-        t.__esModule = true, t.default = void 0;
-        var i5, n3 = (i5 = r5(17)) && i5.__esModule ? i5 : { default: i5 }, a5 = r5(18);
-        var o3 = [{ test: [/Roku\/DVP/], describe: function(e6) {
-          var t2 = n3.default.getFirstMatch(/Roku\/DVP-(\d+\.\d+)/i, e6);
-          return { name: a5.OS_MAP.Roku, version: t2 };
-        } }, { test: [/windows phone/i], describe: function(e6) {
-          var t2 = n3.default.getFirstMatch(/windows phone (?:os)?\s?(\d+(\.\d+)*)/i, e6);
-          return { name: a5.OS_MAP.WindowsPhone, version: t2 };
-        } }, { test: [/windows /i], describe: function(e6) {
-          var t2 = n3.default.getFirstMatch(/Windows ((NT|XP)( \d\d?.\d)?)/i, e6), r6 = n3.default.getWindowsVersionName(t2);
-          return { name: a5.OS_MAP.Windows, version: t2, versionName: r6 };
-        } }, { test: [/Macintosh(.*?) FxiOS(.*?)\//], describe: function(e6) {
-          var t2 = { name: a5.OS_MAP.iOS }, r6 = n3.default.getSecondMatch(/(Version\/)(\d[\d.]+)/, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/macintosh/i], describe: function(e6) {
-          var t2 = n3.default.getFirstMatch(/mac os x (\d+(\.?_?\d+)+)/i, e6).replace(/[_\s]/g, "."), r6 = n3.default.getMacOSVersionName(t2), i6 = { name: a5.OS_MAP.MacOS, version: t2 };
-          return r6 && (i6.versionName = r6), i6;
-        } }, { test: [/(ipod|iphone|ipad)/i], describe: function(e6) {
-          var t2 = n3.default.getFirstMatch(/os (\d+([_\s]\d+)*) like mac os x/i, e6).replace(/[_\s]/g, ".");
-          return { name: a5.OS_MAP.iOS, version: t2 };
-        } }, { test: [/OpenHarmony/i], describe: function(e6) {
-          var t2 = n3.default.getFirstMatch(/OpenHarmony\s+(\d+(\.\d+)*)/i, e6);
-          return { name: a5.OS_MAP.HarmonyOS, version: t2 };
-        } }, { test: function(e6) {
-          var t2 = !e6.test(/like android/i), r6 = e6.test(/android/i);
-          return t2 && r6;
-        }, describe: function(e6) {
-          var t2 = n3.default.getFirstMatch(/android[\s/-](\d+(\.\d+)*)/i, e6), r6 = n3.default.getAndroidVersionName(t2), i6 = { name: a5.OS_MAP.Android, version: t2 };
-          return r6 && (i6.versionName = r6), i6;
-        } }, { test: [/(web|hpw)[o0]s/i], describe: function(e6) {
-          var t2 = n3.default.getFirstMatch(/(?:web|hpw)[o0]s\/(\d+(\.\d+)*)/i, e6), r6 = { name: a5.OS_MAP.WebOS };
-          return t2 && t2.length && (r6.version = t2), r6;
-        } }, { test: [/blackberry|\bbb\d+/i, /rim\stablet/i], describe: function(e6) {
-          var t2 = n3.default.getFirstMatch(/rim\stablet\sos\s(\d+(\.\d+)*)/i, e6) || n3.default.getFirstMatch(/blackberry\d+\/(\d+([_\s]\d+)*)/i, e6) || n3.default.getFirstMatch(/\bbb(\d+)/i, e6);
-          return { name: a5.OS_MAP.BlackBerry, version: t2 };
-        } }, { test: [/bada/i], describe: function(e6) {
-          var t2 = n3.default.getFirstMatch(/bada\/(\d+(\.\d+)*)/i, e6);
-          return { name: a5.OS_MAP.Bada, version: t2 };
-        } }, { test: [/tizen/i], describe: function(e6) {
-          var t2 = n3.default.getFirstMatch(/tizen[/\s](\d+(\.\d+)*)/i, e6);
-          return { name: a5.OS_MAP.Tizen, version: t2 };
-        } }, { test: [/linux/i], describe: function() {
-          return { name: a5.OS_MAP.Linux };
-        } }, { test: [/CrOS/], describe: function() {
-          return { name: a5.OS_MAP.ChromeOS };
-        } }, { test: [/PlayStation 4/], describe: function(e6) {
-          var t2 = n3.default.getFirstMatch(/PlayStation 4[/\s](\d+(\.\d+)*)/i, e6);
-          return { name: a5.OS_MAP.PlayStation4, version: t2 };
-        } }];
-        t.default = o3, e5.exports = t.default;
-      }, 94: function(e5, t, r5) {
-        "use strict";
-        t.__esModule = true, t.default = void 0;
-        var i5, n3 = (i5 = r5(17)) && i5.__esModule ? i5 : { default: i5 }, a5 = r5(18);
-        var o3 = [{ test: [/googlebot/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.bot, vendor: "Google" };
-        } }, { test: [/linespider/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.bot, vendor: "Line" };
-        } }, { test: [/amazonbot/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.bot, vendor: "Amazon" };
-        } }, { test: [/gptbot/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.bot, vendor: "OpenAI" };
-        } }, { test: [/chatgpt-user/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.bot, vendor: "OpenAI" };
-        } }, { test: [/oai-searchbot/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.bot, vendor: "OpenAI" };
-        } }, { test: [/baiduspider/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.bot, vendor: "Baidu" };
-        } }, { test: [/bingbot/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.bot, vendor: "Bing" };
-        } }, { test: [/duckduckbot/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.bot, vendor: "DuckDuckGo" };
-        } }, { test: [/claudebot/i, /claude-web/i, /claude-user/i, /claude-searchbot/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.bot, vendor: "Anthropic" };
-        } }, { test: [/omgilibot/i, /webzio-extended/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.bot, vendor: "Webz.io" };
-        } }, { test: [/diffbot/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.bot, vendor: "Diffbot" };
-        } }, { test: [/perplexitybot/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.bot, vendor: "Perplexity AI" };
-        } }, { test: [/perplexity-user/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.bot, vendor: "Perplexity AI" };
-        } }, { test: [/youbot/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.bot, vendor: "You.com" };
-        } }, { test: [/ia_archiver/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.bot, vendor: "Internet Archive" };
-        } }, { test: [/meta-webindexer/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.bot, vendor: "Meta" };
-        } }, { test: [/meta-externalads/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.bot, vendor: "Meta" };
-        } }, { test: [/meta-externalagent/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.bot, vendor: "Meta" };
-        } }, { test: [/meta-externalfetcher/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.bot, vendor: "Meta" };
-        } }, { test: [/facebookexternalhit/i, /facebookcatalog/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.bot, vendor: "Meta" };
-        } }, { test: [/slackbot/i, /slack-imgProxy/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.bot, vendor: "Slack" };
-        } }, { test: [/yahoo/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.bot, vendor: "Yahoo" };
-        } }, { test: [/yandexbot/i, /yandexmobilebot/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.bot, vendor: "Yandex" };
-        } }, { test: [/pingdom/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.bot, vendor: "Pingdom" };
-        } }, { test: [/huawei/i], describe: function(e6) {
-          var t2 = n3.default.getFirstMatch(/(can-l01)/i, e6) && "Nova", r6 = { type: a5.PLATFORMS_MAP.mobile, vendor: "Huawei" };
-          return t2 && (r6.model = t2), r6;
-        } }, { test: [/nexus\s*(?:7|8|9|10).*/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.tablet, vendor: "Nexus" };
-        } }, { test: [/ipad/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.tablet, vendor: "Apple", model: "iPad" };
-        } }, { test: [/Macintosh(.*?) FxiOS(.*?)\//], describe: function() {
-          return { type: a5.PLATFORMS_MAP.tablet, vendor: "Apple", model: "iPad" };
-        } }, { test: [/kftt build/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.tablet, vendor: "Amazon", model: "Kindle Fire HD 7" };
-        } }, { test: [/silk/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.tablet, vendor: "Amazon" };
-        } }, { test: [/tablet(?! pc)/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.tablet };
-        } }, { test: function(e6) {
-          var t2 = e6.test(/ipod|iphone/i), r6 = e6.test(/like (ipod|iphone)/i);
-          return t2 && !r6;
-        }, describe: function(e6) {
-          var t2 = n3.default.getFirstMatch(/(ipod|iphone)/i, e6);
-          return { type: a5.PLATFORMS_MAP.mobile, vendor: "Apple", model: t2 };
-        } }, { test: [/nexus\s*[0-6].*/i, /galaxy nexus/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.mobile, vendor: "Nexus" };
-        } }, { test: [/Nokia/i], describe: function(e6) {
-          var t2 = n3.default.getFirstMatch(/Nokia\s+([0-9]+(\.[0-9]+)?)/i, e6), r6 = { type: a5.PLATFORMS_MAP.mobile, vendor: "Nokia" };
-          return t2 && (r6.model = t2), r6;
-        } }, { test: [/[^-]mobi/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.mobile };
-        } }, { test: function(e6) {
-          return "blackberry" === e6.getBrowserName(true);
-        }, describe: function() {
-          return { type: a5.PLATFORMS_MAP.mobile, vendor: "BlackBerry" };
-        } }, { test: function(e6) {
-          return "bada" === e6.getBrowserName(true);
-        }, describe: function() {
-          return { type: a5.PLATFORMS_MAP.mobile };
-        } }, { test: function(e6) {
-          return "windows phone" === e6.getBrowserName();
-        }, describe: function() {
-          return { type: a5.PLATFORMS_MAP.mobile, vendor: "Microsoft" };
-        } }, { test: function(e6) {
-          var t2 = Number(String(e6.getOSVersion()).split(".")[0]);
-          return "android" === e6.getOSName(true) && t2 >= 3;
-        }, describe: function() {
-          return { type: a5.PLATFORMS_MAP.tablet };
-        } }, { test: function(e6) {
-          return "android" === e6.getOSName(true);
-        }, describe: function() {
-          return { type: a5.PLATFORMS_MAP.mobile };
-        } }, { test: [/smart-?tv|smarttv/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.tv };
-        } }, { test: [/netcast/i], describe: function() {
-          return { type: a5.PLATFORMS_MAP.tv };
-        } }, { test: function(e6) {
-          return "macos" === e6.getOSName(true);
-        }, describe: function() {
-          return { type: a5.PLATFORMS_MAP.desktop, vendor: "Apple" };
-        } }, { test: function(e6) {
-          return "windows" === e6.getOSName(true);
-        }, describe: function() {
-          return { type: a5.PLATFORMS_MAP.desktop };
-        } }, { test: function(e6) {
-          return "linux" === e6.getOSName(true);
-        }, describe: function() {
-          return { type: a5.PLATFORMS_MAP.desktop };
-        } }, { test: function(e6) {
-          return "playstation 4" === e6.getOSName(true);
-        }, describe: function() {
-          return { type: a5.PLATFORMS_MAP.tv };
-        } }, { test: function(e6) {
-          return "roku" === e6.getOSName(true);
-        }, describe: function() {
-          return { type: a5.PLATFORMS_MAP.tv };
-        } }];
-        t.default = o3, e5.exports = t.default;
-      }, 95: function(e5, t, r5) {
-        "use strict";
-        t.__esModule = true, t.default = void 0;
-        var i5, n3 = (i5 = r5(17)) && i5.__esModule ? i5 : { default: i5 }, a5 = r5(18);
-        var o3 = [{ test: function(e6) {
-          return "microsoft edge" === e6.getBrowserName(true);
-        }, describe: function(e6) {
-          if (/\sedg\//i.test(e6)) return { name: a5.ENGINE_MAP.Blink };
-          var t2 = n3.default.getFirstMatch(/edge\/(\d+(\.?_?\d+)+)/i, e6);
-          return { name: a5.ENGINE_MAP.EdgeHTML, version: t2 };
-        } }, { test: [/trident/i], describe: function(e6) {
-          var t2 = { name: a5.ENGINE_MAP.Trident }, r6 = n3.default.getFirstMatch(/trident\/(\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: function(e6) {
-          return e6.test(/presto/i);
-        }, describe: function(e6) {
-          var t2 = { name: a5.ENGINE_MAP.Presto }, r6 = n3.default.getFirstMatch(/presto\/(\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: function(e6) {
-          var t2 = e6.test(/gecko/i), r6 = e6.test(/like gecko/i);
-          return t2 && !r6;
-        }, describe: function(e6) {
-          var t2 = { name: a5.ENGINE_MAP.Gecko }, r6 = n3.default.getFirstMatch(/gecko\/(\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }, { test: [/(apple)?webkit\/537\.36/i], describe: function() {
-          return { name: a5.ENGINE_MAP.Blink };
-        } }, { test: [/(apple)?webkit/i], describe: function(e6) {
-          var t2 = { name: a5.ENGINE_MAP.WebKit }, r6 = n3.default.getFirstMatch(/webkit\/(\d+(\.?_?\d+)+)/i, e6);
-          return r6 && (t2.version = r6), t2;
-        } }];
-        t.default = o3, e5.exports = t.default;
-      } });
-    }));
+          var platformMatchingDefinition = Utils.find(platformsAndOSNames, function(name) {
+            return _this5.isPlatform(name);
+          });
+          if (platformMatchingDefinition) {
+            var platformResult = this.satisfies(platformsAndOSes[platformMatchingDefinition]);
+            if (platformResult !== void 0) return platformResult;
+          }
+        }
+        if (browsersCounter > 0) {
+          var browserNames = Object.keys(browsers);
+          var matchingDefinition = Utils.find(browserNames, function(name) {
+            return _this5.isBrowser(name, true);
+          });
+          if (matchingDefinition !== void 0) return this.compareVersions(browsers[matchingDefinition]);
+        }
+      };
+      _proto.isBrowser = function isBrowser(browserName, includingAlias) {
+        if (includingAlias === void 0) includingAlias = false;
+        var defaultBrowserName = this.getBrowserName().toLowerCase();
+        var browserNameLower = browserName.toLowerCase();
+        var alias = Utils.getBrowserTypeByAlias(browserNameLower);
+        if (includingAlias && alias) browserNameLower = alias.toLowerCase();
+        return browserNameLower === defaultBrowserName;
+      };
+      _proto.compareVersions = function compareVersions(versionsOrVersion) {
+        var _this6 = this;
+        if (typeof versionsOrVersion === "string") return this.compareVersion(versionsOrVersion);
+        return versionsOrVersion.some(function(version) {
+          return _this6.compareVersion(version);
+        });
+      };
+      _proto.compareVersion = function compareVersion(version) {
+        var expectedResults = [0];
+        var comparableVersion = version;
+        var isLoose = false;
+        var currentBrowserVersion = this.getBrowserVersion();
+        if (typeof currentBrowserVersion !== "string") return;
+        if (version[0] === ">" || version[0] === "<") {
+          comparableVersion = version.substr(1);
+          if (version[1] === "=") {
+            isLoose = true;
+            comparableVersion = version.substr(2);
+          } else expectedResults = [];
+          if (version[0] === ">") expectedResults.push(1);
+          else expectedResults.push(-1);
+        } else if (version[0] === "=") comparableVersion = version.substr(1);
+        else if (version[0] === "~") {
+          isLoose = true;
+          comparableVersion = version.substr(1);
+        }
+        return expectedResults.indexOf(Utils.compareVersions(currentBrowserVersion, comparableVersion, isLoose)) > -1;
+      };
+      _proto.isOS = function isOS(osName) {
+        return this.getOSName(true) === String(osName).toLowerCase();
+      };
+      _proto.isPlatform = function isPlatform(platformType) {
+        return this.getPlatformType(true) === String(platformType).toLowerCase();
+      };
+      _proto.isEngine = function isEngine(engineName) {
+        return this.getEngineName(true) === String(engineName).toLowerCase();
+      };
+      _proto.is = function is(anything, includingAlias) {
+        if (includingAlias === void 0) includingAlias = false;
+        return this.isBrowser(anything, includingAlias) || this.isOS(anything) || this.isPlatform(anything);
+      };
+      _proto.some = function some(anythings) {
+        var _this7 = this;
+        if (anythings === void 0) anythings = [];
+        return anythings.some(function(anything) {
+          return _this7.is(anything);
+        });
+      };
+      return Parser2;
+    })();
+    Bowser = /* @__PURE__ */ (function() {
+      function Bowser2() {
+      }
+      Bowser2.getParser = function getParser2(UA, skipParsingOrHints, clientHints) {
+        if (skipParsingOrHints === void 0) skipParsingOrHints = false;
+        if (clientHints === void 0) clientHints = null;
+        if (typeof UA !== "string") throw new Error("UserAgent should be a string");
+        return new Parser(UA, skipParsingOrHints, clientHints);
+      };
+      Bowser2.parse = function parse2(UA, clientHints) {
+        if (clientHints === void 0) clientHints = null;
+        return new Parser(UA, clientHints).getResult();
+      };
+      return _createClass(Bowser2, null, [{
+        key: "BROWSER_MAP",
+        get: function get2() {
+          return BROWSER_MAP;
+        }
+      }, {
+        key: "ENGINE_MAP",
+        get: function get2() {
+          return ENGINE_MAP;
+        }
+      }, {
+        key: "OS_MAP",
+        get: function get2() {
+          return OS_MAP;
+        }
+      }, {
+        key: "PLATFORMS_MAP",
+        get: function get2() {
+          return PLATFORMS_MAP;
+        }
+      }]);
+    })();
+    parse = Bowser.parse;
+    getParser = Bowser.getParser;
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-user-agent-browser/createUserAgentStringParsingProvider.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-user-agent-browser/createUserAgentStringParsingProvider.js
 var createUserAgentStringParsingProvider;
 var init_createUserAgentStringParsingProvider = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-user-agent-browser/createUserAgentStringParsingProvider.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-user-agent-browser/createUserAgentStringParsingProvider.js"() {
     createUserAgentStringParsingProvider = ({ serviceId, clientVersion }) => async (config) => {
-      const module2 = await Promise.resolve().then(() => __toESM(require_es5()));
-      const parse = module2.parse ?? module2.default.parse ?? (() => "");
-      const parsedUA = typeof window !== "undefined" && window?.navigator?.userAgent ? parse(window.navigator.userAgent) : void 0;
+      const module2 = await Promise.resolve().then(() => (init_bowser(), bowser_exports));
+      const parse2 = module2.parse ?? module2.default.parse ?? (() => "");
+      const parsedUA = typeof window !== "undefined" && window?.navigator?.userAgent ? parse2(window.navigator.userAgent) : void 0;
       const sections = [
         ["aws-sdk-js", clientVersion],
         ["ua", "2.1"],
@@ -64259,50 +67499,59 @@ var init_createUserAgentStringParsingProvider = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-user-agent-browser/defaultUserAgent.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-user-agent-browser/defaultUserAgent.js
 var fallback;
 var init_defaultUserAgent2 = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-user-agent-browser/defaultUserAgent.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-user-agent-browser/defaultUserAgent.js"() {
     fallback = {
       os(ua) {
-        if (/iPhone|iPad|iPod/.test(ua))
+        if (/iPhone|iPad|iPod/.test(ua)) {
           return "iOS";
-        if (/Macintosh|Mac OS X/.test(ua))
+        }
+        if (/Macintosh|Mac OS X/.test(ua)) {
           return "macOS";
-        if (/Windows NT/.test(ua))
+        }
+        if (/Windows NT/.test(ua)) {
           return "Windows";
-        if (/Android/.test(ua))
+        }
+        if (/Android/.test(ua)) {
           return "Android";
-        if (/Linux/.test(ua))
+        }
+        if (/Linux/.test(ua)) {
           return "Linux";
+        }
         return void 0;
       },
       browser(ua) {
-        if (/EdgiOS|EdgA|Edg\//.test(ua))
+        if (/EdgiOS|EdgA|Edg\//.test(ua)) {
           return "Microsoft Edge";
-        if (/Firefox\//.test(ua))
+        }
+        if (/Firefox\//.test(ua)) {
           return "Firefox";
-        if (/Chrome\//.test(ua))
+        }
+        if (/Chrome\//.test(ua)) {
           return "Chrome";
-        if (/Safari\//.test(ua))
+        }
+        if (/Safari\//.test(ua)) {
           return "Safari";
+        }
         return void 0;
       }
     };
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/lib/isIpAddress.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/lib/isIpAddress.js
 var init_isIpAddress2 = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/lib/isIpAddress.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/lib/isIpAddress.js"() {
     init_endpoints();
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/lib/aws/isVirtualHostableS3Bucket.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/lib/aws/isVirtualHostableS3Bucket.js
 var isVirtualHostableS3Bucket;
 var init_isVirtualHostableS3Bucket = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/lib/aws/isVirtualHostableS3Bucket.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/lib/aws/isVirtualHostableS3Bucket.js"() {
     init_endpoints();
     init_isIpAddress2();
     isVirtualHostableS3Bucket = (value, allowSubDomains = false) => {
@@ -64331,19 +67580,21 @@ var init_isVirtualHostableS3Bucket = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/lib/aws/parseArn.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/lib/aws/parseArn.js
 var ARN_DELIMITER, RESOURCE_DELIMITER, parseArn;
 var init_parseArn = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/lib/aws/parseArn.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/lib/aws/parseArn.js"() {
     ARN_DELIMITER = ":";
     RESOURCE_DELIMITER = "/";
     parseArn = (value) => {
       const segments = value.split(ARN_DELIMITER);
-      if (segments.length < 6)
+      if (segments.length < 6) {
         return null;
+      }
       const [arn, partition2, service, region, accountId, ...resourcePath] = segments;
-      if (arn !== "arn" || partition2 === "" || service === "" || resourcePath.join(ARN_DELIMITER) === "")
+      if (arn !== "arn" || partition2 === "" || service === "" || resourcePath.join(ARN_DELIMITER) === "") {
         return null;
+      }
       const resourceId = resourcePath.map((resource) => resource.split(RESOURCE_DELIMITER)).flat();
       return {
         partition: partition2,
@@ -64356,10 +67607,10 @@ var init_parseArn = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/aws.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/aws.js
 var awsEndpointFunctions;
 var init_aws = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/aws.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/aws.js"() {
     init_endpoints();
     init_isVirtualHostableS3Bucket();
     init_parseArn();
@@ -64373,17 +67624,17 @@ var init_aws = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/resolveEndpoint.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/resolveEndpoint.js
 var init_resolveEndpoint2 = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/resolveEndpoint.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/resolveEndpoint.js"() {
     init_endpoints();
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/resolveDefaultAwsRegionalEndpointsConfig.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/resolveDefaultAwsRegionalEndpointsConfig.js
 var resolveDefaultAwsRegionalEndpointsConfig, toEndpointV12;
 var init_resolveDefaultAwsRegionalEndpointsConfig = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/resolveDefaultAwsRegionalEndpointsConfig.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/resolveDefaultAwsRegionalEndpointsConfig.js"() {
     init_protocols();
     resolveDefaultAwsRegionalEndpointsConfig = (input) => {
       if (typeof input.endpointProvider !== "function") {
@@ -64406,22 +67657,22 @@ var init_resolveDefaultAwsRegionalEndpointsConfig = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/types/EndpointError.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/types/EndpointError.js
 var init_EndpointError2 = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/types/EndpointError.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/util-endpoints/types/EndpointError.js"() {
     init_endpoints();
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/region-config-resolver/awsRegionConfig.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/region-config-resolver/awsRegionConfig.js
 var init_awsRegionConfig = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/region-config-resolver/awsRegionConfig.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/region-config-resolver/awsRegionConfig.js"() {
     init_config2();
     init_config2();
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/region-config-resolver/stsRegionDefaultResolver.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/region-config-resolver/stsRegionDefaultResolver.js
 function stsRegionDefaultResolver(loaderConfig = {}) {
   return loadConfig({
     ...NODE_REGION_CONFIG_OPTIONS,
@@ -64435,7 +67686,7 @@ function stsRegionDefaultResolver(loaderConfig = {}) {
 }
 var warning;
 var init_stsRegionDefaultResolver = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/region-config-resolver/stsRegionDefaultResolver.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/region-config-resolver/stsRegionDefaultResolver.js"() {
     init_config2();
     warning = {
       silence: false
@@ -64443,10 +67694,10 @@ var init_stsRegionDefaultResolver = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/region-config-resolver/extensions.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/region-config-resolver/extensions.js
 var getAwsRegionExtensionConfiguration, resolveAwsRegionExtensionConfiguration;
 var init_extensions = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/region-config-resolver/extensions.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/region-config-resolver/extensions.js"() {
     getAwsRegionExtensionConfiguration = (runtimeConfig) => {
       return {
         setRegion(region) {
@@ -64465,7 +67716,7 @@ var init_extensions = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/index.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/index.js
 var client_exports2 = {};
 __export(client_exports2, {
   DEFAULT_UA_APP_ID: () => DEFAULT_UA_APP_ID,
@@ -64485,6 +67736,7 @@ __export(client_exports2, {
   emitWarningIfUnsupportedVersion: () => emitWarningIfUnsupportedVersion,
   fallback: () => fallback,
   getAwsRegionExtensionConfiguration: () => getAwsRegionExtensionConfiguration,
+  getDefaultSocketTimeout: () => getDefaultSocketTimeout,
   getHostHeaderPlugin: () => getHostHeaderPlugin,
   getLoggerPlugin: () => getLoggerPlugin,
   getLongPollPlugin: () => getLongPollPlugin,
@@ -64520,12 +67772,13 @@ __export(client_exports2, {
   userAgentMiddleware: () => userAgentMiddleware
 });
 var init_client3 = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/client/index.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/client/index.js"() {
     init_emitWarningIfUnsupportedVersion();
     init_longPollMiddleware();
     init_setCredentialFeature();
     init_setFeature();
     init_setTokenFeature();
+    init_getDefaultSocketTimeout();
     init_hostHeaderMiddleware();
     init_loggerMiddleware();
     init_configuration();
@@ -64551,28 +67804,28 @@ var init_client3 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/utils/getDateHeader.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/utils/getDateHeader.js
 var getDateHeader, getAgeHeader;
 var init_getDateHeader = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/utils/getDateHeader.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/utils/getDateHeader.js"() {
     init_protocols();
     getDateHeader = (response) => HttpResponse.isInstance(response) ? response.headers?.date ?? response.headers?.Date : void 0;
     getAgeHeader = (response) => HttpResponse.isInstance(response) ? response.headers?.age ?? response.headers?.Age : void 0;
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/utils/getSkewCorrectedDate.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/utils/getSkewCorrectedDate.js
 var getSkewCorrectedDate;
 var init_getSkewCorrectedDate = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/utils/getSkewCorrectedDate.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/utils/getSkewCorrectedDate.js"() {
     getSkewCorrectedDate = (systemClockOffset) => new Date(Date.now() + systemClockOffset);
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/utils/getUpdatedSystemClockOffset.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/utils/getUpdatedSystemClockOffset.js
 var getUpdatedSystemClockOffset;
 var init_getUpdatedSystemClockOffset = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/utils/getUpdatedSystemClockOffset.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/utils/getUpdatedSystemClockOffset.js"() {
     getUpdatedSystemClockOffset = (clockTime, currentSystemClockOffset, timeRequestSent, ageHeader) => {
       if (ageHeader !== void 0) {
         return currentSystemClockOffset;
@@ -64582,27 +67835,26 @@ var init_getUpdatedSystemClockOffset = __esm({
       if (timeRequestSent !== void 0 && timeResponseReceived - timeRequestSent > 9e5) {
         return currentSystemClockOffset;
       }
-      const candidateSkew = timeRequestSent !== void 0 ? serverTime - (timeRequestSent + timeResponseReceived) / 2 : serverTime - timeResponseReceived;
-      return candidateSkew;
+      return serverTime - timeResponseReceived;
     };
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/utils/index.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/utils/index.js
 var init_utils3 = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/utils/index.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/utils/index.js"() {
     init_getDateHeader();
     init_getSkewCorrectedDate();
     init_getUpdatedSystemClockOffset();
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/AwsSdkSigV4Signer.js
-var import_types25, throwSigningPropertyError, hasEventStreamOutput, validateSigningProperties, AwsSdkSigV4Signer, AWSSDKSigV4Signer;
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/AwsSdkSigV4Signer.js
+var import_types26, throwSigningPropertyError, hasEventStreamOutput, validateSigningProperties, AwsSdkSigV4Signer, AWSSDKSigV4Signer;
 var init_AwsSdkSigV4Signer = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/AwsSdkSigV4Signer.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/AwsSdkSigV4Signer.js"() {
     init_protocols();
-    import_types25 = __toESM(require_dist_cjs());
+    import_types26 = __toESM(require_dist_cjs());
     init_utils3();
     throwSigningPropertyError = (name, property) => {
       if (!property) {
@@ -64612,7 +67864,7 @@ var init_AwsSdkSigV4Signer = __esm({
     };
     hasEventStreamOutput = (signingProperties) => {
       const context = signingProperties.context;
-      const eventStream = context?.[import_types25.SMITHY_CONTEXT_KEY]?.eventStream;
+      const eventStream = context?.[import_types26.SMITHY_CONTEXT_KEY]?.eventStream;
       return eventStream?.output === true;
     };
     validateSigningProperties = async (signingProperties) => {
@@ -64703,10 +67955,10 @@ var init_AwsSdkSigV4Signer = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/AwsSdkSigV4ASigner.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/AwsSdkSigV4ASigner.js
 var AwsSdkSigV4ASigner;
 var init_AwsSdkSigV4ASigner = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/AwsSdkSigV4ASigner.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/AwsSdkSigV4ASigner.js"() {
     init_protocols();
     init_utils3();
     init_AwsSdkSigV4Signer();
@@ -64735,26 +67987,26 @@ var init_AwsSdkSigV4ASigner = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/utils/getArrayForCommaSeparatedString.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/utils/getArrayForCommaSeparatedString.js
 var getArrayForCommaSeparatedString;
 var init_getArrayForCommaSeparatedString = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/utils/getArrayForCommaSeparatedString.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/utils/getArrayForCommaSeparatedString.js"() {
     getArrayForCommaSeparatedString = (str) => typeof str === "string" && str.length > 0 ? str.split(",").map((item) => item.trim()) : [];
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/utils/getBearerTokenEnvKey.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/utils/getBearerTokenEnvKey.js
 var getBearerTokenEnvKey;
 var init_getBearerTokenEnvKey = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/utils/getBearerTokenEnvKey.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/utils/getBearerTokenEnvKey.js"() {
     getBearerTokenEnvKey = (signingName) => `AWS_BEARER_TOKEN_${signingName.replace(/[\s-]/g, "_").toUpperCase()}`;
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/NODE_AUTH_SCHEME_PREFERENCE_OPTIONS.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/NODE_AUTH_SCHEME_PREFERENCE_OPTIONS.js
 var NODE_AUTH_SCHEME_PREFERENCE_ENV_KEY, NODE_AUTH_SCHEME_PREFERENCE_CONFIG_KEY, NODE_AUTH_SCHEME_PREFERENCE_OPTIONS;
 var init_NODE_AUTH_SCHEME_PREFERENCE_OPTIONS = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/NODE_AUTH_SCHEME_PREFERENCE_OPTIONS.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/NODE_AUTH_SCHEME_PREFERENCE_OPTIONS.js"() {
     init_getArrayForCommaSeparatedString();
     init_getBearerTokenEnvKey();
     NODE_AUTH_SCHEME_PREFERENCE_ENV_KEY = "AWS_AUTH_SCHEME_PREFERENCE";
@@ -64763,16 +68015,19 @@ var init_NODE_AUTH_SCHEME_PREFERENCE_OPTIONS = __esm({
       environmentVariableSelector: (env2, options) => {
         if (options?.signingName) {
           const bearerTokenKey = getBearerTokenEnvKey(options.signingName);
-          if (bearerTokenKey in env2)
+          if (bearerTokenKey in env2) {
             return ["httpBearerAuth"];
+          }
         }
-        if (!(NODE_AUTH_SCHEME_PREFERENCE_ENV_KEY in env2))
+        if (!(NODE_AUTH_SCHEME_PREFERENCE_ENV_KEY in env2)) {
           return void 0;
+        }
         return getArrayForCommaSeparatedString(env2[NODE_AUTH_SCHEME_PREFERENCE_ENV_KEY]);
       },
       configFileSelector: (profile) => {
-        if (!(NODE_AUTH_SCHEME_PREFERENCE_CONFIG_KEY in profile))
+        if (!(NODE_AUTH_SCHEME_PREFERENCE_CONFIG_KEY in profile)) {
           return void 0;
+        }
         return getArrayForCommaSeparatedString(profile[NODE_AUTH_SCHEME_PREFERENCE_CONFIG_KEY]);
       },
       default: []
@@ -64780,10 +68035,10 @@ var init_NODE_AUTH_SCHEME_PREFERENCE_OPTIONS = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/resolveAwsSdkSigV4AConfig.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/resolveAwsSdkSigV4AConfig.js
 var resolveAwsSdkSigV4AConfig, NODE_SIGV4A_CONFIG_OPTIONS;
 var init_resolveAwsSdkSigV4AConfig = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/resolveAwsSdkSigV4AConfig.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/resolveAwsSdkSigV4AConfig.js"() {
     init_dist_es();
     init_config2();
     resolveAwsSdkSigV4AConfig = (config) => {
@@ -64812,18 +68067,19 @@ var init_resolveAwsSdkSigV4AConfig = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+signature-v4@5.7.4/node_modules/@smithy/signature-v4/dist-cjs/index.js
+// node_modules/.pnpm/@smithy+signature-v4@5.7.5/node_modules/@smithy/signature-v4/dist-cjs/index.js
 var require_dist_cjs2 = __commonJS({
-  "node_modules/.pnpm/@smithy+signature-v4@5.7.4/node_modules/@smithy/signature-v4/dist-cjs/index.js"(exports2) {
-    var { hasOwn: hasOwn2, fromUtf8: fromUtf83, fromHex: fromHex2, toHex: toHex2, toUint8Array: toUint8Array2, isArrayBuffer: isArrayBuffer2 } = (init_serde(), __toCommonJS(serde_exports));
+  "node_modules/.pnpm/@smithy+signature-v4@5.7.5/node_modules/@smithy/signature-v4/dist-cjs/index.js"(exports2) {
+    var { hasOwn: hasOwn2, fromUtf8: fromUtf83, fromHex: fromHex2, toHex: toHex2, toUint8Array: toUint8Array2, writeKey: writeKey3, isArrayBuffer: isArrayBuffer2 } = (init_serde(), __toCommonJS(serde_exports));
     var { normalizeProvider: normalizeProvider3 } = (init_client2(), __toCommonJS(client_exports));
     var { escapeUri: escapeUri2, HttpRequest: HttpRequest2 } = (init_protocols(), __toCommonJS(protocols_exports));
     var HeaderFormatter = class {
       format(headers) {
         const chunks = [];
         for (const headerName in headers) {
-          if (!hasOwn2(headers, headerName))
+          if (!hasOwn2(headers, headerName)) {
             continue;
+          }
           const bytes = fromUtf83(headerName);
           chunks.push(Uint8Array.from([bytes.byteLength]), bytes, this.formatHeaderValue(headers[headerName]));
         }
@@ -64940,8 +68196,9 @@ var require_dist_cjs2 = __commonJS({
       }
       for (let i5 = 7; i5 > -1; i5--) {
         bytes[i5]++;
-        if (bytes[i5] !== 0)
+        if (bytes[i5] !== 0) {
           break;
+        }
       }
     }
     var ALGORITHM_QUERY_PARAM = "X-Amz-Algorithm";
@@ -64991,8 +68248,9 @@ var require_dist_cjs2 = __commonJS({
       const keys = [];
       const serialized = {};
       for (const key in query) {
-        if (!hasOwn2(query, key))
+        if (!hasOwn2(query, key)) {
           continue;
+        }
         if (key.toLowerCase() === SIGNATURE_HEADER) {
           continue;
         }
@@ -65058,10 +68316,12 @@ ${toHex2(hashedRequest)}`;
         if (this.uriEscapePath) {
           const normalizedPathSegments = [];
           for (const pathSegment of path.split("/")) {
-            if (pathSegment?.length === 0)
+            if (pathSegment?.length === 0) {
               continue;
-            if (pathSegment === ".")
+            }
+            if (pathSegment === ".") {
               continue;
+            }
             if (pathSegment === "..") {
               normalizedPathSegments.pop();
             } else {
@@ -65127,10 +68387,13 @@ ${toHex2(hashedRequest)}`;
           continue;
         }
         const canonicalHeaderName = headerName.toLowerCase();
-        if (canonicalHeaderName in ALWAYS_UNSIGNABLE_HEADERS || unsignableHeaders?.has(canonicalHeaderName) || PROXY_HEADER_PATTERN.test(canonicalHeaderName) || SEC_HEADER_PATTERN.test(canonicalHeaderName)) {
+        if (hasOwn2(ALWAYS_UNSIGNABLE_HEADERS, canonicalHeaderName) || unsignableHeaders?.has(canonicalHeaderName) || PROXY_HEADER_PATTERN.test(canonicalHeaderName) || SEC_HEADER_PATTERN.test(canonicalHeaderName)) {
           if (!signableHeaders || signableHeaders && !signableHeaders.has(canonicalHeaderName)) {
             continue;
           }
+        }
+        if (canonicalHeaderName === "__proto__") {
+          writeKey3(canonical);
         }
         canonical[canonicalHeaderName] = headers[headerName].replace(/[\r\n]/g, " ").replace(/[ \t]+/g, " ").replace(/^ | $/g, "");
       }
@@ -65138,8 +68401,9 @@ ${toHex2(hashedRequest)}`;
     };
     var getPayloadHash = async ({ headers, body }, hashConstructor) => {
       for (const headerName in headers) {
-        if (!hasOwn2(headers, headerName))
+        if (!hasOwn2(headers, headerName)) {
           continue;
+        }
         if (headerName.toLowerCase() === SHA256_HEADER) {
           return headers[headerName];
         }
@@ -65156,8 +68420,9 @@ ${toHex2(hashedRequest)}`;
     var hasHeader = (soughtHeader, headers) => {
       soughtHeader = soughtHeader.toLowerCase();
       for (const headerName in headers) {
-        if (!hasOwn2(headers, headerName))
+        if (!hasOwn2(headers, headerName)) {
           continue;
+        }
         if (soughtHeader === headerName.toLowerCase()) {
           return true;
         }
@@ -65167,8 +68432,9 @@ ${toHex2(hashedRequest)}`;
     var moveHeadersToQuery = (request, options = {}) => {
       const { headers, query = {} } = HttpRequest2.clone(request);
       for (const name in headers) {
-        if (!hasOwn2(headers, name))
+        if (!hasOwn2(headers, name)) {
           continue;
+        }
         const lname = name.toLowerCase();
         if (lname.slice(0, 6) === "x-amz-" && !options.unhoistableHeaders?.has(lname) || options.hoistableHeaders?.has(lname)) {
           query[name] = headers[name];
@@ -65184,8 +68450,9 @@ ${toHex2(hashedRequest)}`;
     var prepareRequest = (request) => {
       request = HttpRequest2.clone(request);
       for (const headerName in request.headers) {
-        if (!hasOwn2(request.headers, headerName))
+        if (!hasOwn2(request.headers, headerName)) {
           continue;
+        }
         if (GENERATED_HEADERS.indexOf(headerName.toLowerCase()) > -1) {
           delete request.headers[headerName];
         }
@@ -65360,7 +68627,7 @@ ${toHex2(hashedRequest)}`;
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/resolveAwsSdkSigV4Config.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/resolveAwsSdkSigV4Config.js
 function normalizeCredentialProvider(config, { credentials, credentialDefaultProvider }) {
   let credentialsProvider;
   if (credentials) {
@@ -65394,7 +68661,7 @@ function bindCallerConfig(config, credentialsProvider) {
 }
 var import_signature_v4, bindResolveAwsSdkSigV4Config;
 var init_resolveAwsSdkSigV4Config = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/resolveAwsSdkSigV4Config.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/resolveAwsSdkSigV4Config.js"() {
     init_client3();
     init_dist_es();
     import_signature_v4 = __toESM(require_dist_cjs2());
@@ -65498,9 +68765,9 @@ var init_resolveAwsSdkSigV4Config = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/index.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/index.js
 var init_aws_sdk = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/index.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/index.js"() {
     init_AwsSdkSigV4Signer();
     init_AwsSdkSigV4ASigner();
     init_NODE_AUTH_SCHEME_PREFERENCE_OPTIONS();
@@ -65509,10 +68776,10 @@ var init_aws_sdk = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/clock-skew-node-config.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/clock-skew-node-config.js
 var ENV_DISABLE_CLOCK_SKEW_CORRECTION, CONFIG_DISABLE_CLOCK_SKEW_CORRECTION, NODE_DISABLE_CLOCK_SKEW_CORRECTION_CONFIG_OPTIONS;
 var init_clock_skew_node_config = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/clock-skew-node-config.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/clock-skew-node-config.js"() {
     init_config2();
     ENV_DISABLE_CLOCK_SKEW_CORRECTION = "AWS_DISABLE_CLOCK_SKEW_CORRECTION";
     CONFIG_DISABLE_CLOCK_SKEW_CORRECTION = "disable_clock_skew_correction";
@@ -65524,17 +68791,17 @@ var init_clock_skew_node_config = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/clock-skew-defaults.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/clock-skew-defaults.js
 var DEFAULT_DISABLE_CLOCK_SKEW_CORRECTION;
 var init_clock_skew_defaults = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/clock-skew-defaults.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/aws_sdk/clock-skew-defaults.js"() {
     init_config2();
     init_clock_skew_node_config();
     DEFAULT_DISABLE_CLOCK_SKEW_CORRECTION = loadConfig(NODE_DISABLE_CLOCK_SKEW_CORRECTION_CONFIG_OPTIONS);
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/index.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/index.js
 var httpAuthSchemes_exports = {};
 __export(httpAuthSchemes_exports, {
   AWSSDKSigV4Signer: () => AWSSDKSigV4Signer,
@@ -65550,7 +68817,7 @@ __export(httpAuthSchemes_exports, {
 });
 var resolveAwsSdkSigV4Config, resolveAWSSDKSigV4Config;
 var init_httpAuthSchemes2 = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/index.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/httpAuthSchemes/index.js"() {
     init_aws_sdk();
     init_getBearerTokenEnvKey();
     init_aws_sdk();
@@ -65560,9 +68827,9 @@ var init_httpAuthSchemes2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+credential-provider-env@3.972.76/node_modules/@aws-sdk/credential-provider-env/dist-cjs/index.js
+// node_modules/.pnpm/@aws-sdk+credential-provider-env@3.972.81/node_modules/@aws-sdk/credential-provider-env/dist-cjs/index.js
 var require_dist_cjs3 = __commonJS({
-  "node_modules/.pnpm/@aws-sdk+credential-provider-env@3.972.76/node_modules/@aws-sdk/credential-provider-env/dist-cjs/index.js"(exports2) {
+  "node_modules/.pnpm/@aws-sdk+credential-provider-env@3.972.81/node_modules/@aws-sdk/credential-provider-env/dist-cjs/index.js"(exports2) {
     var { setCredentialFeature: setCredentialFeature2 } = (init_client3(), __toCommonJS(client_exports2));
     var { CredentialsProviderError: CredentialsProviderError2 } = (init_config2(), __toCommonJS(config_exports));
     var ENV_KEY = "AWS_ACCESS_KEY_ID";
@@ -65947,9 +69214,9 @@ For more information, please visit: ` + STATIC_STABILITY_DOC_URL);
   }
 });
 
-// node_modules/.pnpm/@smithy+node-http-handler@4.12.1/node_modules/@smithy/node-http-handler/dist-cjs/index.js
+// node_modules/.pnpm/@smithy+node-http-handler@4.14.2/node_modules/@smithy/node-http-handler/dist-cjs/index.js
 var require_dist_cjs5 = __commonJS({
-  "node_modules/.pnpm/@smithy+node-http-handler@4.12.1/node_modules/@smithy/node-http-handler/dist-cjs/index.js"(exports2) {
+  "node_modules/.pnpm/@smithy+node-http-handler@4.14.2/node_modules/@smithy/node-http-handler/dist-cjs/index.js"(exports2) {
     var { hasOwn: hasOwn2 } = (init_serde(), __toCommonJS(serde_exports));
     var { streamCollector: streamCollector7 } = (init_serde(), __toCommonJS(serde_exports));
     exports2.streamCollector = streamCollector7;
@@ -65978,8 +69245,9 @@ var require_dist_cjs5 = __commonJS({
     var getTransformedHeaders = (headers) => {
       const transformedHeaders = {};
       for (const name in headers) {
-        if (!hasOwn2(headers, name))
+        if (!hasOwn2(headers, name)) {
           continue;
+        }
         const headerValues = headers[name];
         transformedHeaders[name] = Array.isArray(headerValues) ? headerValues.join(",") : headerValues;
       }
@@ -66061,26 +69329,44 @@ var require_dist_cjs5 = __commonJS({
       }
       return timing.setTimeout(registerListener, deferTimeMs);
     };
+    var resolveDefaultSocketTimeout = (config) => {
+      const value = config?.defaultSocketTimeout;
+      return typeof value === "number" && Number.isFinite(value) && value > 0 ? value : void 0;
+    };
     var DEFER_EVENT_LISTENER_TIME = 3e3;
-    var setSocketTimeout = (request, reject, timeoutInMs = 0) => {
-      const registerTimeout = (offset) => {
-        const timeout = timeoutInMs - offset;
-        const onTimeout = () => {
-          request.destroy();
-          reject(Object.assign(new Error(`@smithy/node-http-handler - the request socket timed out after ${timeoutInMs} ms of inactivity (configured by client requestHandler).`), { name: "TimeoutError" }));
-        };
-        if (request.socket) {
-          request.socket.setTimeout(timeout, onTimeout);
-          request.on("close", () => request.socket?.removeListener("timeout", onTimeout));
+    var setSocketTimeout = (request, reject, timeoutInMs = 0, isServiceDefault = false) => {
+      if (!Number.isFinite(timeoutInMs) || timeoutInMs <= 0) {
+        return;
+      }
+      let response;
+      request.once("response", (res) => response = res);
+      const onTimeout = () => {
+        if (response?.complete) {
+          request.socket?.destroy();
+          return;
+        }
+        const error3 = Object.assign(new Error(`@smithy/node-http-handler - the request socket timed out after ${timeoutInMs} ms of inactivity (${isServiceDefault ? "service default socket timeout" : "configured by client requestHandler"}).`), { name: "TimeoutError" });
+        response?.destroy(error3);
+        request.destroy();
+        reject(error3);
+      };
+      const registerTimeout = () => {
+        const { socket } = request;
+        if (!socket) {
+          request.once("socket", registerTimeout);
+        } else if (socket.connecting) {
+          socket.once("connect", registerTimeout);
         } else {
-          request.setTimeout(timeout, onTimeout);
+          socket.setTimeout(timeoutInMs, onTimeout);
+          request.on("close", () => socket.removeListener("timeout", onTimeout));
         }
       };
-      if (0 < timeoutInMs && timeoutInMs < 6e3) {
-        registerTimeout(0);
-        return 0;
+      if (timeoutInMs < 6e3) {
+        registerTimeout();
+        return;
       }
-      return timing.setTimeout(registerTimeout.bind(null, timeoutInMs === 0 ? 0 : DEFER_EVENT_LISTENER_TIME), DEFER_EVENT_LISTENER_TIME);
+      const deferralId = timing.setTimeout(registerTimeout, DEFER_EVENT_LISTENER_TIME);
+      request.once("close", () => timing.clearTimeout(deferralId));
     };
     var MIN_WAIT_TIME = 6e3;
     async function writeRequestBody(httpRequest, request, maxContinueTimeoutMs = MIN_WAIT_TIME, externalAgent = false) {
@@ -66165,8 +69451,9 @@ var require_dist_cjs5 = __commonJS({
         }
         if (sockets && requests) {
           for (const origin in sockets) {
-            if (!hasOwn2(sockets, origin))
+            if (!hasOwn2(sockets, origin)) {
               continue;
+            }
             const socketsInUse = sockets[origin]?.length ?? 0;
             const requestsEnqueued = requests[origin]?.length ?? 0;
             if (socketsInUse >= maxSockets && requestsEnqueued >= 2 * maxSockets) {
@@ -66209,13 +69496,11 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
           let socketWarningTimeoutId = -1;
           let connectionTimeoutId = -1;
           let requestTimeoutId = -1;
-          let socketTimeoutId = -1;
           let keepAliveTimeoutId = -1;
           const clearTimeouts = () => {
             timing.clearTimeout(socketWarningTimeoutId);
             timing.clearTimeout(connectionTimeoutId);
             timing.clearTimeout(requestTimeoutId);
-            timing.clearTimeout(socketTimeoutId);
             timing.clearTimeout(keepAliveTimeoutId);
           };
           const resolve = async (arg) => {
@@ -66308,7 +69593,12 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
           const effectiveRequestTimeout = requestTimeout ?? config.requestTimeout;
           connectionTimeoutId = setConnectionTimeout(req, reject, config.connectionTimeout);
           requestTimeoutId = setRequestTimeout(req, reject, effectiveRequestTimeout, config.throwOnRequestTimeout, logger2 ?? console);
-          socketTimeoutId = setSocketTimeout(req, reject, config.socketTimeout);
+          const defaultSocketTimeout = config.socketTimeout === void 0 ? resolveDefaultSocketTimeout(config) : void 0;
+          if (defaultSocketTimeout) {
+            setSocketTimeout(req, reject, defaultSocketTimeout, true);
+          } else {
+            setSocketTimeout(req, reject, config.socketTimeout);
+          }
           const httpAgent = nodeHttpsOptions.agent;
           if (typeof httpAgent === "object" && "keepAlive" in httpAgent) {
             keepAliveTimeoutId = setSocketKeepAlive(req, {
@@ -66325,11 +69615,15 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
       updateHttpClientConfig(key, value) {
         this.config = void 0;
         this.configProvider = this.configProvider.then((config) => {
-          if (key === /* @__PURE__ */ Symbol.for("logger")) {
-            return {
-              ...config,
-              logger: config.logger ?? value
-            };
+          switch (key) {
+            case /* @__PURE__ */ Symbol.for("logger"):
+              key = "logger";
+              value = config.logger ?? value;
+              break;
+            case /* @__PURE__ */ Symbol.for("@smithy/defaultSocketTimeout"):
+              key = "defaultSocketTimeout";
+              value = resolveDefaultSocketTimeout(config) ?? value;
+              break;
           }
           return {
             ...config,
@@ -66344,13 +69638,15 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
         const { requestTimeout, connectionTimeout, socketTimeout, socketAcquisitionWarningTimeout, httpAgent, httpsAgent, throwOnRequestTimeout, logger: logger2 } = options || {};
         const keepAlive = true;
         const maxSockets = 50;
+        let httpAgentPromise;
         return {
           connectionTimeout,
           requestTimeout,
           socketTimeout,
+          defaultSocketTimeout: resolveDefaultSocketTimeout(options),
           socketAcquisitionWarningTimeout,
           throwOnRequestTimeout,
-          httpAgentProvider: async () => {
+          httpAgentProvider: () => httpAgentPromise ??= (async () => {
             const node_http = require("node:http");
             const { Agent, request } = node_http.default ?? node_http;
             hRequest = request;
@@ -66360,7 +69656,7 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
               return httpAgent;
             }
             return new hAgent({ keepAlive, maxSockets, ...httpAgent });
-          },
+          })(),
           httpsAgent: (() => {
             if (httpsAgent instanceof node_https.Agent || typeof httpsAgent?.destroy === "function") {
               this.externalAgent = true;
@@ -66625,7 +69921,8 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
       }
       async handle(request, { abortSignal, requestTimeout, isEventStream } = {}) {
         if (!this.config) {
-          this.config = await this.configProvider;
+          const config = await this.configProvider;
+          this.config = { ...config, defaultSocketTimeout: resolveDefaultSocketTimeout(config) };
           const { disableConcurrentStreams: disableConcurrentStreams2, maxConcurrentStreams, nodeHttp2ConnectOptions } = this.config;
           this.connectionManager.setDisableConcurrentStreams(disableConcurrentStreams2 ?? false);
           if (maxConcurrentStreams) {
@@ -66635,9 +69932,10 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
             this.connectionManager.setNodeHttp2ConnectOptions(nodeHttp2ConnectOptions);
           }
         }
-        const { requestTimeout: configRequestTimeout, disableConcurrentStreams } = this.config;
+        const { requestTimeout: configRequestTimeout, disableConcurrentStreams, sessionTimeout } = this.config;
         const useIsolatedSession = disableConcurrentStreams || isEventStream;
         const effectiveRequestTimeout = requestTimeout ?? configRequestTimeout;
+        const defaultSocketTimeout = effectiveRequestTimeout === void 0 && sessionTimeout === void 0 ? this.config.defaultSocketTimeout : void 0;
         return new Promise((_resolve, _reject) => {
           let fulfilled = false;
           let writeRequestBodyPromise = void 0;
@@ -66697,6 +69995,18 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
               timeoutError.name = "TimeoutError";
               rejectWithDestroy(timeoutError);
             });
+          } else if (defaultSocketTimeout) {
+            clientHttp2Stream.setTimeout(defaultSocketTimeout, () => {
+              const timeoutError = new Error(`Stream timed out because of no activity for ${defaultSocketTimeout} ms`);
+              timeoutError.name = "TimeoutError";
+              fulfilled = true;
+              reject(timeoutError);
+              clientHttp2Stream.destroy(timeoutError);
+              if (useIsolatedSession) {
+                ref.destroy();
+              }
+            });
+            clientHttp2Stream.once("response", () => clientHttp2Stream.setTimeout(defaultSocketTimeout));
           }
           if (abortSignal) {
             const onAbort = () => {
@@ -66754,6 +70064,12 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
       updateHttpClientConfig(key, value) {
         this.config = void 0;
         this.configProvider = this.configProvider.then((config) => {
+          switch (key) {
+            case /* @__PURE__ */ Symbol.for("@smithy/defaultSocketTimeout"):
+              key = "defaultSocketTimeout";
+              value = resolveDefaultSocketTimeout(config) ?? value;
+              break;
+          }
           return {
             ...config,
             [key]: value
@@ -66770,9 +70086,9 @@ or increase socketAcquisitionWarningTimeout=(millis) in the NodeHttpHandler conf
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+credential-provider-http@3.972.78/node_modules/@aws-sdk/credential-provider-http/dist-cjs/index.js
+// node_modules/.pnpm/@aws-sdk+credential-provider-http@3.972.83/node_modules/@aws-sdk/credential-provider-http/dist-cjs/index.js
 var require_dist_cjs6 = __commonJS({
-  "node_modules/.pnpm/@aws-sdk+credential-provider-http@3.972.78/node_modules/@aws-sdk/credential-provider-http/dist-cjs/index.js"(exports2) {
+  "node_modules/.pnpm/@aws-sdk+credential-provider-http@3.972.83/node_modules/@aws-sdk/credential-provider-http/dist-cjs/index.js"(exports2) {
     var { setCredentialFeature: setCredentialFeature2 } = (init_client3(), __toCommonJS(client_exports2));
     var { CredentialsProviderError: CredentialsProviderError2 } = (init_config2(), __toCommonJS(config_exports));
     var { NodeHttpHandler } = require_dist_cjs5();
@@ -66929,7 +70245,7 @@ Set AWS_CONTAINER_CREDENTIALS_FULL_URI or AWS_CONTAINER_CREDENTIALS_RELATIVE_URI
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/auth/httpAuthSchemeProvider.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/auth/httpAuthSchemeProvider.js
 function createAwsAuthSigv4HttpAuthOption(authParameters) {
   return {
     schemeId: "aws.auth#sigv4",
@@ -66952,7 +70268,7 @@ function createSmithyApiNoAuthHttpAuthOption(authParameters) {
 }
 var defaultSSOOIDCHttpAuthSchemeParametersProvider, defaultSSOOIDCHttpAuthSchemeProvider, resolveHttpAuthSchemeConfig;
 var init_httpAuthSchemeProvider = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/auth/httpAuthSchemeProvider.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/auth/httpAuthSchemeProvider.js"() {
     init_httpAuthSchemes2();
     init_client2();
     defaultSSOOIDCHttpAuthSchemeParametersProvider = async (config, context, input) => {
@@ -66987,10 +70303,10 @@ var init_httpAuthSchemeProvider = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/endpoint/EndpointParameters.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/endpoint/EndpointParameters.js
 var resolveClientEndpointParameters, commonParams;
 var init_EndpointParameters = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/endpoint/EndpointParameters.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/endpoint/EndpointParameters.js"() {
     resolveClientEndpointParameters = (options) => {
       return Object.assign(options, {
         useDualstackEndpoint: options.useDualstackEndpoint ?? false,
@@ -67007,13 +70323,13 @@ var init_EndpointParameters = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/package.json
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/package.json
 var package_default;
 var init_package = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/package.json"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/package.json"() {
     package_default = {
       name: "@aws-sdk/nested-clients",
-      version: "3.997.50",
+      version: "3.998.0",
       description: "Nested clients for AWS SDK packages.",
       homepage: "https://github.com/aws/aws-sdk-js-v3/tree/main/packages/nested-clients",
       license: "Apache-2.0",
@@ -67113,12 +70429,12 @@ var init_package = __esm({
         "test:watch": "yarn g:vitest watch"
       },
       dependencies: {
-        "@aws-sdk/core": "^3.978.5",
-        "@aws-sdk/signature-v4-multi-region": "^3.996.49",
+        "@aws-sdk/core": "^3.980.0",
+        "@aws-sdk/signature-v4-multi-region": "^3.996.51",
         "@aws-sdk/types": "^3.975.0",
-        "@smithy/core": "^3.36.1",
+        "@smithy/core": "^3.38.0",
         "@smithy/fetch-http-handler": "^5.8.0",
-        "@smithy/node-http-handler": "^4.12.1",
+        "@smithy/node-http-handler": "^4.14.0",
         "@smithy/types": "^4.19.0",
         tslib: "^2.6.2"
       },
@@ -67135,10 +70451,10 @@ var init_package = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/cbor/cbor-types.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/cbor/cbor-types.js
 var majorUint64, majorNegativeInt64, majorUnstructuredByteString, majorUtf8String, majorList, majorMap, majorTag, majorSpecial, specialFalse, specialTrue, specialNull, specialUndefined, extendedOneByte, extendedFloat16, extendedFloat32, extendedFloat64, minorIndefinite, tagSymbol;
 var init_cbor_types = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/cbor/cbor-types.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/cbor/cbor-types.js"() {
     majorUint64 = 0;
     majorNegativeInt64 = 1;
     majorUnstructuredByteString = 2;
@@ -67160,10 +70476,10 @@ var init_cbor_types = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/cbor/parseCborBody.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/cbor/parseCborBody.js
 var loadSmithyRpcV2CborErrorCode;
 var init_parseCborBody = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/cbor/parseCborBody.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/cbor/parseCborBody.js"() {
     loadSmithyRpcV2CborErrorCode = (output, data) => {
       const sanitizeErrorCode2 = (rawValue) => {
         let cleanValue = rawValue;
@@ -67185,7 +70501,7 @@ var init_parseCborBody = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/cbor/codec-v2/CborShapeSerializer2.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/cbor/codec-v2/CborShapeSerializer2.js
 function loadCborStructIterator(ns) {
   const schema = ns.getSchema();
   const existing = schema[CBOR_STRUCT_CACHE];
@@ -67398,8 +70714,9 @@ function writeStruct(ns, value, serdeContext) {
   }
   if (typeof value.__type === "string") {
     for (const k5 in value) {
-      if (!hasOwn(value, k5))
+      if (!hasOwn(value, k5)) {
         continue;
+      }
       if (!memberNames.includes(k5)) {
         writeString(k5);
         writeUntypedValue(value[k5]);
@@ -67461,8 +70778,9 @@ function writeMap(ns, value, isDocument, serdeContext) {
   const valueSchema = ns.getValueSchema();
   const keys = [];
   for (const k5 in value) {
-    if (!hasOwn(value, k5))
+    if (!hasOwn(value, k5)) {
       continue;
+    }
     const v = value[k5];
     if (isDocument ? v !== void 0 : v != null || sparse) {
       keys.push(k5);
@@ -67746,7 +71064,7 @@ function writeTimestamp(date2) {
 }
 var CborShapeSerializer2, CBOR_STRUCT_CACHE, USE_BUFFER, textEncoder, INITIAL_BUFFER_SIZE2, buf, view, cursor, STRING_CACHE_MAX, stringEncodeCache, encodeCacheEpoch, encodeCacheSaturated;
 var init_CborShapeSerializer2 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/cbor/codec-v2/CborShapeSerializer2.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/cbor/codec-v2/CborShapeSerializer2.js"() {
     init_transport();
     init_protocols();
     init_schema();
@@ -67780,7 +71098,7 @@ var init_CborShapeSerializer2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/cbor/codec-v2/CborShapeDeserializer2.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/cbor/codec-v2/CborShapeDeserializer2.js
 function readValue(ns) {
   if (pos >= end) {
     throw new Error("unexpected end of CBOR payload.");
@@ -67871,8 +71189,9 @@ function readStruct(ns, count, startPos) {
   if (isUnion) {
     let resultEmpty = true;
     for (const _ in result) {
-      if (!hasOwn(result, _))
+      if (!hasOwn(result, _)) {
         continue;
+      }
       resultEmpty = false;
       break;
     }
@@ -68035,8 +71354,9 @@ function readMapIndefinite(ns) {
         if (isUnion) {
           let resultEmpty = true;
           for (const _ in result) {
-            if (!hasOwn(result, _))
+            if (!hasOwn(result, _)) {
               continue;
+            }
             resultEmpty = false;
             break;
           }
@@ -68332,8 +71652,9 @@ function transformObject(ns, value) {
   if (ns.isMapSchema()) {
     const targetSchema = ns.getValueSchema();
     for (const key in value) {
-      if (!hasOwn(value, key))
+      if (!hasOwn(value, key)) {
         continue;
+      }
       newObject[key] = transformObject(targetSchema, value[key]);
     }
   } else if (ns.isStructSchema()) {
@@ -68342,8 +71663,9 @@ function transformObject(ns, value) {
     if (isUnion) {
       keys = /* @__PURE__ */ new Set();
       for (const k5 in value) {
-        if (!hasOwn(value, k5))
+        if (!hasOwn(value, k5)) {
           continue;
+        }
         if (k5 !== "__type") {
           keys.add(k5);
         }
@@ -68360,8 +71682,9 @@ function transformObject(ns, value) {
     if (isUnion && keys?.size === 1) {
       let newObjectEmpty = true;
       for (const _ in newObject) {
-        if (!hasOwn(newObject, _))
+        if (!hasOwn(newObject, _)) {
           continue;
+        }
         newObjectEmpty = false;
         break;
       }
@@ -68371,8 +71694,9 @@ function transformObject(ns, value) {
       }
     } else if (typeof value.__type === "string") {
       for (const k5 in value) {
-        if (!hasOwn(value, k5))
+        if (!hasOwn(value, k5)) {
           continue;
+        }
         if (!(k5 in newObject)) {
           newObject[k5] = value[k5];
         }
@@ -68383,7 +71707,7 @@ function transformObject(ns, value) {
 }
 var CborShapeDeserializer2, USE_BUFFER2, textDecoder, payload, isBuffer, dataView, pos, end, STRING_CACHE_SIZE, stringCache, stringCacheEpochs, cacheEpoch;
 var init_CborShapeDeserializer2 = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/cbor/codec-v2/CborShapeDeserializer2.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/cbor/codec-v2/CborShapeDeserializer2.js"() {
     init_transport();
     init_protocols();
     init_schema();
@@ -68418,10 +71742,10 @@ var init_CborShapeDeserializer2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/cbor/CborCodec.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/cbor/CborCodec.js
 var CborCodec;
 var init_CborCodec = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/cbor/CborCodec.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/cbor/CborCodec.js"() {
     init_protocols();
     init_CborShapeSerializer2();
     init_CborShapeDeserializer2();
@@ -68440,58 +71764,35 @@ var init_CborCodec = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/cbor/SmithyRpcV2CborProtocol.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/cbor/SmithyRpcV2CborProtocol.js
 var SmithyRpcV2CborProtocol;
 var init_SmithyRpcV2CborProtocol = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/cbor/SmithyRpcV2CborProtocol.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/cbor/SmithyRpcV2CborProtocol.js"() {
     init_protocols();
     init_schema();
-    init_transport();
     init_CborCodec();
     init_parseCborBody();
-    SmithyRpcV2CborProtocol = class extends RpcProtocol {
+    SmithyRpcV2CborProtocol = class extends AbstractRpcV2Protocol {
       codec = new CborCodec();
       serializer = this.codec.createSerializer();
       deserializer = this.codec.createDeserializer();
-      constructor({ defaultNamespace, errorTypeRegistries: errorTypeRegistries5 }) {
-        super({ defaultNamespace, errorTypeRegistries: errorTypeRegistries5 });
-      }
       getShapeId() {
         return "smithy.protocols#rpcv2Cbor";
       }
       getPayloadCodec() {
         return this.codec;
       }
-      async serializeRequest(operationSchema, input, context) {
-        const request = await super.serializeRequest(operationSchema, input, context);
-        Object.assign(request.headers, {
-          "content-type": this.getDefaultContentType(),
-          "smithy-protocol": "rpc-v2-cbor",
-          accept: this.getDefaultContentType()
-        });
-        if (deref(operationSchema.input) === "unit") {
-          delete request.body;
-          delete request.headers["content-type"];
-        } else {
-          if (!request.body) {
-            this.serializer.write(15, {});
-            request.body = this.serializer.flush();
-          }
-          if (request.body instanceof Uint8Array) {
-            request.headers["content-length"] = String(request.body.byteLength);
-          }
-        }
-        const { service, operation: operation2 } = getSmithyContext(context);
-        const path = `/service/${service}/operation/${operation2}`;
-        if (request.path.endsWith("/")) {
-          request.path += path.slice(1);
-        } else {
-          request.path += path;
-        }
-        return request;
+      getSmithyProtocolHeaderValue() {
+        return "rpc-v2-cbor";
       }
-      async deserializeResponse(operationSchema, context, response) {
-        return super.deserializeResponse(operationSchema, context, response);
+      applyEmptyBody(request) {
+        if (!request.body) {
+          this.serializer.write(15, {});
+          request.body = this.serializer.flush();
+        }
+        if (request.body instanceof Uint8Array) {
+          request.headers["content-length"] = String(request.body.byteLength);
+        }
       }
       async handleError(operationSchema, context, response, dataObject, metadata) {
         const errorIdentifier = loadSmithyRpcV2CborErrorCode(response, dataObject) ?? "Unknown";
@@ -68543,18 +71844,18 @@ var init_SmithyRpcV2CborProtocol = __esm({
   }
 });
 
-// node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/cbor/index.js
+// node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/cbor/index.js
 var init_cbor = __esm({
-  "node_modules/.pnpm/@smithy+core@3.36.2/node_modules/@smithy/core/dist-es/submodules/cbor/index.js"() {
+  "node_modules/.pnpm/@smithy+core@3.39.0/node_modules/@smithy/core/dist-es/submodules/cbor/index.js"() {
     init_parseCborBody();
     init_SmithyRpcV2CborProtocol();
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/ProtocolLib.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/ProtocolLib.js
 var ProtocolLib;
 var init_ProtocolLib = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/ProtocolLib.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/ProtocolLib.js"() {
     init_client2();
     init_schema();
     ProtocolLib = class {
@@ -68692,10 +71993,10 @@ var init_ProtocolLib = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/cbor/AwsSmithyRpcV2CborProtocol.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/cbor/AwsSmithyRpcV2CborProtocol.js
 var AwsSmithyRpcV2CborProtocol;
 var init_AwsSmithyRpcV2CborProtocol = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/cbor/AwsSmithyRpcV2CborProtocol.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/cbor/AwsSmithyRpcV2CborProtocol.js"() {
     init_cbor();
     init_schema();
     init_ProtocolLib();
@@ -68749,10 +72050,10 @@ var init_AwsSmithyRpcV2CborProtocol = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/json/AwsJsonRpcProtocol.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/json/AwsJsonRpcProtocol.js
 var AwsJsonRpcProtocol;
 var init_AwsJsonRpcProtocol = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/json/AwsJsonRpcProtocol.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/json/AwsJsonRpcProtocol.js"() {
     init_protocols();
     init_schema();
     init_ProtocolLib();
@@ -68830,10 +72131,10 @@ var init_AwsJsonRpcProtocol = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/json/AwsJson1_0Protocol.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/json/AwsJson1_0Protocol.js
 var AwsJson1_0Protocol;
 var init_AwsJson1_0Protocol = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/json/AwsJson1_0Protocol.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/json/AwsJson1_0Protocol.js"() {
     init_AwsJsonRpcProtocol();
     AwsJson1_0Protocol = class extends AwsJsonRpcProtocol {
       constructor({ defaultNamespace, errorTypeRegistries: errorTypeRegistries5, serviceTarget, awsQueryCompatible, jsonCodec }) {
@@ -68858,10 +72159,10 @@ var init_AwsJson1_0Protocol = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/json/AwsJson1_1Protocol.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/json/AwsJson1_1Protocol.js
 var AwsJson1_1Protocol;
 var init_AwsJson1_1Protocol = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/json/AwsJson1_1Protocol.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/json/AwsJson1_1Protocol.js"() {
     init_AwsJsonRpcProtocol();
     AwsJson1_1Protocol = class extends AwsJsonRpcProtocol {
       constructor({ defaultNamespace, errorTypeRegistries: errorTypeRegistries5, serviceTarget, awsQueryCompatible, jsonCodec }) {
@@ -68886,10 +72187,10 @@ var init_AwsJson1_1Protocol = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/json/AwsRestJsonProtocol.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/json/AwsRestJsonProtocol.js
 var AwsRestJsonProtocol;
 var init_AwsRestJsonProtocol = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/json/AwsRestJsonProtocol.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/json/AwsRestJsonProtocol.js"() {
     init_protocols();
     init_schema();
     init_ProtocolLib();
@@ -68976,9 +72277,67 @@ var init_AwsRestJsonProtocol = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+xml-builder@3.972.41/node_modules/@aws-sdk/xml-builder/dist-cjs/index.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/json/AwsSmithyRpcV2JsonProtocol.js
+var AwsSmithyRpcV2JsonProtocol;
+var init_AwsSmithyRpcV2JsonProtocol = __esm({
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/json/AwsSmithyRpcV2JsonProtocol.js"() {
+    init_protocols();
+    init_schema();
+    init_ProtocolLib();
+    AwsSmithyRpcV2JsonProtocol = class extends SmithyRpcV2JsonProtocol {
+      awsQueryCompatible;
+      mixin;
+      constructor({ defaultNamespace, errorTypeRegistries: errorTypeRegistries5, awsQueryCompatible }) {
+        super({ defaultNamespace, errorTypeRegistries: errorTypeRegistries5 });
+        this.awsQueryCompatible = !!awsQueryCompatible;
+        this.mixin = new ProtocolLib(this.awsQueryCompatible);
+      }
+      async serializeRequest(operationSchema, input, context) {
+        const request = await super.serializeRequest(operationSchema, input, context);
+        if (this.awsQueryCompatible) {
+          request.headers["x-amzn-query-mode"] = "true";
+        }
+        return request;
+      }
+      async handleError(operationSchema, context, response, dataObject, metadata) {
+        if (this.awsQueryCompatible) {
+          this.mixin.setQueryCompatError(dataObject, response);
+        }
+        const errorName = (() => {
+          const compatHeader = response.headers["x-amzn-query-error"];
+          if (compatHeader && this.awsQueryCompatible) {
+            return compatHeader.split(";")[0];
+          }
+          return loadSmithyRpcV2JsonErrorCode(response, dataObject) ?? "Unknown";
+        })();
+        this.mixin.compose(this.compositeErrorRegistry, errorName, this.options.defaultNamespace);
+        const { errorSchema, errorMetadata } = await this.mixin.getErrorSchemaOrThrowBaseException(errorName, this.options.defaultNamespace, response, dataObject, metadata, this.awsQueryCompatible ? this.mixin.findQueryCompatibleError : void 0);
+        const ns = NormalizedSchema.of(errorSchema);
+        const message = dataObject.message ?? dataObject.Message ?? "UnknownError";
+        const ErrorCtor = this.compositeErrorRegistry.getErrorCtor(errorSchema) ?? Error;
+        const exception = new ErrorCtor({});
+        const output = {};
+        const errorDeserializer = this.getPayloadCodec().createDeserializer();
+        for (const [name, member2] of ns.structIterator()) {
+          if (dataObject[name] != null) {
+            output[name] = errorDeserializer.readObject(member2, dataObject[name]);
+          }
+        }
+        if (this.awsQueryCompatible) {
+          this.mixin.queryCompatOutput(dataObject, output);
+        }
+        throw this.mixin.decorateServiceException(Object.assign(exception, errorMetadata, {
+          $fault: ns.getMergedTraits().error,
+          message
+        }, output), dataObject);
+      }
+    };
+  }
+});
+
+// node_modules/.pnpm/@aws-sdk+xml-builder@3.972.42/node_modules/@aws-sdk/xml-builder/dist-cjs/index.js
 var require_dist_cjs7 = __commonJS({
-  "node_modules/.pnpm/@aws-sdk+xml-builder@3.972.41/node_modules/@aws-sdk/xml-builder/dist-cjs/index.js"(exports2) {
+  "node_modules/.pnpm/@aws-sdk+xml-builder@3.972.42/node_modules/@aws-sdk/xml-builder/dist-cjs/index.js"(exports2) {
     var ATTR_ESCAPE_RE = /[&<>"]/g;
     var ATTR_ESCAPE_MAP = {
       "&": "&amp;",
@@ -69337,10 +72696,10 @@ var require_dist_cjs7 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/ConfigurableSerdeContext.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/ConfigurableSerdeContext.js
 var SerdeContextConfig2;
 var init_ConfigurableSerdeContext2 = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/ConfigurableSerdeContext.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/ConfigurableSerdeContext.js"() {
     SerdeContextConfig2 = class {
       serdeContext;
       setSerdeContext(serdeContext) {
@@ -69350,10 +72709,10 @@ var init_ConfigurableSerdeContext2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/UnionSerde.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/UnionSerde.js
 var UnionSerde2;
 var init_UnionSerde2 = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/UnionSerde.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/UnionSerde.js"() {
     UnionSerde2 = class {
       from;
       to;
@@ -69383,19 +72742,19 @@ var init_UnionSerde2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/writeKey.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/writeKey.js
 function writeKey2(obj) {
   Object.defineProperty(obj, "__proto__", { value: void 0, writable: true, enumerable: true, configurable: true });
 }
 var init_writeKey2 = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/writeKey.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/writeKey.js"() {
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/xml/XmlShapeDeserializer.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/xml/XmlShapeDeserializer.js
 var import_xml_builder, XmlShapeDeserializer;
 var init_XmlShapeDeserializer = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/xml/XmlShapeDeserializer.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/xml/XmlShapeDeserializer.js"() {
     import_xml_builder = __toESM(require_dist_cjs7());
     init_client2();
     init_protocols();
@@ -69549,10 +72908,10 @@ var init_XmlShapeDeserializer = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/query/QueryShapeSerializer.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/query/QueryShapeSerializer.js
 var QueryShapeSerializer;
 var init_QueryShapeSerializer = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/query/QueryShapeSerializer.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/query/QueryShapeSerializer.js"() {
     init_protocols();
     init_schema();
     init_serde();
@@ -69729,10 +73088,10 @@ var init_QueryShapeSerializer = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/query/AwsQueryProtocol.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/query/AwsQueryProtocol.js
 var AwsQueryProtocol;
 var init_AwsQueryProtocol = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/query/AwsQueryProtocol.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/query/AwsQueryProtocol.js"() {
     init_protocols();
     init_schema();
     init_ProtocolLib();
@@ -69869,10 +73228,10 @@ var init_AwsQueryProtocol = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/query/AwsEc2QueryProtocol.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/query/AwsEc2QueryProtocol.js
 var AwsEc2QueryProtocol;
 var init_AwsEc2QueryProtocol = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/query/AwsEc2QueryProtocol.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/query/AwsEc2QueryProtocol.js"() {
     init_AwsQueryProtocol();
     AwsEc2QueryProtocol = class extends AwsQueryProtocol {
       options;
@@ -69897,20 +73256,20 @@ var init_AwsEc2QueryProtocol = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/common.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/common.js
 var collectBodyString2;
 var init_common2 = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/common.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/common.js"() {
     init_protocols();
     init_serde();
     collectBodyString2 = (streamBody, context) => collectBody(streamBody, context).then((body) => (context?.utf8Encoder ?? toUtf8)(body));
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/xml/parseXmlBody.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/xml/parseXmlBody.js
 var import_xml_builder2, parseXmlBody, parseXmlErrorBody, loadRestXmlErrorCode;
 var init_parseXmlBody = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/xml/parseXmlBody.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/xml/parseXmlBody.js"() {
     import_xml_builder2 = __toESM(require_dist_cjs7());
     init_client2();
     init_common2();
@@ -69959,10 +73318,10 @@ var init_parseXmlBody = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/xml/XmlShapeSerializer.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/xml/XmlShapeSerializer.js
 var import_xml_builder3, XmlShapeSerializer;
 var init_XmlShapeSerializer = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/xml/XmlShapeSerializer.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/xml/XmlShapeSerializer.js"() {
     import_xml_builder3 = __toESM(require_dist_cjs7());
     init_protocols();
     init_schema();
@@ -70237,10 +73596,10 @@ var init_XmlShapeSerializer = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/xml/XmlCodec.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/xml/XmlCodec.js
 var XmlCodec;
 var init_XmlCodec = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/xml/XmlCodec.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/xml/XmlCodec.js"() {
     init_ConfigurableSerdeContext2();
     init_XmlShapeDeserializer();
     init_XmlShapeSerializer();
@@ -70264,10 +73623,10 @@ var init_XmlCodec = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/xml/AwsRestXmlProtocol.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/xml/AwsRestXmlProtocol.js
 var AwsRestXmlProtocol;
 var init_AwsRestXmlProtocol = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/xml/AwsRestXmlProtocol.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/xml/AwsRestXmlProtocol.js"() {
     init_protocols();
     init_schema();
     init_ProtocolLib();
@@ -70363,10 +73722,10 @@ var init_AwsRestXmlProtocol = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/json/awsExpectUnion.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/json/awsExpectUnion.js
 var awsExpectUnion;
 var init_awsExpectUnion = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/json/awsExpectUnion.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/json/awsExpectUnion.js"() {
     init_serde();
     awsExpectUnion = (value) => {
       if (value == null) {
@@ -70380,10 +73739,10 @@ var init_awsExpectUnion = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/coercing-serializers.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/coercing-serializers.js
 var _toStr, _toBool, _toNum;
 var init_coercing_serializers = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/coercing-serializers.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/coercing-serializers.js"() {
     _toStr = (val) => {
       if (val == null) {
         return val;
@@ -70440,7 +73799,7 @@ var init_coercing_serializers = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/index.js
+// node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/index.js
 var protocols_exports2 = {};
 __export(protocols_exports2, {
   AwsEc2QueryProtocol: () => AwsEc2QueryProtocol,
@@ -70451,6 +73810,7 @@ __export(protocols_exports2, {
   AwsRestJsonProtocol: () => AwsRestJsonProtocol,
   AwsRestXmlProtocol: () => AwsRestXmlProtocol,
   AwsSmithyRpcV2CborProtocol: () => AwsSmithyRpcV2CborProtocol,
+  AwsSmithyRpcV2JsonProtocol: () => AwsSmithyRpcV2JsonProtocol,
   JsonCodec: () => JsonCodec,
   JsonCodec2: () => JsonCodec2,
   JsonShapeDeserializer: () => JsonShapeDeserializer,
@@ -70474,12 +73834,13 @@ __export(protocols_exports2, {
   parseXmlErrorBody: () => parseXmlErrorBody
 });
 var init_protocols2 = __esm({
-  "node_modules/.pnpm/@aws-sdk+core@3.978.5/node_modules/@aws-sdk/core/dist-es/submodules/protocols/index.js"() {
+  "node_modules/.pnpm/@aws-sdk+core@3.980.0/node_modules/@aws-sdk/core/dist-es/submodules/protocols/index.js"() {
     init_AwsSmithyRpcV2CborProtocol();
     init_AwsJson1_0Protocol();
     init_AwsJson1_1Protocol();
     init_AwsJsonRpcProtocol();
     init_AwsRestJsonProtocol();
+    init_AwsSmithyRpcV2JsonProtocol();
     init_protocols();
     init_AwsEc2QueryProtocol();
     init_AwsQueryProtocol();
@@ -70494,10 +73855,10 @@ var init_protocols2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/endpoint/bdd.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/endpoint/bdd.js
 var k, a, b, c, d, e, f, g, h, i, j, _data, root, r, nodes, bdd;
 var init_bdd = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/endpoint/bdd.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/endpoint/bdd.js"() {
     init_endpoints();
     k = "ref";
     a = -1;
@@ -70587,10 +73948,10 @@ var init_bdd = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/endpoint/endpointResolver.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/endpoint/endpointResolver.js
 var cache, defaultEndpointResolver;
 var init_endpointResolver = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/endpoint/endpointResolver.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/endpoint/endpointResolver.js"() {
     init_client3();
     init_endpoints();
     init_bdd();
@@ -70608,10 +73969,10 @@ var init_endpointResolver = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/models/SSOOIDCServiceException.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/models/SSOOIDCServiceException.js
 var SSOOIDCServiceException;
 var init_SSOOIDCServiceException = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/models/SSOOIDCServiceException.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/models/SSOOIDCServiceException.js"() {
     init_client2();
     SSOOIDCServiceException = class _SSOOIDCServiceException extends ServiceException {
       static shapeId = "smithy.ts.sdk.synthetic.com.amazonaws.ssooidc#SSOOIDCServiceException";
@@ -70623,10 +73984,10 @@ var init_SSOOIDCServiceException = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/models/errors.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/models/errors.js
 var AccessDeniedException, AuthorizationPendingException, ExpiredTokenException, InternalServerException, InvalidClientException, InvalidGrantException, InvalidRequestException, InvalidScopeException, SlowDownException, UnauthorizedClientException, UnsupportedGrantTypeException;
 var init_errors = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/models/errors.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/models/errors.js"() {
     init_SSOOIDCServiceException();
     AccessDeniedException = class _AccessDeniedException extends SSOOIDCServiceException {
       static shapeId = "com.amazonaws.ssooidc#AccessDeniedException";
@@ -70822,10 +74183,10 @@ var init_errors = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/schemas/schemas_0.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/schemas/schemas_0.js
 var _ADE, _APE, _AT, _CS, _CT, _CTR, _CTRr, _CV, _ETE, _ICE, _IGE, _IRE, _ISE, _ISEn, _IT, _RT, _SDE, _UCE, _UGTE, _aT, _c, _cI, _cS, _cV, _co, _dC, _e, _eI, _ed, _gT, _h, _hE, _iT, _r, _rT, _rU, _s, _sc, _se, _tT, n0, _s_registry, SSOOIDCServiceException$, n0_registry, AccessDeniedException$, AuthorizationPendingException$, ExpiredTokenException$, InternalServerException$, InvalidClientException$, InvalidGrantException$, InvalidRequestException$, InvalidScopeException$, SlowDownException$, UnauthorizedClientException$, UnsupportedGrantTypeException$, errorTypeRegistries, AccessToken, ClientSecret, CodeVerifier, IdToken, RefreshToken, CreateTokenRequest$, CreateTokenResponse$, Scopes, CreateToken$;
 var init_schemas_0 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/schemas/schemas_0.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/schemas/schemas_0.js"() {
     init_schema();
     init_errors();
     init_SSOOIDCServiceException();
@@ -71011,10 +74372,10 @@ var init_schemas_0 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/runtimeConfig.shared.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/runtimeConfig.shared.js
 var getRuntimeConfig;
 var init_runtimeConfig_shared = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/runtimeConfig.shared.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/runtimeConfig.shared.js"() {
     init_httpAuthSchemes2();
     init_protocols2();
     init_dist_es();
@@ -71064,10 +74425,10 @@ var init_runtimeConfig_shared = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/runtimeConfig.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/runtimeConfig.js
 var import_node_http_handler, getRuntimeConfig2;
 var init_runtimeConfig = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/runtimeConfig.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/runtimeConfig.js"() {
     init_package();
     init_client3();
     init_httpAuthSchemes2();
@@ -71094,6 +74455,7 @@ var init_runtimeConfig = __esm({
         defaultsMode,
         authSchemePreference: config?.authSchemePreference ?? loadConfig(NODE_AUTH_SCHEME_PREFERENCE_OPTIONS, loaderConfig),
         bodyLengthChecker: config?.bodyLengthChecker ?? calculateBodyLength,
+        defaultSocketTimeout: getDefaultSocketTimeout(config?.requestHandler, 3e5),
         defaultUserAgentProvider: config?.defaultUserAgentProvider ?? createDefaultUserAgentProvider({ serviceId: clientSharedValues.serviceId, clientVersion: package_default.version }),
         maxAttempts: config?.maxAttempts ?? loadConfig(NODE_MAX_ATTEMPT_CONFIG_OPTIONS, config),
         region: config?.region ?? loadConfig(NODE_REGION_CONFIG_OPTIONS, { ...NODE_REGION_CONFIG_FILE_OPTIONS, ...loaderConfig }),
@@ -71111,10 +74473,10 @@ var init_runtimeConfig = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/auth/httpAuthExtensionConfiguration.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/auth/httpAuthExtensionConfiguration.js
 var getHttpAuthExtensionConfiguration, resolveHttpAuthRuntimeConfig;
 var init_httpAuthExtensionConfiguration = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/auth/httpAuthExtensionConfiguration.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/auth/httpAuthExtensionConfiguration.js"() {
     getHttpAuthExtensionConfiguration = (runtimeConfig) => {
       const _httpAuthSchemes = runtimeConfig.httpAuthSchemes;
       let _httpAuthSchemeProvider = runtimeConfig.httpAuthSchemeProvider;
@@ -71155,10 +74517,10 @@ var init_httpAuthExtensionConfiguration = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/runtimeExtensions.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/runtimeExtensions.js
 var resolveRuntimeExtensions;
 var init_runtimeExtensions = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/runtimeExtensions.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/runtimeExtensions.js"() {
     init_client3();
     init_client2();
     init_protocols();
@@ -71171,10 +74533,10 @@ var init_runtimeExtensions = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/SSOOIDCClient.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/SSOOIDCClient.js
 var SSOOIDCClient;
 var init_SSOOIDCClient = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/SSOOIDCClient.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/SSOOIDCClient.js"() {
     init_client3();
     init_dist_es();
     init_client2();
@@ -71224,10 +74586,10 @@ var init_SSOOIDCClient = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/commandBuilder.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/commandBuilder.js
 var command, _ep0, _mw0;
 var init_commandBuilder = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/commandBuilder.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/commandBuilder.js"() {
     init_client2();
     init_endpoints();
     init_EndpointParameters();
@@ -71237,10 +74599,10 @@ var init_commandBuilder = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/commands/CreateTokenCommand.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/commands/CreateTokenCommand.js
 var CreateTokenCommand;
 var init_CreateTokenCommand = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/commands/CreateTokenCommand.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/commands/CreateTokenCommand.js"() {
     init_commandBuilder();
     init_schemas_0();
     CreateTokenCommand = class extends command(_ep0, _mw0, "CreateToken", CreateToken$) {
@@ -71248,10 +74610,10 @@ var init_CreateTokenCommand = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/SSOOIDC.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/SSOOIDC.js
 var commands, SSOOIDC;
 var init_SSOOIDC = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/SSOOIDC.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/SSOOIDC.js"() {
     init_client2();
     init_CreateTokenCommand();
     init_SSOOIDCClient();
@@ -71264,17 +74626,17 @@ var init_SSOOIDC = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/commands/index.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/commands/index.js
 var init_commands = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/commands/index.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/commands/index.js"() {
     init_CreateTokenCommand();
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/models/enums.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/models/enums.js
 var AccessDeniedExceptionReason, InvalidRequestExceptionReason;
 var init_enums = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/models/enums.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/models/enums.js"() {
     AccessDeniedExceptionReason = {
       KMS_ACCESS_DENIED: "KMS_AccessDeniedException"
     };
@@ -71287,13 +74649,13 @@ var init_enums = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/models/models_0.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/models/models_0.js
 var init_models_0 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/models/models_0.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/models/models_0.js"() {
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/index.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/index.js
 var sso_oidc_exports = {};
 __export(sso_oidc_exports, {
   $Command: () => Command2,
@@ -71333,7 +74695,7 @@ __export(sso_oidc_exports, {
   errorTypeRegistries: () => errorTypeRegistries
 });
 var init_sso_oidc = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/index.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso-oidc/index.js"() {
     init_SSOOIDCClient();
     init_SSOOIDC();
     init_commands();
@@ -71346,9 +74708,9 @@ var init_sso_oidc = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+token-providers@3.1155.0/node_modules/@aws-sdk/token-providers/dist-cjs/index.js
+// node_modules/.pnpm/@aws-sdk+token-providers@3.1162.0/node_modules/@aws-sdk/token-providers/dist-cjs/index.js
 var require_dist_cjs8 = __commonJS({
-  "node_modules/.pnpm/@aws-sdk+token-providers@3.1155.0/node_modules/@aws-sdk/token-providers/dist-cjs/index.js"(exports2) {
+  "node_modules/.pnpm/@aws-sdk+token-providers@3.1162.0/node_modules/@aws-sdk/token-providers/dist-cjs/index.js"(exports2) {
     var { setTokenFeature: setTokenFeature2 } = (init_client3(), __toCommonJS(client_exports2));
     var { getBearerTokenEnvKey: getBearerTokenEnvKey2 } = (init_httpAuthSchemes2(), __toCommonJS(httpAuthSchemes_exports));
     var { TokenProviderError: TokenProviderError2, getSSOTokenFilepath: getSSOTokenFilepath2, parseKnownFiles: parseKnownFiles2, getProfileName: getProfileName2, loadSsoSessionData: loadSsoSessionData2, getSSOTokenFromFile: getSSOTokenFromFile2, memoize: memoize2, chain: chain2 } = (init_config2(), __toCommonJS(config_exports));
@@ -71512,7 +74874,7 @@ var require_dist_cjs8 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/auth/httpAuthSchemeProvider.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/auth/httpAuthSchemeProvider.js
 function createAwsAuthSigv4HttpAuthOption2(authParameters) {
   return {
     schemeId: "aws.auth#sigv4",
@@ -71535,7 +74897,7 @@ function createSmithyApiNoAuthHttpAuthOption2(authParameters) {
 }
 var defaultSSOHttpAuthSchemeParametersProvider, defaultSSOHttpAuthSchemeProvider, resolveHttpAuthSchemeConfig2;
 var init_httpAuthSchemeProvider2 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/auth/httpAuthSchemeProvider.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/auth/httpAuthSchemeProvider.js"() {
     init_httpAuthSchemes2();
     init_client2();
     defaultSSOHttpAuthSchemeParametersProvider = async (config, context, input) => {
@@ -71570,10 +74932,10 @@ var init_httpAuthSchemeProvider2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/endpoint/EndpointParameters.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/endpoint/EndpointParameters.js
 var resolveClientEndpointParameters2, commonParams2;
 var init_EndpointParameters2 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/endpoint/EndpointParameters.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/endpoint/EndpointParameters.js"() {
     resolveClientEndpointParameters2 = (options) => {
       return Object.assign(options, {
         useDualstackEndpoint: options.useDualstackEndpoint ?? false,
@@ -71590,10 +74952,10 @@ var init_EndpointParameters2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/endpoint/bdd.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/endpoint/bdd.js
 var k2, a2, b2, c2, d2, e2, f2, g2, h2, i2, j2, _data2, root2, r2, nodes2, bdd2;
 var init_bdd2 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/endpoint/bdd.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/endpoint/bdd.js"() {
     init_endpoints();
     k2 = "ref";
     a2 = -1;
@@ -71683,10 +75045,10 @@ var init_bdd2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/endpoint/endpointResolver.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/endpoint/endpointResolver.js
 var cache2, defaultEndpointResolver2;
 var init_endpointResolver2 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/endpoint/endpointResolver.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/endpoint/endpointResolver.js"() {
     init_client3();
     init_endpoints();
     init_bdd2();
@@ -71704,10 +75066,10 @@ var init_endpointResolver2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/models/SSOServiceException.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/models/SSOServiceException.js
 var SSOServiceException;
 var init_SSOServiceException = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/models/SSOServiceException.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/models/SSOServiceException.js"() {
     init_client2();
     SSOServiceException = class _SSOServiceException extends ServiceException {
       static shapeId = "smithy.ts.sdk.synthetic.com.amazonaws.sso#SSOServiceException";
@@ -71719,10 +75081,10 @@ var init_SSOServiceException = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/models/errors.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/models/errors.js
 var InvalidRequestException2, ResourceNotFoundException, TooManyRequestsException, UnauthorizedException;
 var init_errors2 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/models/errors.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/models/errors.js"() {
     init_SSOServiceException();
     InvalidRequestException2 = class _InvalidRequestException extends SSOServiceException {
       static shapeId = "com.amazonaws.sso#InvalidRequestException";
@@ -71779,10 +75141,10 @@ var init_errors2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/schemas/schemas_0.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/schemas/schemas_0.js
 var _ATT, _GRC, _GRCR, _GRCRe, _IRE2, _RC, _RNFE, _SAKT, _STT, _TMRE, _UE, _aI, _aKI, _aT2, _ai, _c2, _e2, _ex, _h2, _hE2, _hH, _hQ, _m, _rC, _rN, _rn, _s2, _sAK, _sT, _xasbt, n02, _s_registry2, SSOServiceException$, n0_registry2, InvalidRequestException$2, ResourceNotFoundException$, TooManyRequestsException$, UnauthorizedException$, errorTypeRegistries2, AccessTokenType, SecretAccessKeyType, SessionTokenType, GetRoleCredentialsRequest$, GetRoleCredentialsResponse$, RoleCredentials$, GetRoleCredentials$;
 var init_schemas_02 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/schemas/schemas_0.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/schemas/schemas_0.js"() {
     init_schema();
     init_errors2();
     init_SSOServiceException();
@@ -71900,10 +75262,10 @@ var init_schemas_02 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/runtimeConfig.shared.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/runtimeConfig.shared.js
 var getRuntimeConfig3;
 var init_runtimeConfig_shared2 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/runtimeConfig.shared.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/runtimeConfig.shared.js"() {
     init_httpAuthSchemes2();
     init_protocols2();
     init_dist_es();
@@ -71953,10 +75315,10 @@ var init_runtimeConfig_shared2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/runtimeConfig.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/runtimeConfig.js
 var import_node_http_handler2, getRuntimeConfig4;
 var init_runtimeConfig2 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/runtimeConfig.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/runtimeConfig.js"() {
     init_package();
     init_client3();
     init_httpAuthSchemes2();
@@ -71983,6 +75345,7 @@ var init_runtimeConfig2 = __esm({
         defaultsMode,
         authSchemePreference: config?.authSchemePreference ?? loadConfig(NODE_AUTH_SCHEME_PREFERENCE_OPTIONS, loaderConfig),
         bodyLengthChecker: config?.bodyLengthChecker ?? calculateBodyLength,
+        defaultSocketTimeout: getDefaultSocketTimeout(config?.requestHandler, 3e5),
         defaultUserAgentProvider: config?.defaultUserAgentProvider ?? createDefaultUserAgentProvider({ serviceId: clientSharedValues.serviceId, clientVersion: package_default.version }),
         maxAttempts: config?.maxAttempts ?? loadConfig(NODE_MAX_ATTEMPT_CONFIG_OPTIONS, config),
         region: config?.region ?? loadConfig(NODE_REGION_CONFIG_OPTIONS, { ...NODE_REGION_CONFIG_FILE_OPTIONS, ...loaderConfig }),
@@ -72000,10 +75363,10 @@ var init_runtimeConfig2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/auth/httpAuthExtensionConfiguration.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/auth/httpAuthExtensionConfiguration.js
 var getHttpAuthExtensionConfiguration2, resolveHttpAuthRuntimeConfig2;
 var init_httpAuthExtensionConfiguration2 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/auth/httpAuthExtensionConfiguration.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/auth/httpAuthExtensionConfiguration.js"() {
     getHttpAuthExtensionConfiguration2 = (runtimeConfig) => {
       const _httpAuthSchemes = runtimeConfig.httpAuthSchemes;
       let _httpAuthSchemeProvider = runtimeConfig.httpAuthSchemeProvider;
@@ -72044,10 +75407,10 @@ var init_httpAuthExtensionConfiguration2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/runtimeExtensions.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/runtimeExtensions.js
 var resolveRuntimeExtensions2;
 var init_runtimeExtensions2 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/runtimeExtensions.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/runtimeExtensions.js"() {
     init_client3();
     init_client2();
     init_protocols();
@@ -72060,10 +75423,10 @@ var init_runtimeExtensions2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/SSOClient.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/SSOClient.js
 var SSOClient;
 var init_SSOClient = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/SSOClient.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/SSOClient.js"() {
     init_client3();
     init_dist_es();
     init_client2();
@@ -72113,10 +75476,10 @@ var init_SSOClient = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/commandBuilder.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/commandBuilder.js
 var command2, _ep02, _mw02;
 var init_commandBuilder2 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/commandBuilder.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/commandBuilder.js"() {
     init_client2();
     init_endpoints();
     init_EndpointParameters2();
@@ -72126,10 +75489,10 @@ var init_commandBuilder2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/commands/GetRoleCredentialsCommand.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/commands/GetRoleCredentialsCommand.js
 var GetRoleCredentialsCommand;
 var init_GetRoleCredentialsCommand = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/commands/GetRoleCredentialsCommand.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/commands/GetRoleCredentialsCommand.js"() {
     init_commandBuilder2();
     init_schemas_02();
     GetRoleCredentialsCommand = class extends command2(_ep02, _mw02, "GetRoleCredentials", GetRoleCredentials$) {
@@ -72137,10 +75500,10 @@ var init_GetRoleCredentialsCommand = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/SSO.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/SSO.js
 var commands2, SSO;
 var init_SSO = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/SSO.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/SSO.js"() {
     init_client2();
     init_GetRoleCredentialsCommand();
     init_SSOClient();
@@ -72153,20 +75516,20 @@ var init_SSO = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/commands/index.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/commands/index.js
 var init_commands2 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/commands/index.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/commands/index.js"() {
     init_GetRoleCredentialsCommand();
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/models/models_0.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/models/models_0.js
 var init_models_02 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/models/models_0.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/models/models_0.js"() {
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/index.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/index.js
 var sso_exports = {};
 __export(sso_exports, {
   $Command: () => Command2,
@@ -72191,7 +75554,7 @@ __export(sso_exports, {
   errorTypeRegistries: () => errorTypeRegistries2
 });
 var init_sso = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/index.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sso/index.js"() {
     init_SSOClient();
     init_SSO();
     init_commands2();
@@ -72203,18 +75566,18 @@ var init_sso = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+credential-provider-sso@3.973.20/node_modules/@aws-sdk/credential-provider-sso/dist-cjs/loadSso-BGYXHf8s.js
+// node_modules/.pnpm/@aws-sdk+credential-provider-sso@3.973.25/node_modules/@aws-sdk/credential-provider-sso/dist-cjs/loadSso-BGYXHf8s.js
 var require_loadSso_BGYXHf8s = __commonJS({
-  "node_modules/.pnpm/@aws-sdk+credential-provider-sso@3.973.20/node_modules/@aws-sdk/credential-provider-sso/dist-cjs/loadSso-BGYXHf8s.js"(exports2) {
+  "node_modules/.pnpm/@aws-sdk+credential-provider-sso@3.973.25/node_modules/@aws-sdk/credential-provider-sso/dist-cjs/loadSso-BGYXHf8s.js"(exports2) {
     var { GetRoleCredentialsCommand: GetRoleCredentialsCommand2, SSOClient: SSOClient2 } = (init_sso(), __toCommonJS(sso_exports));
     exports2.GetRoleCredentialsCommand = GetRoleCredentialsCommand2;
     exports2.SSOClient = SSOClient2;
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+credential-provider-sso@3.973.20/node_modules/@aws-sdk/credential-provider-sso/dist-cjs/index.js
+// node_modules/.pnpm/@aws-sdk+credential-provider-sso@3.973.25/node_modules/@aws-sdk/credential-provider-sso/dist-cjs/index.js
 var require_dist_cjs9 = __commonJS({
-  "node_modules/.pnpm/@aws-sdk+credential-provider-sso@3.973.20/node_modules/@aws-sdk/credential-provider-sso/dist-cjs/index.js"(exports2) {
+  "node_modules/.pnpm/@aws-sdk+credential-provider-sso@3.973.25/node_modules/@aws-sdk/credential-provider-sso/dist-cjs/index.js"(exports2) {
     var { CredentialsProviderError: CredentialsProviderError2, getSSOTokenFromFile: getSSOTokenFromFile2, getProfileName: getProfileName2, parseKnownFiles: parseKnownFiles2, loadSsoSessionData: loadSsoSessionData2 } = (init_config2(), __toCommonJS(config_exports));
     var { setCredentialFeature: setCredentialFeature2 } = (init_client3(), __toCommonJS(client_exports2));
     var { fromSso } = require_dist_cjs8();
@@ -72391,9 +75754,9 @@ Reference: https://docs.aws.amazon.com/cli/latest/userguide/cli-configure-sso.ht
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+signature-v4-multi-region@3.996.49/node_modules/@aws-sdk/signature-v4-multi-region/dist-cjs/index.js
+// node_modules/.pnpm/@aws-sdk+signature-v4-multi-region@3.996.51/node_modules/@aws-sdk/signature-v4-multi-region/dist-cjs/index.js
 var require_dist_cjs10 = __commonJS({
-  "node_modules/.pnpm/@aws-sdk+signature-v4-multi-region@3.996.49/node_modules/@aws-sdk/signature-v4-multi-region/dist-cjs/index.js"(exports2) {
+  "node_modules/.pnpm/@aws-sdk+signature-v4-multi-region@3.996.51/node_modules/@aws-sdk/signature-v4-multi-region/dist-cjs/index.js"(exports2) {
     var { SignatureV4: SignatureV42, signatureV4aContainer } = require_dist_cjs2();
     var signatureV4CrtContainer = {
       CrtSignerV4: null
@@ -72523,10 +75886,10 @@ var require_dist_cjs10 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/endpoint/bdd.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/endpoint/bdd.js
 var q, a3, b3, c3, d3, e3, f3, g3, h3, i3, j3, k3, l, m, n, o, p, _data3, root3, r3, nodes3, bdd3;
 var init_bdd3 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/endpoint/bdd.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/endpoint/bdd.js"() {
     init_endpoints();
     q = "ref";
     a3 = -1;
@@ -72692,10 +76055,10 @@ var init_bdd3 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/endpoint/endpointResolver.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/endpoint/endpointResolver.js
 var cache3, defaultEndpointResolver3;
 var init_endpointResolver3 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/endpoint/endpointResolver.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/endpoint/endpointResolver.js"() {
     init_client3();
     init_endpoints();
     init_bdd3();
@@ -72713,7 +76076,7 @@ var init_endpointResolver3 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/auth/httpAuthSchemeProvider.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/auth/httpAuthSchemeProvider.js
 function createAwsAuthSigv4HttpAuthOption3(authParameters) {
   return {
     schemeId: "aws.auth#sigv4",
@@ -72751,7 +76114,7 @@ function createSmithyApiNoAuthHttpAuthOption3(authParameters) {
 }
 var import_signature_v4_multi_region, createEndpointRuleSetHttpAuthSchemeParametersProvider, _defaultSTSHttpAuthSchemeParametersProvider, defaultSTSHttpAuthSchemeParametersProvider, createEndpointRuleSetHttpAuthSchemeProvider, _defaultSTSHttpAuthSchemeProvider, defaultSTSHttpAuthSchemeProvider, resolveHttpAuthSchemeConfig3;
 var init_httpAuthSchemeProvider3 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/auth/httpAuthSchemeProvider.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/auth/httpAuthSchemeProvider.js"() {
     init_httpAuthSchemes2();
     import_signature_v4_multi_region = __toESM(require_dist_cjs10());
     init_client2();
@@ -72850,10 +76213,10 @@ var init_httpAuthSchemeProvider3 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/endpoint/EndpointParameters.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/endpoint/EndpointParameters.js
 var resolveClientEndpointParameters3, commonParams3;
 var init_EndpointParameters3 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/endpoint/EndpointParameters.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/endpoint/EndpointParameters.js"() {
     resolveClientEndpointParameters3 = (options) => {
       return Object.assign(options, {
         useDualstackEndpoint: options.useDualstackEndpoint ?? false,
@@ -72872,10 +76235,10 @@ var init_EndpointParameters3 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/models/STSServiceException.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/models/STSServiceException.js
 var STSServiceException;
 var init_STSServiceException = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/models/STSServiceException.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/models/STSServiceException.js"() {
     init_client2();
     STSServiceException = class _STSServiceException extends ServiceException {
       static shapeId = "smithy.ts.sdk.synthetic.com.amazonaws.sts#STSServiceException";
@@ -72887,10 +76250,10 @@ var init_STSServiceException = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/models/errors.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/models/errors.js
 var ExpiredTokenException2, MalformedPolicyDocumentException, PackedPolicyTooLargeException, RegionDisabledException, IDPRejectedClaimException, InvalidIdentityTokenException, IDPCommunicationErrorException;
 var init_errors3 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/models/errors.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/models/errors.js"() {
     init_STSServiceException();
     ExpiredTokenException2 = class _ExpiredTokenException extends STSServiceException {
       static shapeId = "com.amazonaws.sts#ExpiredTokenException";
@@ -72987,10 +76350,10 @@ var init_errors3 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/schemas/schemas_0.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/schemas/schemas_0.js
 var _A, _AKI, _AR, _ARI, _ARR, _ARRs, _ARU, _ARWWI, _ARWWIR, _ARWWIRs, _Au, _C, _CA, _DS, _E, _EI, _ETE2, _IDPCEE, _IDPRCE, _IITE, _K, _MPDE, _MSTS, _P, _PA, _PAr, _PC, _PCLT, _PCr, _PDT, _PI, _PPS, _PPTLE, _Pr, _RA, _RDE, _RSN, _SAK, _SFWIT, _SI, _SN, _ST, _STS, _STU, _T, _TC, _TTK, _Ta, _V, _WIT, _a, _aKST, _aQE, _c3, _cTT, _e3, _hE3, _m2, _pDLT, _s3, _tLT, n03, _s_registry3, STSServiceException$, n0_registry3, ExpiredTokenException$2, IDPCommunicationErrorException$, IDPRejectedClaimException$, InvalidIdentityTokenException$, MalformedPolicyDocumentException$, PackedPolicyTooLargeException$, RegionDisabledException$, errorTypeRegistries3, accessKeySecretType, clientTokenType, AssumedRoleUser$, AssumeRoleRequest$, AssumeRoleResponse$, AssumeRoleWithWebIdentityRequest$, AssumeRoleWithWebIdentityResponse$, Credentials$, PolicyDescriptorType$, ProvidedContext$, Tag$, policyDescriptorListType, ProvidedContextsListType, tagKeyListType, tagListType, AssumeRole$, AssumeRoleWithWebIdentity$;
 var init_schemas_03 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/schemas/schemas_0.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/schemas/schemas_0.js"() {
     init_schema();
     init_errors3();
     init_STSServiceException();
@@ -73247,10 +76610,10 @@ var init_schemas_03 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/runtimeConfig.shared.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/runtimeConfig.shared.js
 var import_signature_v4_multi_region2, getRuntimeConfig5;
 var init_runtimeConfig_shared3 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/runtimeConfig.shared.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/runtimeConfig.shared.js"() {
     init_httpAuthSchemes2();
     init_protocols2();
     import_signature_v4_multi_region2 = __toESM(require_dist_cjs10());
@@ -73308,10 +76671,10 @@ var init_runtimeConfig_shared3 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/runtimeConfig.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/runtimeConfig.js
 var import_node_http_handler3, getRuntimeConfig6;
 var init_runtimeConfig3 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/runtimeConfig.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/runtimeConfig.js"() {
     init_package();
     init_client3();
     init_httpAuthSchemes2();
@@ -73339,6 +76702,7 @@ var init_runtimeConfig3 = __esm({
         defaultsMode,
         authSchemePreference: config?.authSchemePreference ?? loadConfig(NODE_AUTH_SCHEME_PREFERENCE_OPTIONS, loaderConfig),
         bodyLengthChecker: config?.bodyLengthChecker ?? calculateBodyLength,
+        defaultSocketTimeout: getDefaultSocketTimeout(config?.requestHandler, 3e5),
         defaultUserAgentProvider: config?.defaultUserAgentProvider ?? createDefaultUserAgentProvider({ serviceId: clientSharedValues.serviceId, clientVersion: package_default.version }),
         httpAuthSchemes: config?.httpAuthSchemes ?? [
           {
@@ -73374,10 +76738,10 @@ var init_runtimeConfig3 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/auth/httpAuthExtensionConfiguration.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/auth/httpAuthExtensionConfiguration.js
 var getHttpAuthExtensionConfiguration3, resolveHttpAuthRuntimeConfig3;
 var init_httpAuthExtensionConfiguration3 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/auth/httpAuthExtensionConfiguration.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/auth/httpAuthExtensionConfiguration.js"() {
     getHttpAuthExtensionConfiguration3 = (runtimeConfig) => {
       const _httpAuthSchemes = runtimeConfig.httpAuthSchemes;
       let _httpAuthSchemeProvider = runtimeConfig.httpAuthSchemeProvider;
@@ -73418,10 +76782,10 @@ var init_httpAuthExtensionConfiguration3 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/runtimeExtensions.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/runtimeExtensions.js
 var resolveRuntimeExtensions3;
 var init_runtimeExtensions3 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/runtimeExtensions.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/runtimeExtensions.js"() {
     init_client3();
     init_client2();
     init_protocols();
@@ -73434,10 +76798,10 @@ var init_runtimeExtensions3 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/STSClient.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/STSClient.js
 var STSClient;
 var init_STSClient = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/STSClient.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/STSClient.js"() {
     init_client3();
     init_dist_es();
     init_client2();
@@ -73488,10 +76852,10 @@ var init_STSClient = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/commandBuilder.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/commandBuilder.js
 var command3, _ep03, _mw03;
 var init_commandBuilder3 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/commandBuilder.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/commandBuilder.js"() {
     init_client2();
     init_endpoints();
     init_EndpointParameters3();
@@ -73501,10 +76865,10 @@ var init_commandBuilder3 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/commands/AssumeRoleCommand.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/commands/AssumeRoleCommand.js
 var AssumeRoleCommand;
 var init_AssumeRoleCommand = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/commands/AssumeRoleCommand.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/commands/AssumeRoleCommand.js"() {
     init_commandBuilder3();
     init_schemas_03();
     AssumeRoleCommand = class extends command3(_ep03, _mw03, "AssumeRole", AssumeRole$) {
@@ -73512,10 +76876,10 @@ var init_AssumeRoleCommand = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/commands/AssumeRoleWithWebIdentityCommand.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/commands/AssumeRoleWithWebIdentityCommand.js
 var AssumeRoleWithWebIdentityCommand;
 var init_AssumeRoleWithWebIdentityCommand = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/commands/AssumeRoleWithWebIdentityCommand.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/commands/AssumeRoleWithWebIdentityCommand.js"() {
     init_commandBuilder3();
     init_schemas_03();
     AssumeRoleWithWebIdentityCommand = class extends command3(_ep03, _mw03, "AssumeRoleWithWebIdentity", AssumeRoleWithWebIdentity$) {
@@ -73523,10 +76887,10 @@ var init_AssumeRoleWithWebIdentityCommand = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/STS.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/STS.js
 var commands3, STS;
 var init_STS = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/STS.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/STS.js"() {
     init_client2();
     init_AssumeRoleCommand();
     init_AssumeRoleWithWebIdentityCommand();
@@ -73541,24 +76905,24 @@ var init_STS = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/commands/index.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/commands/index.js
 var init_commands3 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/commands/index.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/commands/index.js"() {
     init_AssumeRoleCommand();
     init_AssumeRoleWithWebIdentityCommand();
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/models/models_0.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/models/models_0.js
 var init_models_03 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/models/models_0.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/models/models_0.js"() {
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/defaultStsRoleAssumers.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/defaultStsRoleAssumers.js
 var getAccountIdFromAssumedRoleUser, resolveRegion, getDefaultRoleAssumer, getDefaultRoleAssumerWithWebIdentity, isH2;
 var init_defaultStsRoleAssumers = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/defaultStsRoleAssumers.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/defaultStsRoleAssumers.js"() {
     init_client3();
     init_AssumeRoleCommand();
     init_AssumeRoleWithWebIdentityCommand();
@@ -73663,10 +77027,10 @@ var init_defaultStsRoleAssumers = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/defaultRoleAssumers.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/defaultRoleAssumers.js
 var getCustomizableStsClientCtor, getDefaultRoleAssumer2, getDefaultRoleAssumerWithWebIdentity2, decorateDefaultCredentialProvider;
 var init_defaultRoleAssumers = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/defaultRoleAssumers.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/defaultRoleAssumers.js"() {
     init_defaultStsRoleAssumers();
     init_STSClient();
     getCustomizableStsClientCtor = (baseCtor, customizations) => {
@@ -73692,7 +77056,7 @@ var init_defaultRoleAssumers = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/index.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/index.js
 var sts_exports = {};
 __export(sts_exports, {
   $Command: () => Command2,
@@ -73734,7 +77098,7 @@ __export(sts_exports, {
   getDefaultRoleAssumerWithWebIdentity: () => getDefaultRoleAssumerWithWebIdentity2
 });
 var init_sts = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/index.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/sts/index.js"() {
     init_STSClient();
     init_STS();
     init_commands3();
@@ -73747,7 +77111,7 @@ var init_sts = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/auth/httpAuthSchemeProvider.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/auth/httpAuthSchemeProvider.js
 function createAwsAuthSigv4HttpAuthOption4(authParameters) {
   return {
     schemeId: "aws.auth#sigv4",
@@ -73770,7 +77134,7 @@ function createSmithyApiNoAuthHttpAuthOption4(authParameters) {
 }
 var defaultSigninHttpAuthSchemeParametersProvider, defaultSigninHttpAuthSchemeProvider, resolveHttpAuthSchemeConfig4;
 var init_httpAuthSchemeProvider4 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/auth/httpAuthSchemeProvider.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/auth/httpAuthSchemeProvider.js"() {
     init_httpAuthSchemes2();
     init_client2();
     defaultSigninHttpAuthSchemeParametersProvider = async (config, context, input) => {
@@ -73805,10 +77169,10 @@ var init_httpAuthSchemeProvider4 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/endpoint/EndpointParameters.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/endpoint/EndpointParameters.js
 var resolveClientEndpointParameters4, commonParams4;
 var init_EndpointParameters4 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/endpoint/EndpointParameters.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/endpoint/EndpointParameters.js"() {
     resolveClientEndpointParameters4 = (options) => {
       return Object.assign(options, {
         useDualstackEndpoint: options.useDualstackEndpoint ?? false,
@@ -73825,10 +77189,10 @@ var init_EndpointParameters4 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/endpoint/bdd.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/endpoint/bdd.js
 var s, a4, b4, c4, d4, e4, f4, g4, h4, i4, j4, k4, l2, m2, n2, o2, p2, q2, _data4, root4, r4, nodes4, bdd4;
 var init_bdd4 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/endpoint/bdd.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/endpoint/bdd.js"() {
     init_endpoints();
     s = "ref";
     a4 = -1;
@@ -74028,10 +77392,10 @@ var init_bdd4 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/endpoint/endpointResolver.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/endpoint/endpointResolver.js
 var cache4, defaultEndpointResolver4;
 var init_endpointResolver4 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/endpoint/endpointResolver.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/endpoint/endpointResolver.js"() {
     init_client3();
     init_endpoints();
     init_bdd4();
@@ -74049,10 +77413,10 @@ var init_endpointResolver4 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/models/SigninServiceException.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/models/SigninServiceException.js
 var SigninServiceException;
 var init_SigninServiceException = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/models/SigninServiceException.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/models/SigninServiceException.js"() {
     init_client2();
     SigninServiceException = class _SigninServiceException extends ServiceException {
       static shapeId = "smithy.ts.sdk.synthetic.com.amazonaws.signin#SigninServiceException";
@@ -74064,10 +77428,10 @@ var init_SigninServiceException = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/models/errors.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/models/errors.js
 var AccessDeniedException2, InternalServerException2, TooManyRequestsError, ValidationException;
 var init_errors4 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/models/errors.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/models/errors.js"() {
     init_SigninServiceException();
     AccessDeniedException2 = class _AccessDeniedException extends SigninServiceException {
       static shapeId = "com.amazonaws.signin#AccessDeniedException";
@@ -74132,10 +77496,10 @@ var init_errors4 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/schemas/schemas_0.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/schemas/schemas_0.js
 var _ADE2, _AT2, _COAT, _COATR, _COATRB, _COATRBr, _COATRr, _COATWIAM, _COATWIAMR, _COATWIAMRr, _ISE2, _OAAT, _RT2, _TMRE2, _VE, _aKI2, _aT3, _at, _c4, _cI2, _cV2, _co2, _e4, _eI2, _ei, _gT2, _gt, _h3, _hE4, _iT2, _jN, _m3, _r2, _rT2, _rU2, _s4, _sAK2, _sT2, _se2, _tI, _tO, _tT2, _tt, n04, _s_registry4, SigninServiceException$, n0_registry4, AccessDeniedException$2, InternalServerException$2, TooManyRequestsError$, ValidationException$, errorTypeRegistries4, OAuthAccessToken, RefreshToken2, AccessToken$, CreateOAuth2TokenRequest$, CreateOAuth2TokenRequestBody$, CreateOAuth2TokenResponse$, CreateOAuth2TokenResponseBody$, CreateOAuth2TokenWithIAMRequest$, CreateOAuth2TokenWithIAMResponse$, CreateOAuth2Token$, CreateOAuth2TokenWithIAM$;
 var init_schemas_04 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/schemas/schemas_0.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/schemas/schemas_0.js"() {
     init_schema();
     init_errors4();
     init_SigninServiceException();
@@ -74315,10 +77679,10 @@ var init_schemas_04 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/runtimeConfig.shared.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/runtimeConfig.shared.js
 var getRuntimeConfig7;
 var init_runtimeConfig_shared4 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/runtimeConfig.shared.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/runtimeConfig.shared.js"() {
     init_httpAuthSchemes2();
     init_protocols2();
     init_dist_es();
@@ -74368,10 +77732,10 @@ var init_runtimeConfig_shared4 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/runtimeConfig.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/runtimeConfig.js
 var import_node_http_handler4, getRuntimeConfig8;
 var init_runtimeConfig4 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/runtimeConfig.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/runtimeConfig.js"() {
     init_package();
     init_client3();
     init_httpAuthSchemes2();
@@ -74398,6 +77762,7 @@ var init_runtimeConfig4 = __esm({
         defaultsMode,
         authSchemePreference: config?.authSchemePreference ?? loadConfig(NODE_AUTH_SCHEME_PREFERENCE_OPTIONS, loaderConfig),
         bodyLengthChecker: config?.bodyLengthChecker ?? calculateBodyLength,
+        defaultSocketTimeout: getDefaultSocketTimeout(config?.requestHandler, 3e5),
         defaultUserAgentProvider: config?.defaultUserAgentProvider ?? createDefaultUserAgentProvider({ serviceId: clientSharedValues.serviceId, clientVersion: package_default.version }),
         maxAttempts: config?.maxAttempts ?? loadConfig(NODE_MAX_ATTEMPT_CONFIG_OPTIONS, config),
         region: config?.region ?? loadConfig(NODE_REGION_CONFIG_OPTIONS, { ...NODE_REGION_CONFIG_FILE_OPTIONS, ...loaderConfig }),
@@ -74415,10 +77780,10 @@ var init_runtimeConfig4 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/auth/httpAuthExtensionConfiguration.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/auth/httpAuthExtensionConfiguration.js
 var getHttpAuthExtensionConfiguration4, resolveHttpAuthRuntimeConfig4;
 var init_httpAuthExtensionConfiguration4 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/auth/httpAuthExtensionConfiguration.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/auth/httpAuthExtensionConfiguration.js"() {
     getHttpAuthExtensionConfiguration4 = (runtimeConfig) => {
       const _httpAuthSchemes = runtimeConfig.httpAuthSchemes;
       let _httpAuthSchemeProvider = runtimeConfig.httpAuthSchemeProvider;
@@ -74459,10 +77824,10 @@ var init_httpAuthExtensionConfiguration4 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/runtimeExtensions.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/runtimeExtensions.js
 var resolveRuntimeExtensions4;
 var init_runtimeExtensions4 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/runtimeExtensions.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/runtimeExtensions.js"() {
     init_client3();
     init_client2();
     init_protocols();
@@ -74475,10 +77840,10 @@ var init_runtimeExtensions4 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/SigninClient.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/SigninClient.js
 var SigninClient;
 var init_SigninClient = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/SigninClient.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/SigninClient.js"() {
     init_client3();
     init_dist_es();
     init_client2();
@@ -74528,10 +77893,10 @@ var init_SigninClient = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/commandBuilder.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/commandBuilder.js
 var command4, _ep04, _ep1, _mw04;
 var init_commandBuilder4 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/commandBuilder.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/commandBuilder.js"() {
     init_client2();
     init_endpoints();
     init_EndpointParameters4();
@@ -74546,10 +77911,10 @@ var init_commandBuilder4 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/commands/CreateOAuth2TokenCommand.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/commands/CreateOAuth2TokenCommand.js
 var CreateOAuth2TokenCommand;
 var init_CreateOAuth2TokenCommand = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/commands/CreateOAuth2TokenCommand.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/commands/CreateOAuth2TokenCommand.js"() {
     init_commandBuilder4();
     init_schemas_04();
     CreateOAuth2TokenCommand = class extends command4(_ep04, _mw04, "CreateOAuth2Token", CreateOAuth2Token$) {
@@ -74557,10 +77922,10 @@ var init_CreateOAuth2TokenCommand = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/commands/CreateOAuth2TokenWithIAMCommand.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/commands/CreateOAuth2TokenWithIAMCommand.js
 var CreateOAuth2TokenWithIAMCommand;
 var init_CreateOAuth2TokenWithIAMCommand = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/commands/CreateOAuth2TokenWithIAMCommand.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/commands/CreateOAuth2TokenWithIAMCommand.js"() {
     init_commandBuilder4();
     init_schemas_04();
     CreateOAuth2TokenWithIAMCommand = class extends command4(_ep1, _mw04, "CreateOAuth2TokenWithIAM", CreateOAuth2TokenWithIAM$) {
@@ -74568,10 +77933,10 @@ var init_CreateOAuth2TokenWithIAMCommand = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/Signin.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/Signin.js
 var commands4, Signin;
 var init_Signin = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/Signin.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/Signin.js"() {
     init_client2();
     init_CreateOAuth2TokenCommand();
     init_CreateOAuth2TokenWithIAMCommand();
@@ -74586,23 +77951,30 @@ var init_Signin = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/commands/index.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/commands/index.js
 var init_commands4 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/commands/index.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/commands/index.js"() {
     init_CreateOAuth2TokenCommand();
     init_CreateOAuth2TokenWithIAMCommand();
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/models/enums.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/models/enums.js
 var OAuth2ErrorCode;
 var init_enums2 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/models/enums.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/models/enums.js"() {
     OAuth2ErrorCode = {
       AUTHCODE_EXPIRED: "AUTHCODE_EXPIRED",
       CONFLICT: "CONFLICT",
       INSUFFICIENT_PERMISSIONS: "INSUFFICIENT_PERMISSIONS",
       INVALID_REQUEST: "INVALID_REQUEST",
+      OAUTH_INVALID_GRANT: "invalid_grant",
+      OAUTH_INVALID_REQUEST: "invalid_request",
+      OAUTH_INVALID_SCOPE: "invalid_scope",
+      OAUTH_INVALID_TARGET: "invalid_target",
+      OAUTH_RATE_EXCEEDED: "rate_exceeded",
+      OAUTH_SERVICE_UNAVAILABLE: "service_unavailable",
+      OAUTH_UNSUPPORTED_GRANT_TYPE: "unsupported_grant_type",
       RESOURCE_NOT_FOUND: "RESOURCE_NOT_FOUND",
       SERVER_ERROR: "server_error",
       SERVICE_QUOTA_EXCEEDED: "SERVICE_QUOTA_EXCEEDED",
@@ -74612,13 +77984,13 @@ var init_enums2 = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/models/models_0.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/models/models_0.js
 var init_models_04 = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/models/models_0.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/models/models_0.js"() {
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/index.js
+// node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/index.js
 var signin_exports = {};
 __export(signin_exports, {
   $Command: () => Command2,
@@ -74650,7 +78022,7 @@ __export(signin_exports, {
   errorTypeRegistries: () => errorTypeRegistries4
 });
 var init_signin = __esm({
-  "node_modules/.pnpm/@aws-sdk+nested-clients@3.997.50/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/index.js"() {
+  "node_modules/.pnpm/@aws-sdk+nested-clients@3.998.0/node_modules/@aws-sdk/nested-clients/dist-es/submodules/signin/index.js"() {
     init_SigninClient();
     init_Signin();
     init_commands4();
@@ -74663,9 +78035,9 @@ var init_signin = __esm({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+credential-provider-login@3.972.83/node_modules/@aws-sdk/credential-provider-login/dist-cjs/index.js
+// node_modules/.pnpm/@aws-sdk+credential-provider-login@3.972.88/node_modules/@aws-sdk/credential-provider-login/dist-cjs/index.js
 var require_dist_cjs11 = __commonJS({
-  "node_modules/.pnpm/@aws-sdk+credential-provider-login@3.972.83/node_modules/@aws-sdk/credential-provider-login/dist-cjs/index.js"(exports2) {
+  "node_modules/.pnpm/@aws-sdk+credential-provider-login@3.972.88/node_modules/@aws-sdk/credential-provider-login/dist-cjs/index.js"(exports2) {
     var { setCredentialFeature: setCredentialFeature2 } = (init_client3(), __toCommonJS(client_exports2));
     var { CredentialsProviderError: CredentialsProviderError2, parseKnownFiles: parseKnownFiles2, getProfileName: getProfileName2 } = (init_config2(), __toCommonJS(config_exports));
     var { HttpRequest: HttpRequest2 } = (init_protocols(), __toCommonJS(protocols_exports));
@@ -74948,9 +78320,9 @@ var require_dist_cjs11 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+credential-provider-process@3.972.76/node_modules/@aws-sdk/credential-provider-process/dist-cjs/index.js
+// node_modules/.pnpm/@aws-sdk+credential-provider-process@3.972.81/node_modules/@aws-sdk/credential-provider-process/dist-cjs/index.js
 var require_dist_cjs12 = __commonJS({
-  "node_modules/.pnpm/@aws-sdk+credential-provider-process@3.972.76/node_modules/@aws-sdk/credential-provider-process/dist-cjs/index.js"(exports2) {
+  "node_modules/.pnpm/@aws-sdk+credential-provider-process@3.972.81/node_modules/@aws-sdk/credential-provider-process/dist-cjs/index.js"(exports2) {
     var { externalDataInterceptor: externalDataInterceptor2, CredentialsProviderError: CredentialsProviderError2, parseKnownFiles: parseKnownFiles2, getProfileName: getProfileName2 } = (init_config2(), __toCommonJS(config_exports));
     var { exec } = require("node:child_process");
     var { promisify } = require("node:util");
@@ -75022,9 +78394,9 @@ var require_dist_cjs12 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+credential-provider-web-identity@3.972.82/node_modules/@aws-sdk/credential-provider-web-identity/dist-cjs/index.js
+// node_modules/.pnpm/@aws-sdk+credential-provider-web-identity@3.972.87/node_modules/@aws-sdk/credential-provider-web-identity/dist-cjs/index.js
 var require_dist_cjs13 = __commonJS({
-  "node_modules/.pnpm/@aws-sdk+credential-provider-web-identity@3.972.82/node_modules/@aws-sdk/credential-provider-web-identity/dist-cjs/index.js"(exports2) {
+  "node_modules/.pnpm/@aws-sdk+credential-provider-web-identity@3.972.87/node_modules/@aws-sdk/credential-provider-web-identity/dist-cjs/index.js"(exports2) {
     var { setCredentialFeature: setCredentialFeature2 } = (init_client3(), __toCommonJS(client_exports2));
     var { CredentialsProviderError: CredentialsProviderError2, externalDataInterceptor: externalDataInterceptor2 } = (init_config2(), __toCommonJS(config_exports));
     var { readFileSync } = require("node:fs");
@@ -75082,9 +78454,9 @@ var require_dist_cjs13 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+credential-provider-ini@3.973.21/node_modules/@aws-sdk/credential-provider-ini/dist-cjs/index.js
+// node_modules/.pnpm/@aws-sdk+credential-provider-ini@3.973.26/node_modules/@aws-sdk/credential-provider-ini/dist-cjs/index.js
 var require_dist_cjs14 = __commonJS({
-  "node_modules/.pnpm/@aws-sdk+credential-provider-ini@3.973.21/node_modules/@aws-sdk/credential-provider-ini/dist-cjs/index.js"(exports2) {
+  "node_modules/.pnpm/@aws-sdk+credential-provider-ini@3.973.26/node_modules/@aws-sdk/credential-provider-ini/dist-cjs/index.js"(exports2) {
     var { CredentialsProviderError: CredentialsProviderError2, chain: chain2, getProfileName: getProfileName2, parseKnownFiles: parseKnownFiles2 } = (init_config2(), __toCommonJS(config_exports));
     var { setCredentialFeature: setCredentialFeature2 } = (init_client3(), __toCommonJS(client_exports2));
     var resolveCredentialSource = (credentialSource, profileName, logger2) => {
@@ -75279,9 +78651,9 @@ var require_dist_cjs14 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+credential-provider-node@3.972.88/node_modules/@aws-sdk/credential-provider-node/dist-cjs/index.js
+// node_modules/.pnpm/@aws-sdk+credential-provider-node@3.972.93/node_modules/@aws-sdk/credential-provider-node/dist-cjs/index.js
 var require_dist_cjs15 = __commonJS({
-  "node_modules/.pnpm/@aws-sdk+credential-provider-node@3.972.88/node_modules/@aws-sdk/credential-provider-node/dist-cjs/index.js"(exports2) {
+  "node_modules/.pnpm/@aws-sdk+credential-provider-node@3.972.93/node_modules/@aws-sdk/credential-provider-node/dist-cjs/index.js"(exports2) {
     var { ENV_KEY, ENV_SECRET, fromEnv: fromEnv2 } = require_dist_cjs3();
     var { chain: chain2, CredentialsProviderError: CredentialsProviderError2, ENV_PROFILE: ENV_PROFILE2 } = (init_config2(), __toCommonJS(config_exports));
     var ENV_IMDS_DISABLED2 = "AWS_EC2_METADATA_DISABLED";
@@ -75435,10 +78807,10 @@ var require_dist_cjs15 = __commonJS({
   }
 });
 
-// node_modules/.pnpm/@aws-sdk+client-translate@3.1156.0/node_modules/@aws-sdk/client-translate/dist-cjs/index.js
+// node_modules/.pnpm/@aws-sdk+client-translate@3.1162.0/node_modules/@aws-sdk/client-translate/dist-cjs/index.js
 var require_dist_cjs16 = __commonJS({
-  "node_modules/.pnpm/@aws-sdk+client-translate@3.1156.0/node_modules/@aws-sdk/client-translate/dist-cjs/index.js"(exports2) {
-    var { awsEndpointFunctions: awsEndpointFunctions2, emitWarningIfUnsupportedVersion: emitWarningIfUnsupportedVersion$1, createDefaultUserAgentProvider: createDefaultUserAgentProvider2, NODE_APP_ID_CONFIG_OPTIONS: NODE_APP_ID_CONFIG_OPTIONS2, getAwsRegionExtensionConfiguration: getAwsRegionExtensionConfiguration2, resolveAwsRegionExtensionConfiguration: resolveAwsRegionExtensionConfiguration2, resolveUserAgentConfig: resolveUserAgentConfig2, resolveHostHeaderConfig: resolveHostHeaderConfig2, getUserAgentPlugin: getUserAgentPlugin2, getHostHeaderPlugin: getHostHeaderPlugin2, getLoggerPlugin: getLoggerPlugin2, getRecursionDetectionPlugin: getRecursionDetectionPlugin2 } = (init_client3(), __toCommonJS(client_exports2));
+  "node_modules/.pnpm/@aws-sdk+client-translate@3.1162.0/node_modules/@aws-sdk/client-translate/dist-cjs/index.js"(exports2) {
+    var { awsEndpointFunctions: awsEndpointFunctions2, emitWarningIfUnsupportedVersion: emitWarningIfUnsupportedVersion$1, createDefaultUserAgentProvider: createDefaultUserAgentProvider2, getDefaultSocketTimeout: getDefaultSocketTimeout2, NODE_APP_ID_CONFIG_OPTIONS: NODE_APP_ID_CONFIG_OPTIONS2, getAwsRegionExtensionConfiguration: getAwsRegionExtensionConfiguration2, resolveAwsRegionExtensionConfiguration: resolveAwsRegionExtensionConfiguration2, resolveUserAgentConfig: resolveUserAgentConfig2, resolveHostHeaderConfig: resolveHostHeaderConfig2, getUserAgentPlugin: getUserAgentPlugin2, getHostHeaderPlugin: getHostHeaderPlugin2, getLoggerPlugin: getLoggerPlugin2, getRecursionDetectionPlugin: getRecursionDetectionPlugin2 } = (init_client3(), __toCommonJS(client_exports2));
     var { getHttpAuthSchemeEndpointRuleSetPlugin: getHttpAuthSchemeEndpointRuleSetPlugin2, DefaultIdentityProviderConfig: DefaultIdentityProviderConfig2, getHttpSigningPlugin: getHttpSigningPlugin2, createPaginator: createPaginator2 } = (init_dist_es(), __toCommonJS(dist_es_exports));
     var { normalizeProvider: normalizeProvider3, getSmithyContext: getSmithyContext2, ServiceException: ServiceException2, NoOpLogger: NoOpLogger2, emitWarningIfUnsupportedVersion: emitWarningIfUnsupportedVersion3, loadConfigsForDefaultMode: loadConfigsForDefaultMode2, getDefaultExtensionConfiguration: getDefaultExtensionConfiguration2, resolveDefaultRuntimeConfig: resolveDefaultRuntimeConfig2, Client: Client2, makeBuilder: makeBuilder2, createAggregatedClient: createAggregatedClient2 } = (init_client2(), __toCommonJS(client_exports));
     var { Command: $Command } = (init_client2(), __toCommonJS(client_exports));
@@ -75506,7 +78878,7 @@ var require_dist_cjs16 = __commonJS({
       Region: { type: "builtInParams", name: "region" },
       UseDualStack: { type: "builtInParams", name: "useDualstackEndpoint" }
     };
-    var version = "3.1155.0";
+    var version = "3.1161.0";
     var packageInfo = {
       version
     };
@@ -76892,6 +80264,7 @@ var require_dist_cjs16 = __commonJS({
         authSchemePreference: config?.authSchemePreference ?? loadConfig2(NODE_AUTH_SCHEME_PREFERENCE_OPTIONS2, loaderConfig),
         bodyLengthChecker: config?.bodyLengthChecker ?? calculateBodyLength2,
         credentialDefaultProvider: config?.credentialDefaultProvider ?? defaultProvider,
+        defaultSocketTimeout: getDefaultSocketTimeout2(config?.requestHandler, 3e5),
         defaultUserAgentProvider: config?.defaultUserAgentProvider ?? createDefaultUserAgentProvider2({ serviceId: clientSharedValues.serviceId, clientVersion: packageInfo.version }),
         maxAttempts: config?.maxAttempts ?? loadConfig2(NODE_MAX_ATTEMPT_CONFIG_OPTIONS2, config),
         region: config?.region ?? loadConfig2(NODE_REGION_CONFIG_OPTIONS2, { ...NODE_REGION_CONFIG_FILE_OPTIONS2, ...loaderConfig }),
@@ -78054,5 +81427,19 @@ mime-types/index.js:
    *)
 
 axios/dist/node/axios.cjs:
-  (*! Axios v1.20.0 Copyright (c) 2026 Matt Zabriskie and contributors *)
+  (*! Axios v1.21.0 Copyright (c) 2026 Matt Zabriskie and contributors *)
+
+bowser/bowser.mjs:
+  (*!
+   * Bowser - a browser detector
+   * https://github.com/lancedikson/bowser
+   * MIT License | (c) Dustin Diaz 2012-2015
+   * MIT License | (c) Denis Demchenko 2015-2026
+   *)
+  (*!
+  * Bowser - a browser detector
+  * https://github.com/bowser-js/bowser
+  * MIT License | (c) Dustin Diaz 2012-2015
+  * MIT License | (c) Denis Demchenko 2015-2026
+  *)
 */

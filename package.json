@@ -28,23 +28,23 @@
   "homepage": "https://github.com/fabasoad/translation-action#readme",
   "dependencies": {
     "@actions/core": "~3.0.1",
-    "@aws-sdk/client-translate": "~3.1158.0",
+    "@aws-sdk/client-translate": "~3.1162.0",
     "cross-fetch": "~4.1.0",
-    "deepl-node": "~1.28.1",
+    "deepl-node": "~1.29.0",
     "google-translate-api-x": "~10.7.3",
     "typed-rest-client": "~3.1.2"
   },
   "devDependencies": {
-    "@biomejs/biome": "~2.6.4",
-    "@vitest/coverage-v8": "~5.0.5",
+    "@biomejs/biome": "~2.6.5",
+    "@vitest/coverage-v8": "~5.1.0",
     "dotenv": "~18.0.9",
     "esbuild": "~0.28.2",
     "typescript": "~7.0.2",
-    "vitest": "~5.0.5"
+    "vitest": "~5.1.0"
   },
   "allowScripts": {
     "esbuild@0.28.1": true,
     "fsevents@2.3.3": true
   },
-  "packageManager": "pnpm@12.4.2"
+  "packageManager": "pnpm@12.18.0"
 }

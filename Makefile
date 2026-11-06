@@ -17,8 +17,7 @@ install:
 	@pnpm install
 
 .PHONY: reinstall
-reinstall:
-	@make clean
+reinstall: clean
 	@pnpm run clean:unsafe
 	@make install
 
