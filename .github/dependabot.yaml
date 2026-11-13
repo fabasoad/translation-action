@@ -1,3 +1,4 @@
+---
 version: 2
 
 multi-ecosystem-groups:
@@ -5,6 +6,7 @@ multi-ecosystem-groups:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 5
+    labels: ["dependencies"]
 
 updates:
   - package-ecosystem: "github-actions"
